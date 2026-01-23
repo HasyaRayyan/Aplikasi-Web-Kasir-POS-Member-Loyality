@@ -1,0 +1,41 @@
+<ion-safe-area>
+
+  <ion-tabs>
+    <ion-tab-bar slot="bottom">
+      <ion-tab-button tab="home">
+        <div class="circle">
+          <ion-icon name="home"></ion-icon>
+        </div>
+        <ion-label>Home</ion-label>
+      </ion-tab-button>
+  
+      <ion-tab-button tab="riwayat">
+        <div class="circle">
+          <ion-icon name="time"></ion-icon>
+        </div>
+        <ion-label>Riwayat</ion-label>
+      </ion-tab-button>
+  
+      <ion-tab-button tab="chat">
+        <div class="circle">
+          <ion-icon name="chatbox-ellipses"></ion-icon>
+        </div>
+        <ion-label>Campaign</ion-label>
+      </ion-tab-button>
+  
+      <ion-tab-button tab="user" *ngIf="user_level === '1'">
+        <div class="circle">
+          <ion-icon name="people"></ion-icon>
+        </div>
+        <ion-label>Data User</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="profile">
+        <div class="circle">
+          <ion-icon name="person"></ion-icon>
+        </div>
+        <ion-label>Profil</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+</ion-safe-area>

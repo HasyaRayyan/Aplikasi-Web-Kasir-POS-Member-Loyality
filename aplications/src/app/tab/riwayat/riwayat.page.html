@@ -1,0 +1,280 @@
+<ion-content>
+
+  <!-- <ion-spinner *ngIf="isLoading" class="loading-spinner"></ion-spinner> -->
+  <!-- <div *ngIf="!isLoading && errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+  </div> -->
+
+  <ion-grid class="top">
+    <ion-row>
+      <ion-searchbar
+        placeholder="Cari Riwayat"
+        showCancelButton="focus"
+        class="custom"
+        [(ngModel)]="searchQuery"
+        (ionInput)="searchRiwayat()"
+      ></ion-searchbar>
+    </ion-row>
+
+    <div class="add-btn">
+      <button expand="full" (click)="showExportAlert()">
+        <ion-icon name="cloud-download-outline"></ion-icon>Unduh Excel
+      </button>
+    </div>
+  </ion-grid>
+
+
+  <div style="padding: 0; margin-top: 14rem ; position: fixed; overflow-y: scroll; width: 100%; background: white; height: 100%;">
+
+    <div style="width: 100%; height: auto; position: fixed; background: white; z-index: 999; display: flex; justify-content: center; align-items: start; box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.073);">
+      <ion-segment [color]="selectedSegment === 'lunas' ? 'success' : 'danger'" [(ngModel)]="selectedSegment" (ionChange)="filterRiwayat()">
+        <ion-segment-button
+          value="lunas">
+          <ion-label color="success" style="font-weight: bolder;" >Lunas</ion-label>
+        </ion-segment-button>
+
+        <ion-segment-button
+          value="belum_lunas">
+          <ion-label color="danger" style="font-weight: bolder;">Belum Lunas</ion-label>
+          <ion-badge *ngIf="belum_lunas > 0"> {{ belum_lunas }} </ion-badge>
+        </ion-segment-button>
+      </ion-segment>
+
+    </div>
+
+    <div class="bottom">
+
+
+      <ion-list *ngIf="!riwayatList.length || filteredRiwayatList?.length === 0">
+        <div class="no-found">
+          <img src="assets/no-found.png" alt="anajy ">
+          <ion-title>Data Tidak Ditemukan.</ion-title>
+        </div>
+      </ion-list>
+
+      <ion-list *ngIf="!isLoading && riwayatList.length > 0">
+
+        <div class="riwayat" *ngFor="let riwayat of filteredRiwayatList">
+
+          <!-- Bagian Status Pembayaran dan Tanggal -->
+          <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 .5rem;">
+            <p *ngIf="riwayat.status_pembayaran === 'Lunas'" style="font-size: medium; font-weight: bold; color: white; background: #2dd36f; padding: 10px 20px; border-radius: 1rem;">
+              {{ riwayat.status_pembayaran }}
+            </p>
+            <p *ngIf="riwayat.status_pembayaran === 'Belum Lunas'" style="font-size: medium; font-weight: bold; color: white; background: #ff4c4c; padding: 10px 10px; border-radius: 1rem; font-size: small;">
+              {{ riwayat.status_pembayaran }}
+            </p>
+            <p style="font-weight: bold;">{{ riwayat.created_date }} | {{ riwayat.created_time }}</p>
+            <!-- <p style="font-weight: bold;">{{ riwayat.created_time }}</p> -->
+          </div>
+
+          <!-- Tambahkan Nama dan Nomor HP Pelanggan -->
+          <div style="line-height: 0; padding-left: .5rem;">
+            <p style="color: #666666; padding: 5px 0 5px 0; ">
+              <span style="font-weight: bolder ;">Pelanggan:</span> {{ riwayat.customer_name }}
+            </p>
+            <p style="color: #666666; padding: 5px 0 5px 0;">
+              <span style="font-weight: bolder; ">No.Hp:</span> {{ riwayat.customer_phone }}
+            </p>
+            <p style="color: #666666; padding: 5px 0 5px 0;">
+              <span style="font-weight: bolder; ">Alamat</span> {{ riwayat.customer_address }}
+            </p>
+          </div>
+
+          <div style="width: 100%; display: flex; justify-content: start; align-items: center; padding-left: .5rem;">
+            <p style="font-weight: bold; font-size: medium;">Rincian Item</p>
+            <ion-icon name="chevron-forward" style="color: #424242;"></ion-icon>
+          </div>
+
+          <ion-grid *ngIf="riwayat.items_detail && riwayat.items_detail.length > 0">
+            <div *ngFor="let item of riwayat.items_detail">
+              <div style="display: flex;">
+                <img [src]="item.img_url" alt="{{ item.product_name }}" (error)="setDefaultImage($event)"
+                  style="width: 100px; height: 120px; object-fit: cover; padding: 15px 0 3px 0;" />
+                <div style="padding-left: 1.5rem; width: 60%;">
+                  <p style="font-size: large; font-weight: bold; color: #424242; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: normal;">
+                    {{ item.product_name }}
+                  </p>
+                  <p style="font-size: medium; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: normal;">
+                    {{ item.price | currency: 'Rp. ': 'symbol': '0.0-0' }} x {{ item.qty }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Jika ada topping/addon -->
+              <div class="toping" style="padding-left: 5px; padding-bottom: 25px;" *ngIf="item.addons && item.addons.length > 0">
+                <div class="list-toping" style="display: flex;" *ngFor="let addon of item.addons">
+                  <p style="color: #424242; font-size: small; line-height: 0;">
+                    + {{ addon.addon_name }}
+                    <span style="color: #CF8F24; font-size: small;">-{{ addon.addon_price | currency: 'Rp. ': 'symbol': '0.0-0' }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ion-grid>
+
+          <div style="line-height: 0; padding-left: .5rem;">
+            <p style="color: #666666; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold; color: #CF8F24;">Pembayaran:</span> {{ getPaymentMethod(riwayat.customer_payment_method) }}
+            </p>
+
+            <p style="color: #666666; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold; color: #CF8F24;">Total Bayar:</span> {{ riwayat.total_bayar | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+
+            <p *ngIf="riwayat.customer_discount > 0" style="color: #666666; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold; color: #CF8F24;">Diskon:</span> -{{ riwayat.customer_discount | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+
+            <p *ngIf="riwayat.customer_ppn > 0" style="color: #666666; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold; color: #CF8F24;">PPN:</span> {{ riwayat.customer_ppn | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+
+            <p style="color: #666666; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold; color: #CF8F24;">Dibayar:</span> {{ riwayat.dibayar | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+
+            <p *ngIf="riwayat.kurang_bayar > 0" style="color: #ff4c4c; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold;">Kekurangan:</span> {{ riwayat.kurang_bayar | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+
+            <p *ngIf="riwayat.kembalian > 0" style="color: #28a745; padding: 5px 0 5px 0;">
+                <span style="font-weight: bold;">Kembalian:</span> {{ riwayat.kembalian | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+        </div>
+
+
+          <div style="width: 100%; display: flex; justify-content: center; gap: 10px;">
+
+          <ion-button expand="block" style="--background : #ff4c4c; color: white; margin: 15px 0; --border-radius: 10px;" *ngIf="riwayat.status_pembayaran !== 'Lunas'" (click)="openPaymentModal(riwayat.id, riwayat.kurang_bayar)">
+            Bayar
+          </ion-button>
+          <ion-button expand="block" style="--background : #febb4b; color: white; margin: 15px 0; --border-radius: 10px;" (click)="presentPrintOptions(riwayat)" >
+            Cetak Invoice
+          </ion-button>
+          <ion-button expand="block" style="--background : #ff4c4c; color: white; margin: 15px 0; --border-radius: 10px;"
+          *ngIf="riwayat.status_pembayaran !== 'Belum Lunas'" (click)="openEditModal(riwayat.id)">
+          Edit Bayar
+        </ion-button>
+
+
+          </div>
+
+        </div>
+
+      </ion-list>
+
+
+
+    </div>
+
+  </div>
+
+</ion-content>
+
+
+<ion-modal [isOpen]="isDateSelected" >
+  <ng-template>
+
+
+    <ion-header>
+        <ion-button slot="start" fill="clear" size="small" (click)="closeDateModal()" >
+          <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <ion-title style="color: black;">Pilih Tanggal</ion-title>
+      </ion-header>
+
+    <ion-content class="ion-padding">
+
+      <ion-grid>
+        <div class="date-container">
+          <ion-datetime color="warning" display-format="YYYY-MM-DD" [(ngModel)]="selectedDate"></ion-datetime>
+        </div>
+      </ion-grid>
+
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+
+        <div class="btn">
+          <ion-button expand="block" (click)="onDateSelected()">
+            <ion-title>Unduh Data</ion-title>
+          </ion-button>
+        </div>
+
+      </ion-toolbar>
+    </ion-footer>
+
+
+
+  </ng-template>
+</ion-modal>
+
+
+
+<ion-modal class="pay-modal" [isOpen]="isPaymentModalOpen">
+  <ng-template>
+
+
+
+
+    <ion-header>
+
+      <ion-button slot="start" fill="clear" size="small" (click)="closePaymentModal()" >
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Bayar Kekurangan</ion-title>
+
+    </ion-header>
+
+
+  <ion-content>
+
+    <ion-grid class="login-container">
+
+      <ion-grid class="input-container">
+        <ion-input [(ngModel)]="inputPaymentAmount" type="number" (keypress)="validateNumber($event)" pattern="[0-9]*" label="Masukkan Nominal Kekurangan" label-placement="floating"  required></ion-input>
+      </ion-grid>
+
+      <ion-grid class="btn">
+        <ion-button expand="block" shape="round" (click)="updatePayment()">
+          <ion-title>Bayar Kekurangan</ion-title>
+        </ion-button>
+      </ion-grid>
+
+    </ion-grid>
+
+
+  </ion-content>
+
+
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="edit-pay-modal" [isOpen]="isEditModalOpen">
+  <ng-template>
+    <ion-header>
+      <ion-button slot="start" fill="clear" size="small" (click)="closeEditModal()">
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Edit Pembayaran</ion-title>
+    </ion-header>
+
+    <ion-content>
+      <ion-grid class="login-container">
+        <ion-grid class="input-container">
+          <ion-input [(ngModel)]="inputPaymentAmount" type="number" (keypress)="validateNumber($event)"
+            pattern="[0-9]*" label="Masukkan Jumlah Pembayaran" label-placement="floating" required>
+          </ion-input>
+        </ion-grid>
+
+        <ion-grid class="btn">
+          <ion-button expand="block" shape="round" (click)="submitPayment()">
+            <ion-title>Simpan Pembayaran</ion-title>
+          </ion-button>
+        </ion-grid>
+      </ion-grid>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,0 +1,261 @@
+<ion-header>
+  <ion-button slot="start" fill="clear" size="small" (click)="router.navigate(['tab/home'])">
+    <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+  </ion-button>
+  <ion-title style="color: black;">Keranjang Saya ({{ getItemCount() }}) </ion-title>
+</ion-header>
+
+<ion-content>
+  <div class="pilih-semua">
+    <ion-checkbox
+      labelPlacement="end"
+      slot="start"
+      [checked]="selectAllChecked"
+      (ionChange)="toggleSelectAll($event)"
+      ></ion-checkbox>
+    <ion-title>* Pilih Semua</ion-title>
+  </div>
+
+  <div class="no-found" *ngIf="cartItems.length === 0">
+    <img src="assets/empty-cart.png" alt="anajy ">
+    <ion-title>Keranjang Anda Kosong.</ion-title>
+  </div>
+
+  <ion-card class="item-card" *ngFor="let item of cartItems">
+    <div class="main">
+      <ion-checkbox [checked]="selectedItems.includes(item)" slot="start" [(ngModel)]="item.selected" (ionChange)="toggleSelection(item, $event)">
+      </ion-checkbox>
+      <ion-thumbnail slot="start">
+        <img [src]="item.img_url" (error)="setDefaultImage($event)" alt="{{ item.name }}" />
+      </ion-thumbnail>
+      <ion-grid>
+        <ion-title>{{ item.name }}</ion-title>
+        <ion-title>{{ item.point_sale }} point</ion-title>
+        <!-- <ion-title>{{ item.point_sale }} pointsale</ion-title> -->
+        <ion-title>{{ item.price | currency: 'Rp. ': 'symbol': '0.0-0' }} x {{ item.qty | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-title>
+        <div class="increment">
+          <button (click)="decreaseQty(item)">-</button>
+          <ion-label>{{ item.qty }}</ion-label>
+          <button (click)="increaseQty(item)">+</button>
+        </div>
+      </ion-grid>
+      <ion-button slot="end" fill="clear" (click)="removeItem(item)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="toping" *ngIf="item.selectedToppings && item.selectedToppings.length > 0">
+      <div class="list-toping" *ngFor="let topping of item.selectedToppings">
+          <ion-label>{{ topping.name }} - Rp{{ topping.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-label>
+          <ion-checkbox slot="start" [(ngModel)]="topping.selected"
+          (ionChange)="toggleToppingSelection(topping, $event)">
+          </ion-checkbox>
+      </div>
+  </div>
+
+  <div class="toping" *ngIf="item.availableToppings && item.availableToppings.length > 0">
+      <div class="list-toping" *ngFor="let topping of item.availableToppings">
+          <ion-label>{{ topping.name }} - Rp{{ topping.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-label>
+          <ion-checkbox slot="start" [(ngModel)]="topping.selected"
+          (ionChange)="toggleToppingSelection(topping, $event)">
+          </ion-checkbox>
+      </div>
+  </div>
+
+  </ion-card>
+
+
+  <ion-card class="option-card">
+    <ion-title>*Opsi Pengiriman</ion-title>
+    <div>
+      <ion-segment color="warning" [(ngModel)]="deliveryOption" (ionChange)="onDeliveryOptionChange($event)">
+        <ion-segment-button value="takeaway">Takeaway</ion-segment-button>
+        <ion-segment-button value="delivery">Delivery</ion-segment-button>
+      </ion-segment>
+    </div>
+  </ion-card>
+  <ion-item *ngIf="deliveryOption === 'delivery' && isOngkirEnabled">
+    <ion-label position="floating">Ongkos Kirim</ion-label>
+    <ion-input type="tel"inputmode="numeric"pattern="[0-9]*"[(ngModel)]="ongkir"  (ionInput)="onOngkirChange($event)">
+  </ion-input>
+
+  </ion-item>
+<ion-card class="metode-card">
+  <div>
+    <ion-title>*Metode Pembayaran</ion-title>
+    <ion-select color="warning"
+      [value]="paymentMethod"
+      (ionChange)="onPaymentMethodChange($event)"
+      placeholder="Pilih Metode"
+      interface="action-sheet"
+      slot="end">
+      <ion-select-option *ngFor="let method of paymentOptions" [value]="method.code">
+        {{ method.name }}
+      </ion-select-option>
+      <ion-select-option value="point">Point</ion-select-option>
+    </ion-select>
+  </div>
+</ion-card>
+
+
+
+<ion-card class="customer-info-card">
+  <ion-grid>
+    <ion-row>
+
+      <div>
+        <ion-input
+          [label]="paymentMethod === 'point' ? 'Total Point Dibutuhkan' : 'Total Pembayaran'"
+          label-placement="floating"
+          type="text"
+          readonly
+          [value]="paymentMethod === 'point'
+              ? calculateTotalPoint()
+              : (calculateTotal() | currency: 'Rp. ': 'symbol': '0.0-0')">
+        </ion-input>
+      </div>
+
+      <!-- Jika bayar POINT → input kode / karcis -->
+      <div *ngIf="paymentMethod === 'point'">
+
+        <ion-grid class="input-container">
+          <ion-input
+            [(ngModel)]="redeemCode"
+            (keyup)="onRedeemKeyup($event)"
+            label="Kode Redeem"
+            label-placement="floating"
+            type="text"
+          ></ion-input>
+        </ion-grid>
+
+        <!-- tampilkan point customer -->
+        <ion-item *ngIf="customerPoint !== null">
+          <ion-label>Total Point Customer</ion-label>
+          <ion-note slot="end">{{ customerPoint }}</ion-note>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Total Point Dibutuhkan (redeem)</ion-label>
+          <ion-note slot="end">{{ calculateTotalPoint() }}</ion-note>
+        </ion-item>
+
+        <ion-item *ngIf="remainingPoint !== null">
+          <ion-label position="stacked">Sisa Point Setelah Transaksi</ion-label>
+          <ion-note slot="end">{{ remainingPoint }}</ion-note>
+        </ion-item>
+
+      </div>
+
+      <!-- Jika pembayaran normal (cash / QRIS / transfer) -->
+      <div *ngIf="paymentMethod !== 'point'">
+        <ion-input
+          label="Jumlah Dibayar"
+          label-placement="floating"
+          type="text"
+          inputmode="decimal"
+          [value]="customerPaidAmount"
+          (ionInput)="onPaidAmountChange($event)"
+          pattern="[0-9]*">
+        </ion-input>
+      </div>
+
+      <!-- Remaining / Kekurangan / Sisa Point -->
+      <div>
+        <ion-input
+          [label]="paymentMethod === 'point' ? 'Sisa Point' : remainingLabel"
+          label-placement="floating"
+          type="text"
+          readonly
+          [value]="paymentMethod === 'point'
+            ? remainingPoint
+            : (remainingAmount | currency: 'Rp. ': 'symbol': '0.0-0')">
+        </ion-input>
+      </div>
+
+    </ion-row>
+  </ion-grid>
+</ion-card>
+<ion-card class="customer-info-card">
+  <ion-grid>
+    <ion-row>
+
+      <div>
+        <ion-input
+          label="Nama Pelanggan"
+          label-placement="floating"
+          type="text"
+          [(ngModel)]="customer_name"
+          (ionInput)="onCustomerNameChange($event)"
+          required
+          [value]="customer_name">
+        </ion-input>
+      </div>
+
+      <div>
+        <ion-input
+          label="Nomor Telepon"
+          label-placement="floating"
+          type="tel"
+          [(ngModel)]="customer_phone"
+          (ionInput)="onCustomerPhoneChange($event)"
+          required
+          [value]="customer_phone">
+        </ion-input>
+      </div>
+
+      <div>
+        <ion-input
+          label="Alamat Pelanggan"
+          label-placement="floating"
+          type="text"
+          [(ngModel)]="customer_address"
+          (ionInput)="onCustomerAddressChange($event)"
+          [value]="customer_address">
+        </ion-input>
+      </div>
+
+    </ion-row>
+  </ion-grid>
+</ion-card>
+
+
+
+
+
+</ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6">
+          <ion-label>Subtotal: </ion-label>
+          <ion-title> {{ calculateSubtotal() | currency: 'Rp. ': 'symbol': '0.0-0'}}</ion-title>
+        </ion-col>
+        <ion-col size="6">
+          <ion-label>Diskon:</ion-label>
+          <ion-title> {{ calculateDiscount() | currency: 'Rp. ': 'symbol': '0.0-0'}}</ion-title>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="6">
+          <ion-label>PPN ({{ ppn }}%): </ion-label>
+          <ion-title> {{ calculatePPN() | currency: 'Rp. ': 'symbol': '0.0-0'}}</ion-title>
+        </ion-col>
+        <ion-col size="6" *ngIf="deliveryOption === 'delivery'">
+          <ion-label>Ongkir:</ion-label>
+          <ion-title> {{ ongkir | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-title>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="12">
+          <ion-label>Total:</ion-label>
+          <ion-title> {{ calculateTotal() | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-title>
+        </ion-col>
+      </ion-row>
+      <ion-button expand="block" (click)="pay()">
+        <ion-title>Bayar</ion-title>
+      </ion-button>
+    </ion-grid>
+  </ion-toolbar>
+</ion-footer>
+

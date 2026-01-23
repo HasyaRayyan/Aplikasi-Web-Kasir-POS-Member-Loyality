@@ -1,0 +1,111 @@
+<ion-header class="ion-border">
+  <ion-button slot="start" fill="clear" size="small" (click)="back()">
+    <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+  </ion-button>
+  <ion-title style="color: black;">Reset Password</ion-title>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="forgot-page">
+    <ion-grid class="forgot-container">
+
+      <!-- STEP 1: input username -->
+      <ng-container *ngIf="stage === 'input'">
+        <ion-row class="subtitle-row">
+          <p class="subtitle">
+            Masukkan username terdaftar. Jika benar, kami akan menampilkan detail outlet dan memberikan opsi pengiriman kode verifikasi (OTP).
+          </p>
+        </ion-row>
+
+        <ion-row class="form-row">
+          <ion-item lines="none" class="username-item">
+            <ion-icon slot="start" name="person-outline"></ion-icon>
+            <ion-input [(ngModel)]="username" placeholder="Username" required autocomplete="username"></ion-input>
+          </ion-item>
+
+          <div class="error" *ngIf="error">{{ error }}</div>
+
+          <ion-button expand="block" class="continue-btn" (click)="checkUsername()">Lanjutkan</ion-button>
+        </ion-row>
+
+        <ion-row class="help-row">
+          <p class="help-text">Butuh bantuan? <a (click)="contactSupport()">Hubungi support</a></p>
+        </ion-row>
+      </ng-container>
+
+      <!-- STEP 2: detail user/outlet -->
+      <ng-container *ngIf="stage === 'detail' && foundData">
+        <div class="detail-panel">
+          <div class="detail-avatar" aria-hidden="true">{{ initials }}</div>
+          <div class="detail-body">
+            <div class="detail-header">
+              <div class="detail-name">{{ foundData.name || foundData.username }}</div>
+              <div class="detail-sub">Username: <span class="muted">{{ foundData.username }}</span></div>
+            </div>
+
+            <div class="detail-info">
+              <div class="info-row">
+                <ion-icon name="pricetag-outline"></ion-icon>
+                <div>
+                  <div class="info-key">Kode Outlet</div>
+                  <div class="info-val">{{ foundData.outlet_code }}</div>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <ion-icon name="call-outline"></ion-icon>
+                <div>
+                  <div class="info-key">Nomor Terdaftar</div>
+                  <div class="info-val">{{ foundData.phone }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="notice" role="note">
+              <strong>Langkah selanjutnya:</strong>
+              <div class="notice-text">Periksa kembali data di atas. Jika sudah sesuai, tekan <strong>Kirim OTP</strong>.</div>
+            </div>
+
+            <div class="actions">
+              <ion-button expand="block" class="btn-send" (click)="onSendOtp()">Kirim OTP</ion-button>
+              <ion-button fill="clear" class="btn-edit" (click)="editUsername()">Ubah Username</ion-button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- STEP 3: OTP input -->
+      <ng-container *ngIf="stage === 'otp' && foundData">
+        <div class="otp-container">
+          <p class="otp-title">Masukkan 6 digit kode verifikasi.</p>
+
+          <div class="otp-inputs">
+            <input #otp1 type="text" maxlength="1" (input)="moveToNext($event, otp2)" (keydown)="handleBackspace($event, null, otp1)" [(ngModel)]="otpDigits[0]">
+            <input #otp2 type="text" maxlength="1" (input)="moveToNext($event, otp3)" (keydown)="handleBackspace($event, otp1, otp2)" [(ngModel)]="otpDigits[1]">
+            <input #otp3 type="text" maxlength="1" (input)="moveToNext($event, otp4)" (keydown)="handleBackspace($event, otp2, otp3)" [(ngModel)]="otpDigits[2]">
+            <input #otp4 type="text" maxlength="1" (input)="moveToNext($event, otp5)" (keydown)="handleBackspace($event, otp3, otp4)" [(ngModel)]="otpDigits[3]">
+            <input #otp5 type="text" maxlength="1" (input)="moveToNext($event, otp6)" (keydown)="handleBackspace($event, otp4, otp5)" [(ngModel)]="otpDigits[4]">
+            <input #otp6 type="text" maxlength="1" (input)="onOtpComplete()" (keydown)="handleBackspace($event, otp5, otp6)" [(ngModel)]="otpDigits[5]">
+          </div>
+
+          <div class="btn">
+            <ion-button expand="block" shape="round" (click)="verifyOtp()">
+              <ion-title>Verifikasi OTP</ion-title>
+            </ion-button>
+          </div>
+
+          <p class="resend-text">
+            <ion-button fill="clear" (click)="resendOtp()" [disabled]="otpCooldownRemaining > 0">
+              <ion-title>Kirim Ulang OTP ({{ otpCooldownRemaining }}s)</ion-title>
+            </ion-button>
+          </p>
+        </div>
+
+        <div style="text-align:center; margin-top:12px;">
+          <ion-button fill="clear" (click)="editUsername()">Ubah Username / Ganti Nomor</ion-button>
+        </div>
+      </ng-container>
+
+    </ion-grid>
+  </div>
+</ion-content>

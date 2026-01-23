@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reset Password</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2>Reset Password</h2>
+
+  <ion-item>
+    <ion-label position="stacked">Password Baru</ion-label>
+    <ion-input type="password" [(ngModel)]="password"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="stacked">Konfirmasi Password</ion-label>
+    <ion-input type="password" [(ngModel)]="confirm"></ion-input>
+  </ion-item>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <ion-button expand="block" (click)="submit()">Simpan</ion-button>
+</ion-content>

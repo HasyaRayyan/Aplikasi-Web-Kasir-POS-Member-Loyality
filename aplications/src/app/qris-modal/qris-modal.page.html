@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>QRIS Payment</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" text-center>
+  <ion-spinner *ngIf="loading"></ion-spinner>
+
+  <div *ngIf="!loading && qrUrl">
+    <img [src]="qrUrl" alt="QRIS" style="width:300px;height:300px"/>
+    <p>Scan QR untuk membayar Rp {{ amount | currency:'Rp. ' }}</p>
+  </div>
+
+  <div *ngIf="!loading && !qrUrl">
+    <p>Gagal memuat QRIS. Silakan coba lagi.</p>
+  </div>
+</ion-content>

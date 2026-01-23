@@ -1,0 +1,21 @@
+ion-content {
+  --background : white;
+}
+.lottie-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    ion-title {
+      font-size: xx-large;
+      font-weight: bold;
+      font-family: 'Poppins';
+      text-align: center;
+    }
+  }
+  
+  .lottie-animation {
+    width: 200px;
+    height: 200px;
+  }
+  

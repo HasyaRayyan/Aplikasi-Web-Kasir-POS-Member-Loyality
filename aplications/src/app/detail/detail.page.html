@@ -1,0 +1,121 @@
+<ion-header class="top">
+    <ion-button slot="start" fill="clear" size="small" (click)="router.navigate(['tab/home'])">
+      <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+    </ion-button>
+    <div class="label">
+      <ion-title style="color: black;"> Detail Item </ion-title>
+    </div>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="detail-container">
+    <img [src]="item.img_url" (error)="setDefaultImage($event)" alt="{{ item?.name }}" class="item-image">
+  </div>
+  <div class="detail-info">
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <div class="price">
+      <p *ngIf="isDiscountEnabled && item.sale_price > 0 && getDiscountPercentage() > 0">
+        <span style="text-decoration: line-through; color: #666666;">
+          {{ item.price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+        </span> <br>
+        {{ item.sale_price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+        <span style="color: red; font-size: 14px;">(-{{ getDiscountPercentage() }}%)</span>
+      </p>
+
+      <p *ngIf="!isDiscountEnabled || item.sale_price == 0 || getDiscountPercentage() == 0">
+        {{ item?.price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+      </p>
+
+      <ion-button class="btn-cart" fill="solid" shape="round" (click)="openModal(item)">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <br>
+    <p>Setiap pembelian item <b> {{ item.name }} </b> mendapatkan <b> {{ item.point }} </b> point</p>
+  </div>
+
+  <!-- <div *ngIf="toppings.length > 0">
+    <ul>
+      <div *ngFor="let topping of toppings">
+        <ion-item>
+          <ion-label>{{ topping.name }} - Rp {{ topping.price }}</ion-label>
+          <ion-checkbox slot="start" (ionChange)="toggleToppingSelection(topping)"></ion-checkbox>
+        </ion-item>
+      </div>
+    </ul>
+  </div> -->
+
+  <!-- <div class="toping" *ngIf="isToppingEnabled && toppings.length > 0">
+    <p>*Pilihan Toping</p>
+    <div class="list-toping" *ngFor="let topping of toppings">
+      <ion-label>{{ topping.name }} </ion-label>
+      <ion-label style="color: #CF8F24;"> - Rp{{ topping.price }}</ion-label>
+
+    </div>
+  </div> -->
+
+</ion-content>
+
+<ion-modal class="custom-modal" #detailModal [initialBreakpoint]="0.70" [breakpoints]="[0, 0.70]" [presentingElement]="ionRouterOutlet" [canDismiss]="true">
+  <ng-template>
+
+    <ion-header class="header">
+      <ion-toolbar>
+        <ion-title class="modal-title">Tambahkan Menu</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <div class="modal-content">
+        <div class="item">
+          <img [src]="item.img_url" (error)="setDefaultImage($event)" alt="{{ item.name }}" />
+          <div class="desc">
+            <b>{{ item.name }}</b>
+            <p *ngIf="isDiscountEnabled && item.sale_price > 0">
+              <span style="text-decoration: line-through; color: #666666;" >{{ item.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</span> <br>
+              {{ item.sale_price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+              <span style="color: red; font-size: 14px;"> (-{{ getDiscountPercentage() }}%)</span>
+            </p>
+            <p *ngIf="!isDiscountEnabled || item?.sale_price == 0">
+              {{ item?.price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+            </p>
+            <div class="qty-controls">
+              <ion-button (click)="decrementQty()">-</ion-button>
+              <span>{{ qty }}</span>
+              <ion-button (click)="incrementQty()">+</ion-button>
+            </div>
+          </div>
+        </div>
+
+
+        <div style="overflow-y: scroll;  width: 100%;">
+
+          <!-- Toppings list in the modal -->
+          <div class="toping" *ngIf="isToppingEnabled && toppings.length > 0">
+            <p>*Pilih Tambahan Toping</p>
+            <div class="list-toping" *ngFor="let topping of toppings">
+              <ion-label>{{ topping.name }} - {{ topping.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-label>
+              <ion-checkbox slot="start" (ionChange)="toggleToppingSelection(topping)" [checked]="topping.selected"></ion-checkbox>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Display total price -->
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        <div class="btn">
+          <ion-button expand="block" (click)="addToCart(item)">
+            <p>Masuk ke Troli - {{ calculateTotal() | currency: 'Rp. ': 'symbol': '0.0-0' }}</p>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+
+  </ng-template>
+</ion-modal>

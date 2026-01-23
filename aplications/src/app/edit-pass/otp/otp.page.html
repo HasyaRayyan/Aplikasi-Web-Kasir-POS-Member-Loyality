@@ -1,0 +1,42 @@
+<ion-header>
+  
+    <ion-button slot="start" fill="clear" size="small" (click)="router.navigate(['/edit-pass'])">
+      <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+    </ion-button>
+    <ion-title style="color: black;">Verifikasi OTP</ion-title>
+  
+</ion-header>
+
+<ion-content>
+
+  <ion-grid>
+    
+    <div class="otp-container">
+
+      <p class="otp-title">Masukkan 6 digit kode verifikasi.</p>
+      <!-- <p class="otp-subtitle">Kode telah dikirim ke nomor <strong>{{ formattedPhone }}</strong></p> -->
+      
+      <div class="otp-inputs">
+        <input #otp1 type="text" maxlength="1" (input)="moveToNext($event, otp2)" (keydown)="handleBackspace($event, otp1)" [(ngModel)]="otp[0]">
+    <input #otp2 type="text" maxlength="1" (input)="moveToNext($event, otp3)" (keydown)="handleBackspace($event, otp1, otp2)" [(ngModel)]="otp[1]">
+    <input #otp3 type="text" maxlength="1" (input)="moveToNext($event, otp4)" (keydown)="handleBackspace($event, otp2, otp3)" [(ngModel)]="otp[2]">
+    <input #otp4 type="text" maxlength="1" (input)="moveToNext($event, otp5)" (keydown)="handleBackspace($event, otp3, otp4)" [(ngModel)]="otp[3]">
+    <input #otp5 type="text" maxlength="1" (input)="moveToNext($event, otp6)" (keydown)="handleBackspace($event, otp4, otp5)" [(ngModel)]="otp[4]">
+    <input #otp6 type="text" maxlength="1" (input)="verifyOTP()" (keydown)="handleBackspace($event, otp5, otp6)" [(ngModel)]="otp[5]">
+  </div>
+
+  <div class="btn">
+    <ion-button expand="block" shape="round" (click)="verifyOTP()" [disabled]="isVerifying">
+      <ion-title >Verifikasi OTP</ion-title>
+    </ion-button>
+  </div>
+  
+  <p class="resend-text">
+    <ion-button fill="clear" (click)="resendOTP()" [disabled]="resendDisabled">
+      <ion-title>Kirim Ulang OTP {{ resendDisabled ? '(' + countdown + 's)' : '' }}</ion-title>
+    </ion-button>
+  </p>
+</div>
+</ion-grid>
+
+</ion-content>

@@ -1,0 +1,39 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Chat</ion-title>
+    <ion-buttons slot="end">
+      <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="chat-container">
+    <div class="messages">
+      <div *ngFor="let message of messages" [class.me]="message.sender === 'me'">
+        <div class="message-content">
+          <div *ngIf="message.sender === 'other'" class="avatar">
+            <ion-avatar>
+              <img src="assets/avatar.png" alt="avatar">
+            </ion-avatar>
+          </div>
+          <div class="bubble">{{ message.text }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ion-footer>
+    <ion-toolbar>
+      <ion-item lines="none">
+        <ion-input placeholder="Type a message..." [(ngModel)]="newMessage"></ion-input>
+        <ion-button fill="clear" (click)="sendMessage()">
+          <ion-icon name="send"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-toolbar>
+  </ion-footer>
+</ion-content>

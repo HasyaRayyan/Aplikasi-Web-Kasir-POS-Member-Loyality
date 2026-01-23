@@ -1,0 +1,39 @@
+<ion-header>
+    <ion-button slot="start" fill="clear" size="small" (click)="dismissModal()" > 
+      <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+    </ion-button>
+    <ion-title style="color: black;">Pilih Waktu</ion-title>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-grid>
+    <div class="date-container">
+      <ion-datetime
+        color="warning"
+        [(ngModel)]="selectedDate"
+        [min]="minDate"
+        display-format="YYYY-MM-DD HH:mm:ss"
+        picker-format="YYYY-MM-DD HH:mm:ss"
+        locale="id-ID"
+        presentation="date-time"
+        preferWheel="false"
+      ></ion-datetime>
+    </div>
+  </ion-grid>
+
+    
+  
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    
+    <div class="btn">
+      <ion-button expand="block" (click)="applyFilter()">
+        <ion-title>Terapkan</ion-title>
+      </ion-button>        
+    </div>
+
+  </ion-toolbar>
+</ion-footer>

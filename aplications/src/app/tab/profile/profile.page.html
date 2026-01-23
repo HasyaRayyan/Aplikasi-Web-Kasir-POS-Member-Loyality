@@ -1,0 +1,696 @@
+
+<ion-header class="ion-no-border">
+</ion-header>
+
+<div style="display: flex; justify-content: center; align-items: center; width: 100%; background: transparent; ">
+
+<ion-grid class="profile">
+
+  <ion-grid *ngIf="userData">
+    <ion-grid class="username">
+      <ion-title class="label">Username</ion-title>
+      <ion-title>{{ userData.userData.username }}</ion-title>
+    </ion-grid>
+    <ion-grid class="outlet">
+      <ion-title class="label">Outlet</ion-title>
+      <ion-title>{{ userData.userData.outlet_name }}</ion-title>
+    </ion-grid>
+  </ion-grid>
+
+  <ion-grid style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+    <!-- <ion-icon style="font-size: 5rem;" name="person-circle-outline"></ion-icon> -->
+
+    <div style="display: flex; justify-content: center; align-items: center; border-radius: 50%;" *ngIf="user_level !== '1'">
+      <img style="width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover;" (error)="setDefaultImage($event)" [src]="profileImage" alt="Foto Profil">
+    </div>
+
+    <div style="display: flex; justify-content: center; align-items: center; border-radius: 50%;" (click)="openProfileModal()" *ngIf="user_level === '1'">
+      <img style="width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover;" (error)="setDefaultImage($event)" [src]="profileImage" alt="Foto Profil">
+    </div>
+
+    <!-- <ion-button expand="block" color="danger" (click)="deleteImage()">
+      Hapus Gambar
+    </ion-button> -->
+
+    <!-- <ion-button *ngIf="user_level === '1'" expand="block" fill="clear" (click)="openProfileModal()" style="--color:#CF8F24 ;">
+      <ion-icon style="color: #CF8F24;" name="create-outline"></ion-icon>
+      Edit
+    </ion-button> -->
+
+    <ion-title class="member" *ngIf="userData.userData.member_level === '1'" style="font-family: 'Poppins'; font-size: medium; color: white; background: linear-gradient(to right, #FEBB4B,#dd971d); padding: 5px 25px; margin-top: 20px; border-radius: 1rem; ">Gold</ion-title>
+    <ion-title class="member" *ngIf="userData.userData.member_level === '2'" style="font-family: 'Poppins'; font-size: medium; color: white; background:linear-gradient(to right, #1EA7CE,#156074); padding: 5px 25px; margin-top: 20px; border-radius: 1rem; " >Silver</ion-title>
+    <ion-title class="member" *ngIf="userData.userData.member_level === '3'" style="font-family: 'Poppins'; font-size: medium; color: white; background:linear-gradient(to right, #a37541, #684216) ; padding: 5px 25px; margin-top: 20px; border-radius: 1rem; ">Bronze</ion-title>
+  </ion-grid>
+
+</ion-grid>
+</div>
+
+<ion-content>
+
+  <!-- <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="user_level === '1'">
+    <ion-fab-button *ngIf="user_level === '1'" (click)="openAddUser()">
+      <ion-icon name="person-add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab> -->
+
+<div style="margin-top: 4rem ; padding: 4rem 0 20rem 0 ; position: fixed; overflow-y: scroll; width: 100%; background: white; height: 100% ;">
+<ion-grid class="main">
+
+    <ion-grid class="accordion">
+
+
+      <ion-grid class="value" (click)="openProfileEdit()">
+        <ion-row>
+          <ion-title>Edit Profil</ion-title>
+          <ion-icon name="chevron-down-outline" *ngIf="!profileEdit"></ion-icon>
+          <ion-icon name="chevron-up-outline" *ngIf="profileEdit"></ion-icon>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="value-item" *ngIf="profileEdit" >
+
+        <ion-card class="user-pass" (click)="router.navigate(['/edit-pass'])">
+          <ion-title>Edit Username and Password</ion-title>
+          <!-- <ion-title><ion-icon name="arrow-forward-outline"></ion-icon></ion-title> -->
+        </ion-card>
+        <ion-card class="member" (click)="router.navigate(['/edit-membership'])">
+          <ion-title>Update Membership</ion-title>
+          <!-- <ion-title><ion-icon name="arrow-forward-outline"></ion-icon></ion-title> -->
+        </ion-card>
+
+      </ion-grid>
+
+
+
+      <ion-grid class="value" (click)="openAddPay()" *ngIf="user_level === '1'">
+        <ion-row>
+          <ion-title>Tambah Metode Pembayaran</ion-title>
+          <ion-icon name="chevron-down-outline" *ngIf="!addPay"></ion-icon>
+          <ion-icon name="chevron-up-outline" *ngIf="addPay"></ion-icon>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="value-item" *ngIf="addPay" >
+
+        <ion-grid class="pay">
+          <div *ngFor="let method of paymentMethods">
+            <ion-checkbox
+              slot="start"
+              [checked]="selectedMethods.includes(method.code)"
+              (ionChange)="toggleMethod(method.code, $event.detail.checked)"
+              [disabled]="method.isDisabled">
+            </ion-checkbox>
+            <ion-label>{{ method.name }}</ion-label>
+          </div>
+
+          <ion-button expand="block" (click)="savePaymentMethods()" [disabled]="disableSelection">
+            <ion-title>
+              Simpan Metode Pembayaran
+            </ion-title>
+          </ion-button>
+
+        </ion-grid>
+
+      </ion-grid>
+
+
+
+      <ion-grid class="value" (click)="openOption()" *ngIf="user_level === '1'">
+        <ion-row>
+          <ion-title>Pengaturan Opsi</ion-title>
+          <ion-icon name="chevron-down-outline" *ngIf="!option"></ion-icon>
+          <ion-icon name="chevron-up-outline" *ngIf="option"></ion-icon>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="value-item" *ngIf="option" >
+
+        <ion-grid class="option">
+
+          <!-- Menampilkan status topping di luar dropdown -->
+          <!-- <div style="display: flex; justify-content: space-between;">  -->
+
+          <div style="background: white; padding: 10px 15px; border-radius: 10px; margin: 10px 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);">
+            <ion-select label="Toping :" label-placement="fixed" placeholder="" [(ngModel)]="isToppingEnabled"  (ionChange)="toggleToppingStatus()">
+              <ion-select-option [value]="false">Non Aktif</ion-select-option>
+              <ion-select-option [value]="true">Aktif</ion-select-option>
+            </ion-select>
+          </div>
+
+          <div style="background: white; padding: 10px 15px; border-radius: 10px; margin: 10px 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);">
+            <ion-select label="PPN :" label-placement="fixed" placeholder="" (ionChange)="updatePPNStatus($event)" [ngModel]="ppnEnabled ? 'true' : 'false'">
+              <ion-select-option value="false">Non Aktif</ion-select-option>
+              <ion-select-option value="true">Aktif</ion-select-option>
+            </ion-select>
+        </div>
+
+          <div style="background: white; padding: 10px 15px; border-radius: 10px; margin: 10px 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);">
+            <ion-select label="Diskon :" label-placement="fixed" placeholder="" [(ngModel)]="isDiscountEnabled" (ionChange)="saveDiscountStatus()">
+              <ion-select-option [value]="false">Non Aktif</ion-select-option>
+              <ion-select-option [value]="true">Aktif</ion-select-option>
+            </ion-select>
+          </div>
+          <div style="background: white; padding: 10px 15px; border-radius: 10px; margin: 10px 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);">
+            <ion-select label="Ongkir :" label-placement="fixed" placeholder="" [(ngModel)]="isOngkirEnabled" (ionChange)="toggleOngkirStatus()">
+              <ion-select-option [value]="false">Non Aktif</ion-select-option>
+              <ion-select-option [value]="true">Aktif</ion-select-option>
+            </ion-select>
+          </div>
+
+          <div style="background: white; padding: 10px 15px; border-radius: 10px; margin: 10px 0; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);">
+            <ion-label>Kategori :</ion-label>
+            <div class="category-grid" [ngClass]="{'three-cols': columns.length === 3, 'two-cols': columns.length === 2}">
+              <div class="col" *ngFor="let col of columns; let ci = index">
+                <div *ngFor="let cat of col" class="cat-item">
+                  <ion-item lines="none">
+                    <ion-button slot="start" fill="clear" (click)="promptDeleteCategory(cat)">
+                      <ion-icon slot="icon-only" name="trash-bin-outline" color="danger"></ion-icon>
+                    </ion-button>
+                    <ion-label class="cat-name">{{ cat.name }}</ion-label>
+                    <ion-checkbox slot="end" [checked]="selectedCategoryIds.includes(cat.id)" (ionChange)="onCategoryToggle(cat, $event)" ></ion-checkbox>
+                  </ion-item>
+                </div>
+              </div>
+
+              <!-- Tombol tambah kategori -->
+              <div class="col add-col">
+                <ion-button expand="block" fill="clear" (click)="promptAddCategory()" class="add-btn">
+                  <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+                  <span>Tambah</span>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+          <!-- </div> -->
+
+        </ion-grid>
+
+      </ion-grid>
+      <!-- <ion-item>
+        <ion-label>PPN</ion-label>
+        <ion-select (ionChange)="updatePPNStatus($event)" [value]="ppnEnabled ? 'true' : 'false'">
+          <ion-select-option value="true">Aktif</ion-select-option>
+          <ion-select-option value="false">Nonaktif</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
+        <ion-label>Diskon</ion-label>
+        <ion-select [(ngModel)]="isDiscountEnabled" (ionChange)="saveDiscountStatus()">
+          <ion-select-option [value]="true">Aktif</ion-select-option>
+          <ion-select-option [value]="false">Nonaktif</ion-select-option>
+        </ion-select>
+      </ion-item> -->
+
+      <!-- percobaan ke : 11 -->
+
+      <ion-grid class="value" (click)="openAddPrinter()" *ngIf="user_level === '1'">
+        <ion-row>
+          <ion-title>Hubungkan Printer</ion-title>
+          <ion-icon name="chevron-down-outline" *ngIf="!addPrinter"></ion-icon>
+          <ion-icon name="chevron-up-outline" *ngIf="addPrinter"></ion-icon>
+        </ion-row>
+      </ion-grid>
+      <ion-grid class="value-item" *ngIf="addPrinter" >
+
+        <div style="display: flex; justify-content: left; width: 100%;">
+          <p style="color: #CF8F24; font-size: small; padding: 0 1rem;" >*Pastikan Bluetooth dan GPS aktif!</p>
+        </div>
+
+        <ion-grid class="printer">
+
+          @if (!isScanning) {
+            <ion-button expand="block" shape="round" fill="outline" (click)="startScan()">
+              <ion-icon slot="start" name="search"></ion-icon>
+              <ion-label>Temukan Printer</ion-label>
+            </ion-button>
+          } @else {
+            <ion-button expand="block" shape="round" fill="outline" color="danger" (click)="stopScan()">
+              <ion-icon slot="start" name="stop-circle"></ion-icon>
+              <ion-label>Berhenti Mencari</ion-label>
+            </ion-button>
+          }
+
+          <ion-grid style="display: flex; justify-content: center; padding-top: 12px;">
+            @if (isScanning) {
+              <ion-spinner color="warning"></ion-spinner>
+            }
+          </ion-grid>
+
+          @for (device of devices; track device.address) {
+              <div style="display: flex; justify-content: space-between;">
+                <ion-item (click)="connectDevice(device)" class="device" lines="none" detail="false" [button]="true">
+                  <ion-icon slot="start" name="print"></ion-icon>
+                  <ion-grid class="device-wrapper">
+                    <ion-label>{{device.name}}</ion-label>
+                    <ion-note>{{device.address}}</ion-note>
+                  </ion-grid>
+                </ion-item>
+              </div>
+            }
+
+              <!-- <div style="display: flex; justify-content: space-between;">
+                <ion-item  class="device" lines="none" detail="false" [button]="true">
+                  <ion-icon slot="start" name="print"></ion-icon>
+                  <ion-grid class="device-wrapper">
+                    <ion-label>device.name</ion-label>
+                    <ion-note>device.address</ion-note>
+                  </ion-grid>
+                </ion-item>
+              </div> -->
+
+
+
+        </ion-grid>
+
+      </ion-grid>
+
+
+
+    </ion-grid>
+
+    <div style="display: flex; justify-content: center; align-items: center; padding: 0 2rem; gap: 1rem;">
+      <ion-grid class="logout-btn" style="width: 50%; padding: 0;">
+        <ion-button expand="block" color="primary" (click)="openStockModal()">
+          <div class="label">
+            <ion-icon name="stats-chart-outline"></ion-icon>
+            <ion-title size="small"> Stock </ion-title>
+          </div>
+        </ion-button>
+      </ion-grid>
+      <ion-grid class="logout-btn" style="width: 50%; padding: 0;">
+        <ion-button expand="block" color="success" (click)="openFinanceModal()">
+          <div class="label">
+            <ion-icon name="wallet-outline"></ion-icon>
+            <ion-title size="small"> Keuangan </ion-title>
+          </div>
+        </ion-button>
+      </ion-grid>
+    </div>
+
+
+    <ion-grid class="logout-btn">
+      <ion-button expand="block" color="danger" (click)="logout()">
+        <div class="label">
+          <ion-icon name="log-out-outline"></ion-icon>
+          <ion-title> Logout </ion-title>
+        </div>
+      </ion-button>
+    </ion-grid>
+
+  </ion-grid>
+</div>
+
+
+
+</ion-content>
+
+<ion-modal class="manajemen-stock-modal" [isOpen]="managementStock">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-button slot="start" fill="clear" size="small" (click)="closeStockModal()">
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Manajemen Stock</ion-title>
+    </ion-header>
+
+    <!-- <div class="add-btn">
+      <ion-button expand="block" (click)="showExportAlert('masuk')">
+        <ion-icon name="cloud-download-outline"></ion-icon>&nbsp;Unduh Stock Masuk
+      </ion-button>
+
+      <ion-button expand="block" color="danger" (click)="showExportAlert('keluar')">
+        <ion-icon name="cloud-download-outline"></ion-icon>&nbsp;Unduh Stock Keluar
+      </ion-button>
+    </div> -->
+    <ion-content>
+
+      <!-- SEGMENT -->
+      <div style="z-index: 999; width: 100%; height: auto; position: fixed; background: white; display: grid; justify-content: center; align-items: center;">
+
+        <div style="width: 100%; height: auto; background: white; z-index: 999; display: flex; justify-content: center; align-items: start; box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.073);">
+          <ion-segment [color]="selectedSegment === 'masuk' ? 'success' : 'danger'" [(ngModel)]="selectedSegment">
+            <ion-segment-button value="masuk">
+              <ion-label color="success" style="font-weight: bolder;">Stock Masuk</ion-label>
+            </ion-segment-button>
+            
+            <ion-segment-button value="keluar">
+              <ion-label color="danger" style="font-weight: bolder;">Stock Keluar</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+
+        <div style="width: 100%; height: auto; background: white; z-index: 999; display: flex; justify-content: center; align-items: start; padding: 1rem;">
+          <ion-button *ngIf="selectedSegment === 'masuk'" expand="block" style="--background : #febb4b; color: white; margin: 15px 0; --border-radius: 10px;" (click)="showExportAlert('masuk')">
+            Unduh Stock Masuk
+          </ion-button>
+          <ion-button *ngIf="selectedSegment === 'keluar'" expand="block" style="--background : #fe604b; color: white; margin: 15px 0; --border-radius: 10px;" (click)="showExportAlert('keluar')">
+            Unduh Stock Keluar
+          </ion-button>
+        </div>
+          
+      </div>
+
+      <div style="margin-top: 120px; padding: 1rem;">
+        <!-- TAMPILAN DATA STOCK MASUK -->
+        <div *ngIf="selectedSegment === 'masuk'">
+
+
+          <div class="list-user" *ngFor="let item of stockMasuk">
+            <ion-grid>
+              <div style="display: flex; justify-content: end; padding: 0;">
+                <p style="font-size: small;">{{ item.created_at | date:'short' }}</p>
+              </div>
+              <ion-title>{{ item.name }}</ion-title>
+              <ion-title class="title-bawah">Qty: {{ item.qty }}</ion-title>
+            </ion-grid>
+          </div>
+
+        </div>
+
+        <!-- TAMPILAN DATA STOCK KELUAR -->
+        <div *ngIf="selectedSegment === 'keluar'">
+
+          <div class="list-user" *ngFor="let item of stockKeluar">
+            <ion-grid>
+              <div style="display: flex; justify-content: end; padding: 0;">
+                <p style="font-size: small;">{{ item.created_at | date:'short' }}</p>
+              </div>  
+              <ion-title>{{ item.name }}</ion-title>
+              <ion-title class="title-bawah">Qty: {{ item.qty }}</ion-title>
+            </ion-grid>
+          </div>
+        </div>
+      </div>
+
+    </ion-content>
+
+  </ng-template>
+</ion-modal>
+
+<ion-modal class="profile-modal" [isOpen]="isProfileModalOpen" (didDismiss)="closeProfileModal()">
+  <ng-template>
+
+    <ion-header>
+
+      <ion-button slot="start" fill="clear" size="small" (click)="closeProfileModal()" >
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Edit Foto Profil</ion-title>
+
+    </ion-header>
+
+    <ion-content>
+
+      <ion-title class="text">*Foto profil anda akan dicetak pada struk.</ion-title>
+
+      <div class="photo">
+
+        <div style="display: flex; justify-content: center; align-items: center; border-radius: 50%;"  >
+          <img style="width: 15rem; height: 15rem; border-radius: 50%; object-fit: cover;" (error)="setDefaultImage($event)" [src]="profileImage" alt="Foto Profil">
+        </div>
+
+      </div>
+
+      <div style="display: flex; justify-content: center; align-items: center; padding-bottom: 10px; gap: 5px;">
+
+        <ion-button class="btn-edit" fill="solid" (click)="selectImage()">
+          <ion-icon name="create-outline"></ion-icon>
+          <ion-label>Edit</ion-label>
+        </ion-button>
+
+
+        <ion-button class="btn-delete" fill="solid" (click)="deleteImage()">
+          <ion-icon name="trash-outline"></ion-icon>
+          <ion-label>Hapus</ion-label>
+        </ion-button>
+      </div>
+
+    </ion-content>
+
+
+  </ng-template>
+</ion-modal>
+
+
+
+<ion-modal class="date-modal" [isOpen]="isDateSelected">
+  <ng-template>
+
+    <ion-header>
+
+      <ion-button slot="start" fill="clear" size="small" (click)="closeDateModal()" >
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Pilih Tanggal</ion-title>
+
+    </ion-header>
+
+    <!-- <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeDateModal()">
+            <ion-icon name="chevron-back-outline" style="font-size: 2rem; color: #FC9C4C;"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title style="color: black;">Pilih Tanggal</ion-title>
+      </ion-toolbar>
+    </ion-header> -->
+
+    <ion-content>
+
+      <ion-grid>
+        <div class="date-container">
+
+          <ion-datetime
+            [(ngModel)]="selectedDate"
+            color="warning"
+            display-format="YYYY-MM-DD"
+            presentation="date"
+          ></ion-datetime>
+
+        </div>
+      </ion-grid>
+
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        <div class="btn">
+          <ion-button expand="block" (click)="onDateSelected()">
+            <ion-title>Unduh Data</ion-title>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal class="manajemen-stock-modal" [isOpen]="isfinance">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-button slot="start" fill="clear" size="small" (click)="closeFinanceModal()">
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Manajemen Keuangan </ion-title>
+    </ion-header>
+    
+    <!-- <ion-button expand="block" color="success" (click)="showExportAlertFinance('pemasukan')">
+      <ion-icon name="cloud-download-outline"></ion-icon>&nbsp;Unduh Laporan Pemasukan
+    </ion-button>
+
+    <ion-button expand="block" color="danger" (click)="showExportAlertFinance('pengeluaran')">
+      <ion-icon name="cloud-download-outline"></ion-icon>&nbsp;Unduh Laporan Pengeluaran
+    </ion-button> -->
+
+    <ion-content>
+
+      <div style="z-index: 999; width: 100%; height: auto; position: fixed; background: white; display: grid; justify-content: center; align-items: center;">
+        
+        <div style="width: 100%; height: auto; background: white; z-index: 999; display: flex; justify-content: center; align-items: start; box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.073);">
+          <ion-segment [color]="selectedSegment === 'masuk' ? 'success' : 'danger'" [(ngModel)]="selectedSegment">
+            <ion-segment-button value="masuk">
+              <ion-label color="success" style="font-weight: bolder;">Pemasukan</ion-label>
+            </ion-segment-button>
+  
+            <ion-segment-button value="keluar">
+              <ion-label color="danger" style="font-weight: bolder;">Pengeluaran</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+        
+        <div style="width: 100%; height: auto; background: white; z-index: 999; display: flex; justify-content: center; align-items: start; padding: 1rem;">
+          <ion-button *ngIf="selectedSegment === 'masuk'" expand="block" style="--background : #febb4b; color: white; margin: 15px 0; --border-radius: 10px;" (click)="showExportAlertFinance('pemasukan')">
+            Unduh Laporan Pemasukan
+          </ion-button>
+          <ion-button *ngIf="selectedSegment === 'keluar'" expand="block" style="--background : #fe604b; color: white; margin: 15px 0; --border-radius: 10px;" (click)="showExportAlertFinance('pengeluaran')">
+            Unduh Laporan Pengeluaran
+          </ion-button>
+        </div>
+
+      </div>
+      
+
+      <!-- CONTENT SESUAI SEGMENT -->
+      <div style="margin-top: 120px; padding: 1rem;">
+        <!-- PEMASUKAN -->
+        <div *ngIf="selectedSegment === 'masuk'">
+
+          <div class="list-user" *ngFor="let data of pemasukanData">
+            <ion-grid>
+              <div style="display: flex; justify-content: end; padding: 0;">
+                <p style="font-size: small;">{{ data.tanggal }}</p>
+              </div>
+              <ion-title>{{ data.customer_name }}</ion-title>
+              <ion-title style="font-size: medium;">Total Bayar: Rp{{ data.customer_payment_total | number:'1.0-0' }}</ion-title>
+              <div style="padding: 0 1.5rem;">
+                <p style="font-size: small;">Produk: {{ data.product_names?.join(', ') }}</p>
+                <p style="font-size: small;" *ngIf="data.addon_names?.length > 0">
+                    Topping: {{ data.addon_names?.join(', ') }}
+                </p>
+              </div>
+            </ion-grid>
+          </div>
+
+        </div>
+
+        
+        <div *ngIf="selectedSegment === 'keluar'">
+
+          <div class="list-user" *ngFor="let data of pengeluaranData">
+            <ion-grid>
+              <div style="display: flex; justify-content: end; padding: 0;">
+                <p style="font-size: small;">{{ data.tanggal }}</p>
+              </div>
+              <ion-title>{{ data.deskripsi }}</ion-title>
+              <ion-title>Jumlah: Rp{{ data.jumlah | number:'1.0-0' }}</ion-title>
+            </ion-grid>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Input Pengeluaran -->
+
+    </ion-content>
+
+    <!-- FAB (Floating Action Button) -->
+    <ion-fab *ngIf="selectedSegment === 'keluar'" horizontal="end" vertical="bottom" slot="fixed" style="padding: .5rem .5rem .5rem .5rem;">
+      <ion-fab-button (click)="openAddPengeluaranModal()" style="--background : #FEBB4B;">
+        <ion-icon name="add" style="color : white;"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+
+  </ng-template>
+</ion-modal>
+
+
+<ion-modal class="pengeluaran-modal" [isOpen]="isAddPengeluaranModal">
+  <ng-template>
+
+    <ion-header>
+      <ion-button slot="start" fill="clear" size="small" (click)="closeAddPengeluaranModal()">
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;"> Tambah Pengeluaran </ion-title>
+    </ion-header>
+
+    <ion-content>
+
+      <!-- <form (submit)="submitPengeluaran()"> -->
+      <div class="modal-content">
+
+        <ion-grid class="form">
+          <ion-input label="Jumlah" label-placement="floating" type="text" [(ngModel)]="newPengeluaran.jumlah" name="jumlah" required (keypress)="validateNumber($event)" pattern="[0-9]*"></ion-input>
+        </ion-grid>
+        <!-- <ion-label position="floating">Jumlah</ion-label>
+        </ion-item> -->
+      
+        <ion-grid class="form">
+          <!-- <ion-label position="floating">Deskripsi</ion-label> -->
+          <ion-input label="Deskripsi" label-placement="floating" type="text" [(ngModel)]="newPengeluaran.deskripsi" name="deskripsi" required></ion-input>
+        </ion-grid>
+
+      <!-- </form> -->
+      </div>
+
+      <ion-grid>
+        <div class="date-container">
+          <ion-datetime 
+            [(ngModel)]="newPengeluaran.tanggal"
+            name="tanggal"
+            required
+            color="warning"
+            ></ion-datetime>
+        </div>
+      </ion-grid>
+
+      <!-- <ion-button expand="full" type="submit" color="primary" (click)="submitPengeluaran()">Submit</ion-button> -->
+
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        
+        <div class="btn">
+          <ion-button expand="block" (click)="submitPengeluaran()">
+            <ion-title>Tambahkan</ion-title>
+          </ion-button>        
+        </div>
+    
+      </ion-toolbar>
+    </ion-footer>
+    
+
+  </ng-template>
+</ion-modal>
+
+
+
+<ion-modal class="date-modal" [isOpen]="isDateFinanceSelected">
+  <ng-template>
+
+    <ion-header>
+
+      <ion-button slot="start" fill="clear" size="small" (click)="closeDateFinanceModal()" >
+        <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+      <ion-title style="color: black;">Pilih Tanggal</ion-title>
+
+    </ion-header>
+
+    <!-- <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="closeDateFinanceModal()">
+            <ion-icon name="chevron-back-outline" style="font-size: 2rem; color: #FC9C4C;"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title style="color: black;">Pilih Tanggal</ion-title>
+      </ion-toolbar>
+    </ion-header> -->
+
+    <ion-content class="ion-padding">
+      <ion-grid>
+        <div class="date-container">
+          <ion-datetime
+            [(ngModel)]="selectedFinanceDate"
+            color="warning"
+            display-format="YYYY-MM-DD"
+            presentation="date"
+          ></ion-datetime>
+        </div>
+      </ion-grid>
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        <div class="btn">
+          <ion-button expand="block" (click)="onDateFinanceSelected()">
+            <ion-title>Unduh Data</ion-title>
+          </ion-button>
+        </div>
+      </ion-toolbar>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

@@ -1,0 +1,45 @@
+.chat-container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  
+  .messages {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  
+  .message-content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .me .message-content {
+    justify-content: flex-end;
+  }
+  
+  .bubble {
+    max-width: 70%;
+    padding: 10px;
+    border-radius: 20px;
+    background-color: #e0e0e0;
+    color: #000;
+    margin: 5px;
+  }
+  
+  .me .bubble {
+    background-color: #0078ff;
+    color: #fff;
+  }
+  
+  .avatar {
+    margin-right: 10px;
+  }
+  
+  ion-footer {
+    padding: 10px;
+    border-top: 1px solid #ccc;
+  }

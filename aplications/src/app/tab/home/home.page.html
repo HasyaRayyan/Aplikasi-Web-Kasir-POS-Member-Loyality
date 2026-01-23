@@ -1,0 +1,393 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <div class="logo">
+      <img src="assets/otatea-logo.png" alt="">
+    </div>
+
+    <div class="container-find">
+      <ion-row>
+
+        <ion-col size="10">
+          <ion-searchbar
+            placeholder="Cari Item"
+            showCancelButton="focus"
+            class="custom"
+            (ionInput)="onSearchChange($event)"
+          ></ion-searchbar>
+        </ion-col>
+
+        <ion-col size="2">
+          <div class="btn-add-card">
+            <ion-button class="custom" fill="clear" (click)="router.navigate(['/keranjang'])">
+              <ion-icon slot="icon-only" name="cart"></ion-icon>
+                <ion-badge
+                  *ngIf="cartCount > 0"
+                  >{{ cartCount }}</ion-badge
+                >
+            </ion-button>
+          </div>
+        </ion-col>
+
+      </ion-row>
+
+      <div class="container-filter">
+        <div
+          *ngFor="let category of categoriesForFilter"
+          class="filter"
+          [class.active]="category.id === selectedFilter"
+          (click)="selectFilter(category.id)"
+        >
+          <b>{{ category.name }}</b>
+        </div>
+      </div>
+
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+
+
+
+<ion-content [fullscreen]="true">
+
+  <ion-fab horizontal="end" vertical="bottom" slot="fixed" *ngIf="user_level === '1'">
+    <ion-fab-button *ngIf="user_level === '1'" (click)="openAddItemModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <div style="padding: 0; padding-bottom: 16rem; position: fixed; overflow-y: scroll; width: 100%; background: white; height: 100%;">
+
+
+  <div class="no-found" *ngIf="filteredItems?.length === 0">
+    <img src="assets/no-found.png" alt="anajy ">
+    <ion-title>Data Tidak Ditemukan.</ion-title>
+  </div>
+
+  <div class="container-card">
+
+
+      <ion-card size="6" *ngFor="let item of filteredItems">
+
+        <div class="img-container">
+          <!-- <img
+            src="assets/menu.png"
+            alt="{{ item.name }}"
+            (click)="openDetailPage(item)"
+          /> -->
+          <img
+            [src]="item.img_url"
+            (error)="setDefaultImage($event)"
+            alt=" {{ item.name }} "
+            (click)="openDetailPage(item)"
+          />
+
+
+
+          <ion-button  class="btn-cart" fill="solid" shape="round" (click)="openModal(item)">
+            <ion-icon slot="icon-only" name="bag-add-outline"></ion-icon>
+          </ion-button>
+
+        </div>
+
+
+        <div class="details">
+          <b>{{ item.name }}</b>
+          <p *ngIf="item.qty > 0" style="font-size: small;">Tersedia: {{ item.qty }}</p>
+          <p *ngIf="item.qty == 0" style="font-size: small; color: rgb(203, 73, 59); font-weight: 600;">Sold Out</p>
+          <p>{{ item.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</p>
+          <p>{{ item.point_sale }} point untuk item ini</p>
+        </div>
+
+        <div *ngIf="user_level === '1'" style="display: flex; justify-content: center; align-items: center; padding-bottom: 10px;">
+
+          <ion-button class="btn-edit" fill="clear" (click)="openEditItemModal(item)">
+            <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+          </ion-button>
+
+
+          <ion-button class="btn-delete" fill="clear" (click)="deleteProduct(item.id)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+      </ion-card>
+  </div>
+
+
+
+
+  <!-- <ion-col size="2">
+    <ion-button fill="solid" color="primary" (click)="openAddItemModal()">
+      <ion-icon slot="icon-only" name="add-circle"></ion-icon>
+      Tambah Item
+    </ion-button>
+  </ion-col> -->
+
+  <ion-modal class="add-modal" #addItemModal [canDismiss]="true" backdropDismiss="true">
+    <ng-template>
+      <ion-header>
+          <ion-button slot="start" fill="clear" size="small" (click)="closeAddItemModal()">
+            <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+          </ion-button>
+          <ion-title style="color: black;"> Tambahkan Item & Toping </ion-title>
+      </ion-header>
+
+      <ion-content >
+        <div class="modal-content">
+          <!-- Add Item Section -->
+          <ion-grid class="form">
+            <ion-textarea [(ngModel)]="itemData.name" type="text" label="Nama Item" label-placement="floating" [counter]="true" maxlength="15" [counterFormatter]="customCounterFormatter"></ion-textarea>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-textarea [(ngModel)]="itemData.description" type="text" label="Deskripsi Item" label-placement="floating" [counter]="true" maxlength="200" [counterFormatter]="customCounterFormatter" required></ion-textarea>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-select 
+              *ngIf="categories && categories.length > 0" 
+              label="Kategori Item" 
+              label-placement="floating" 
+              [(ngModel)]="itemData.id_category">
+
+              <ion-select-option 
+                *ngFor="let category of categories" 
+                [value]="category.id">
+                {{ category.name }}
+              </ion-select-option>
+            </ion-select>
+
+            <div *ngIf="!categories || categories.length === 0" class="no-category-info">
+              <ion-label color="medium">
+                <strong>Tentukan / tambahkan kategori dulu di Profil</strong>
+              </ion-label>
+            </div>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-input [(ngModel)]="itemData.price" type="text" label="Harga Item" label-placement="floating" required (keypress)="validateNumber($event)" pattern="[0-9]*"></ion-input>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-input [(ngModel)]="itemData.point_sale" type="text" label="Point Item" label-placement="floating" required (keypress)="validateNumber($event)" pattern="[0-9]*"></ion-input>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <!-- <ion-label position="floating">Qty Awal</ion-label> -->
+            <ion-input type="text" [(ngModel)]="itemData.qty" label="Qty Awal" label-placement="floating" required (keypress)="validateNumber($event)" pattern="[0-9]*"></ion-input>
+          </ion-grid>
+
+          <ion-grid class="photo-btn">
+            <ion-button expand="block" (click)="choosePhoto()"><ion-icon name="camera-outline"></ion-icon>Pilih Foto</ion-button>
+          </ion-grid>
+
+          <ion-grid class="photo-container">
+            <div style="display: flex; justify-content: end; width: 100%;">
+              <ion-button size="small" color="danger" *ngIf="itemData.photo" (click)="closePhoto()">
+                <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+              </ion-button>
+            </div>
+            <ion-img *ngIf="itemData.photo" [src]="itemData.photo"></ion-img>
+          </ion-grid>
+
+          <!-- Add Topping Section -->
+          <ion-grid class="form">
+            <ion-textarea [(ngModel)]="toppingData.name" type="text" label="Nama Topping" label-placement="floating" [counter]="true" maxlength="12" [counterFormatter]="customCounterFormatter" required></ion-textarea>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-input  [(ngModel)]="toppingData.price" type="text" label="Harga Topping" label-placement="floating" required (keypress)="validateNumber($event)" pattern="[0-9]*"></ion-input>
+          </ion-grid>
+
+          <ion-grid class="form">
+            <ion-select label="Nama Item" label-placement="floating" [(ngModel)]="toppingData.selectedItems" (ionChange)="selectItem($event)" multiple="true">
+              <ion-select-option *ngFor="let item of nullParentItems" [value]="item.id">
+                {{ item.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-grid>
+
+
+        </div>
+      </ion-content>
+
+      <ion-footer>
+        <ion-toolbar>
+          <ion-grid>
+            <!-- Button to Add Item -->
+            <ion-button expand="block" (click)="addProduct()">
+              <ion-title>Tambah Item</ion-title>
+            </ion-button>
+          </ion-grid>
+          <ion-grid>
+            <!-- Button to Add Topping -->
+            <ion-button expand="block" (click)="addTopping()">
+              <ion-title>Tambah Topping</ion-title>
+            </ion-button>
+          </ion-grid>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+
+
+  <ion-modal  #itemModal (willPresent)="onItemModalOpenAndRefreshToppings()" [canDismiss]="true" backdropDismiss="true" class="custom-modal" [initialBreakpoint]="0.70" [breakpoints]="[0, 0.70]" >
+    <ng-template>
+      <ion-header class="header">
+        <ion-toolbar>
+          <ion-title class="modal-title">Tambahkan Menu</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content>
+        <div class="modal-content">
+
+          <div class="item">
+            <img [src]="selectedItem?.img_url" (error)="setDefaultImage($event)" alt="{{ selectedItem?.name }}" />
+            <div class="desc">
+              <b>{{ selectedItem?.name }}</b>
+
+              <!-- Menampilkan harga asli, harga diskon, dan persentase diskon -->
+              <p *ngIf="isDiscountEnabled && selectedItem?.sale_price > 0 && getDiscountPercentage() > 0">
+                <span style="text-decoration: line-through; color: #666666;">
+                  {{ selectedItem?.price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+                </span> <br>
+                {{ selectedItem?.sale_price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+                <span style="color: red; font-size: 14px;"> (-{{ getDiscountPercentage() }}%)</span>
+              </p>
+
+              <p *ngIf="!isDiscountEnabled || selectedItem?.sale_price == 0 || getDiscountPercentage() == 0">
+                {{ selectedItem?.price | currency: 'Rp. ': 'symbol': '0.0-0' }}
+              </p>
+
+
+              <div class="qty-controls">
+                <ion-button (click)="decrementQty()">-</ion-button>
+                <span>{{ qty }}</span>
+                <ion-button (click)="incrementQty()">+</ion-button>
+              </div>
+            </div>
+          </div>
+
+          <div style="overflow-y: scroll;  width: 100%;">
+
+            <!-- Display Toppings -->
+            <div class="toping" *ngIf="isToppingEnabled && toppings.length > 0">
+              <p>*Pilih Tambahan Toping</p>
+                <div class="list-toping" *ngFor="let topping of toppings">
+                  <ion-label>{{ topping.name }} - {{ topping.price | currency: 'Rp. ': 'symbol': '0.0-0' }}</ion-label>
+                  <ion-checkbox [(ngModel)]="topping.selected"></ion-checkbox>
+                </div>
+            </div>
+          </div>
+
+
+          <div *ngIf="!isToppingEnabled">
+            <p>Topping saat ini tidak tersedia.</p>
+          </div>
+
+        </div>
+
+      </ion-content>
+   <ion-footer>
+  <ion-toolbar>
+    <div class="btn">
+      <ion-button expand="block" [disabled]="isButtonDisabled()" (click)="addToCart()">
+        <p>Masuk ke Troli - {{ calculateTotal() | currency: 'Rp. ': 'symbol': '0.0-0' }}</p>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
+    </ng-template>
+  </ion-modal>
+
+
+
+
+
+
+
+  <ion-modal class="edit-modal" #editItemModal [isOpen]="isEditItemModalOpen" (didDismiss)="closeEditItemModal()">
+    <ng-template>
+      <ion-header>
+        <ion-button slot="start" fill="clear" size="small" (click)="closeEditItemModal()">
+          <ion-icon style="color:#FC9C4C; font-size: 2rem;" name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <ion-title style="color: black;">Edit Item</ion-title>
+      </ion-header>
+
+      <ion-content>
+        <ion-grid class="login-container">
+
+          <!-- Nama Item -->
+          <ion-grid class="input-container">
+            <ion-textarea [counter]="true" maxlength="15" [counterFormatter]="customCounterFormatter"
+              [(ngModel)]="selectedItem.name" type="text" label="Edit Nama Item" label-placement="floating"
+              required></ion-textarea>
+          </ion-grid>
+
+          <!-- Deskripsi Item -->
+          <ion-grid class="input-container">
+            <ion-textarea [counter]="true" maxlength="200" [counterFormatter]="customCounterFormatter"
+              [(ngModel)]="selectedItem.description" type="text" label="Edit Deskripsi Item"
+              label-placement="floating" required></ion-textarea>
+          </ion-grid>
+          <!-- Tambah Qty -->
+          <ion-grid class="input-container">
+            <ion-input [(ngModel)]="selectedItem.qty" type="number" (keypress)="validateNumber($event)"label="Jumlah Tambahan Qty" label-placement="floating" required>
+            </ion-input>
+          </ion-grid>
+
+          <!-- Harga Item -->
+          <ion-grid class="input-container">
+            <ion-input [(ngModel)]="selectedItem.price" type="text" (keypress)="validateNumber($event)"
+              pattern="[0-9]*" label="Edit Harga Item" label-placement="floating" required></ion-input>
+          </ion-grid>
+
+          <!-- Diskon -->
+          <ion-grid class="input-container">
+            <ion-select label="Pilih Jenis Diskon" label-placement="floating" [(ngModel)]="discountType">
+              <ion-select-option value="nominal">Nominal (Rp)</ion-select-option>
+              <ion-select-option value="percent">Persentase (%)</ion-select-option>
+            </ion-select>
+          </ion-grid>
+
+          <ion-grid class="input-container">
+            <ion-input [(ngModel)]="selectedItem.discount" type="text" (keypress)="validateNumber($event)"
+              pattern="[0-9]*" label="Masukkan Jumlah Diskon" label-placement="floating" required></ion-input>
+          </ion-grid>
+
+          <!-- Harga Akhir -->
+          <ion-grid class="input-container">
+            <ion-input
+              [value]="selectedItem.price - (discountType === 'percent' ? selectedItem.price * (selectedItem.discount / 100) : selectedItem.discount)"
+              readonly type="number" pattern="[0-9]*" label="Harga Akhir" label-placement="floating">
+            </ion-input>
+          </ion-grid>
+
+          <!-- PILIH FOTO -->
+          <ion-grid class="photo-btn">
+            <ion-button expand="block" (click)="choosePhotoEdit()">
+              <ion-icon name="camera-outline"></ion-icon>
+              Pilih Foto
+            </ion-button>
+          </ion-grid>
+
+          <!-- PREVIEW FOTO -->
+          <ion-grid class="preview-photo" *ngIf="selectedItem.photo">
+            <ion-img [src]="selectedItem.photo" alt="Preview Foto Item" style="width: 100%; height: auto; border-radius: 10px; margin-top: 10px;"></ion-img>
+          </ion-grid>
+
+          <!-- SIMPAN -->
+          <ion-grid class="btn">
+            <ion-button expand="block" shape="round" (click)="updateItem()">
+              <ion-title>Simpan Perubahan</ion-title>
+            </ion-button>
+          </ion-grid>
+
+        </ion-grid>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
