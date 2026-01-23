@@ -1,5 +1,7 @@
 {
-  "name": "Aplication",
-  "integrations": {},
+  "name": "be-ta-ionic",
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular-standalone"
 }
