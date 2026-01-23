@@ -1,7 +1,0 @@
-{
-  "name": "Otatea",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}
