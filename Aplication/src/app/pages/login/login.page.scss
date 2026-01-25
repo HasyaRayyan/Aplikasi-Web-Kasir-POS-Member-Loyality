@@ -1,0 +1,178 @@
+// /* ===== BACKGROUND ===== */
+// .auth-bg {
+//   --background: radial-gradient(
+//     circle at top,
+//     #f0fdf4,
+//     #f3f4f6 60%
+//   );
+// }
+
+// /* ===== CENTER ===== */
+// .auth-wrapper {
+//   min-height: 100vh;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   padding: 24px;
+// }
+
+// /* ===== CARD ===== */
+// .auth-card {
+//   width: 960px;
+//   max-width: 100%;
+//   height: 540px;
+//   display: flex;
+//   background: #ffffff;
+//   border-radius: 22px;
+//   overflow: hidden;
+//   box-shadow:
+//     0 40px 90px rgba(0, 0, 0, 0.18);
+// }
+
+// /* ===== LEFT ===== */
+// .auth-left {
+//   flex: 1;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .auth-left-inner {
+//   width: 100%;
+//   max-width: 360px;
+//   text-align: center;
+// }
+
+// .title {
+//   font-size: 34px;
+//   font-weight: 800;
+//   margin-bottom: 6px;
+//   color: #0f172a;
+// }
+
+// .subtitle {
+//   font-size: 14px;
+//   color: #6b7280;
+//   margin-bottom: 32px;
+// }
+
+// /* ===== LOGO ===== */
+// .auth-logo {
+//   width: 250px;        // ukuran pas desktop
+//   max-width: 100%;
+//   margin: 0 auto 28px; // jarak ke title
+//   display: block;
+
+// }
+
+
+// .input {
+//   background: #f3f4f6;
+//   border-radius: 9px;      // lebih kecil
+//   padding: 3px 14px;       // 🔽 sebelumnya 14px 16px
+//   margin-bottom: 24px;      // 🔽 jarak antar input
+//   transition: all 0.25s ease;
+
+//   ion-input {
+//     font-size: 13px;        // 🔽 sebelumnya 14px
+//     color: #111827;
+//     --padding-start: 0;
+//     --padding-end: 0;
+//     --min-height: 12px;     // 🔥 penting: kecilkan tinggi internal
+//   }
+
+//   &:focus-within {
+//     background: #ffffff;
+//     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+//   }
+// }
+
+
+// /* FORGOT */
+// .forgot {
+//   display: block;
+//   margin: 8px 0 28px;
+//   font-size: 13px;
+//   color: #374151;
+//   cursor: pointer;
+// }
+
+// /* SIGN IN BUTTON */
+// .btn-signin {
+//   height: 48px;
+//   font-weight: 700;
+//   letter-spacing: 1px;
+//   --border-radius: 999px;
+//   --background: linear-gradient(
+//     135deg,
+//     #14b8a6,
+//     #10b981
+//   );
+//   --box-shadow:
+//     0 14px 30px rgba(16, 185, 129, 0.45);
+// }
+
+// /* ===== RIGHT ===== */
+// .auth-right {
+//   flex: 1;
+//   background: linear-gradient(
+//     135deg,
+//     #10b981,
+//     #059669
+//   );
+//   color: #ffffff;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .auth-right-inner {
+//   max-width: 300px;
+//   text-align: center;
+// }
+
+// .auth-right h1 {
+//   font-size: 34px;
+//   font-weight: 800;
+//   margin-bottom: 14px;
+// }
+
+// .auth-right p {
+//   font-size: 14px;
+//   line-height: 1.7;
+//   margin-bottom: 34px;
+//   opacity: 0.95;
+// }
+
+// /* SIGN UP BUTTON */
+// .btn-outline {
+//   padding: 12px 46px;
+//   border-radius: 999px;
+//   border: 2px solid #ffffff;
+//   background: transparent;
+//   color: #ffffff;
+//   font-weight: 700;
+//   letter-spacing: 1px;
+//   cursor: pointer;
+//   transition: all 0.25s ease;
+
+//   &:hover {
+//     background: rgba(255, 255, 255, 0.15);
+//   }
+// }
+
+// /* ===== RESPONSIVE ===== */
+// @media (max-width: 768px) {
+//   .auth-card {
+//     flex-direction: column;
+//     height: auto;
+//   }
+
+//   .auth-right {
+//     display: none;
+//   }
+
+//   .auth-left-inner {
+//     padding: 40px 0;
+//   }
+// }
