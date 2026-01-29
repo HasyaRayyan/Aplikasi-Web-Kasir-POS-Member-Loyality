@@ -1,8 +1,12 @@
-@import 'tailwindcss/base';
+// @import 'tailwindcss/base';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import 'tailwindcss/components';
 
-@import 'tailwindcss/utilities';
+// @import 'tailwindcss/components';
+
+// @import 'tailwindcss/utilities';
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -29,13 +33,24 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
-* {
-  font-family: 'Montserrat', sans-serif;
-}
+// * {
+//   font-family: 'Montserrat', sans-serif;
+// }
 
-:root {
-  --ion-font-family: 'Montserrat', sans-serif;
-}
+// :root {
+//   --ion-font-family: 'Montserrat', sans-serif;
+// }
+// .menu-item {
+//   @apply flex items-center h-11 px-4 rounded-2xl
+//          hover:bg-slate-800 hover:text-white
+//          transition relative;
+// }
+
+// .menu-item > * + * {
+//   margin-left: 1rem; /* ganti gap-4 */
+// }
+
+
 // @import "@ionic/angular/css/spacing.css";
 // @import "@ionic/angular/css/width.css";
 // @import "@ionic/angular/css/height.css";
@@ -54,13 +69,17 @@
 @import '@ionic/angular/css/palettes/dark.system.css';
 
 
-@tailwind base;
-@tailwind components;
-@import "tailwindcss";
-@tailwind utilities;
+// @tailwind base;
+// @tailwind components;
+// @import "tailwindcss";
+// @tailwind utilities;
 
 /* Font */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
+// .menu {
+//   @apply flex items-center gap-3 px-4 py-2 rounded-xl
+//          text-slate-700 hover:bg-slate-100 transition;
+// }

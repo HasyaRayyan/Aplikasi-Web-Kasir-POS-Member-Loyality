@@ -11,4 +11,10 @@ import { RouterModule } from '@angular/router';
   ],
   templateUrl: './app.component.html',
 })
-export class AppComponent {}
+export class AppComponent {
+    collapsed = false;
+
+  toggleSidebar() {
+    this.collapsed = !this.collapsed;
+  }
+}
