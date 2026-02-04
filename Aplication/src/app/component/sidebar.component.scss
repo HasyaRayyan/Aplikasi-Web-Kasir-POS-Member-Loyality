@@ -1,0 +1,207 @@
+/* ================= SIDEBAR ================= */
+.sidebar {
+  --width: 260px;
+  --background: #020617;
+  box-shadow: 8px 0 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ================= HEADER ================= */
+ion-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+  }
+}
+
+.sidebar-logo {
+  padding: 24px;
+  text-align: center;
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #ffffff;
+  }
+}
+
+/* ================= CONTENT ================= */
+ion-content {
+  --background: #020617;
+  padding-bottom: 88px;
+}
+
+/* ================= MENU GROUP ================= */
+.menu-group {
+  background: transparent;
+  margin-bottom: 22px;
+}
+
+.menu-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding: 0 20px 8px;
+}
+
+/* ================= MENU ITEM ================= */
+.menu-item {
+  --background: transparent;
+  --padding-start: 20px;
+  --min-height: 44px;
+
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  animation: fadeInUp 0.3s ease forwards;
+  animation-delay: calc(var(--delay) * 0.05s);
+  opacity: 0;
+
+  ion-icon {
+    color: #94a3b8;
+    font-size: 18px;
+    margin-right: 14px;
+  }
+
+  ion-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e5e7eb;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+
+    ion-icon {
+      color: #ffffff;
+    }
+
+    ion-label {
+      color: #ffffff;
+    }
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.08);
+    border-left-color: #ffffff;
+
+    ion-icon {
+      color: #ffffff;
+    }
+
+    ion-label {
+      font-weight: 600;
+      color: #ffffff;
+    }
+  }
+}
+
+/* ================= USER PROFILE ================= */
+.user-profile {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 16px 20px;
+  background: rgba(2, 6, 23, 0.95);
+  border-top: 1px solid #1e293b;
+}
+
+/* Avatar (Initial) */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #020617;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User Info */
+.user-info {
+  flex: 1;
+
+  h6 {
+    margin: 0;
+    font-size: 13px;
+    color: #ffffff;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+}
+
+/* Logout Button */
+ion-button {
+  --color: #94a3b8;
+
+  &:hover {
+    --color: #ffffff;
+    transform: scale(1.1);
+  }
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+
+/* DEFAULT: indikator tampil */
+.sidebar-indicator {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  background: #1e1f24;
+  width: 18px;
+  height: 40px;
+  border-radius: 0 12px 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* SAAT MENU TERBUKA → HILANG */
+ion-menu.menu-content-open ~ .sidebar-indicator {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-10px);
+}
+
+
+ion-menu::part(backdrop) {
+  background: transparent !important;
+}
+
+
+.spinner-black {
+  width: 60px;
+  height: 60px;
+  --color: #000000;
+}

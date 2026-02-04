@@ -10,14 +10,17 @@ export class RoleGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot): boolean | UrlTree {
-    const role = this.auth.getRole();
-    const allowedRoles: number[] = route.data['roles'] ?? [];
+canActivate(route: ActivatedRouteSnapshot): boolean | UrlTree {
+  const role = this.auth.getRole();
+  const allowedRoles: number[] = route.data['roles'] ?? [];
 
-    if (role && allowedRoles.includes(role)) {
-      return true;
-    }
+  console.log('ROLE:', role, 'ALLOWED:', allowedRoles);
 
-    return this.router.createUrlTree(['/login']);
+  if (role !== null && allowedRoles.includes(role)) {
+    return true;
   }
+
+  return this.router.createUrlTree(['/login']);
+}
+
 }

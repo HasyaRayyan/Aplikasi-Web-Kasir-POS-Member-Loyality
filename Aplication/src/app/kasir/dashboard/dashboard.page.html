@@ -1,13 +1,137 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>dashboard</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="space-y-8">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+  <!-- METRIC CARDS KASIR -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Transaksi Hari Ini</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">87</h2>
+        <ion-icon name="receipt-outline" class="text-4xl text-gray-300"></ion-icon>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Omzet Hari Ini</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">Rp 2.350.000</h2>
+        <ion-icon name="cash-outline" class="text-4xl text-gray-300"></ion-icon>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Produk Terjual</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">143</h2>
+        <ion-icon name="cube-outline" class="text-4xl text-gray-300"></ion-icon>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Member Datang</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">32</h2>
+        <ion-icon name="people-outline" class="text-4xl text-gray-300"></ion-icon>
+      </div>
+    </div>
+
+  </div>
+
+<!-- CHART + PRODUK TERLARIS -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+  <!-- CHART -->
+  <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+      Grafik Transaksi Mingguan
+    </h3>
+    <div class="relative h-[300px]">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+
+  <!-- PRODUK TERLARIS -->
+  <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">
+        Produk Terlaris
+      </h3>
+      <a routerLink="/kasir/transaksi" class="text-sm text-indigo-600 hover:underline">
+        Lihat Semua
+      </a>
+    </div>
+
+    <ul class="space-y-4">
+      <li class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold">1</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800">Es Kopi Susu</p>
+          <p class="text-xs text-gray-500">Terjual 120x</p>
+        </div>
+        <span class="text-sm font-semibold text-gray-700">Rp 18.000</span>
+      </li>
+
+      <li class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">2</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800">Americano</p>
+          <p class="text-xs text-gray-500">Terjual 95x</p>
+        </div>
+        <span class="text-sm font-semibold text-gray-700">Rp 15.000</span>
+      </li>
+
+      <li class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 font-semibold">3</div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800">Cappuccino</p>
+          <p class="text-xs text-gray-500">Terjual 80x</p>
+        </div>
+        <span class="text-sm font-semibold text-gray-700">Rp 22.000</span>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+
+  <!-- TRANSAKSI TERBARU -->
+  <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800">
+        Transaksi Terbaru
+      </h3>
+      <a routerLink="/kasir/transaksi" class="text-sm text-indigo-600 hover:underline">
+        Lihat Semua
+      </a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-500 border-b">
+            <th class="pb-3">Invoice</th>
+            <th class="pb-3">Total</th>
+            <th class="pb-3">Metode</th>
+            <th class="pb-3">Status</th>
+            <th class="pb-3">Tanggal</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y">
+          <tr class="hover:bg-gray-50">
+            <td class="py-3 font-medium text-gray-800">INV-0091</td>
+            <td class="py-3">Rp 120.000</td>
+            <td class="py-3">Cash</td>
+            <td class="py-3">
+              <span class="px-3 py-1 rounded-full text-xs bg-emerald-100 text-emerald-700">
+                Selesai
+              </span>
+            </td>
+            <td class="py-3 text-gray-500">Hari Ini</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

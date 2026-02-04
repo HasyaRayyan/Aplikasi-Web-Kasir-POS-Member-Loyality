@@ -6,15 +6,9 @@ import { RouterModule } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [
-    IonicModule,     // ✅ TANPA forRoot
+    IonicModule,
     RouterModule,
   ],
   templateUrl: './app.component.html',
 })
-export class AppComponent {
-    collapsed = false;
-
-  toggleSidebar() {
-    this.collapsed = !this.collapsed;
-  }
-}
+export class AppComponent {}

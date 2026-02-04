@@ -18,3 +18,24 @@ $routes->get('/', 'Home::index');
 $routes->post('auth', 'Auth::index');
 $routes->post('auth/login', 'Auth::login');
 
+$routes->group('api', function ($routes) {
+    $routes->get('products', 'ProductController::index');
+    $routes->get('addons', 'ProductController::addons');
+    $routes->post('products', 'ProductController::create');
+    $routes->get('categories', 'ProductController::categories');
+    $routes->delete('products/(:num)', 'ProductController::delete/$1');
+    $routes->get('generate-product-code', 'ProductController::generateCode');
+    $routes->post('updateproduct/(:num)', 'ProductController::updates/$1');
+
+    $routes->get('addons', 'AddonController::index');
+    $routes->post('addons', 'AddonController::create');
+    $routes->post('addons/update/(:num)', 'AddonController::update/$1');
+    $routes->delete('addons/(:num)', 'AddonController::delete/$1');
+
+
+
+
+
+});
+
+

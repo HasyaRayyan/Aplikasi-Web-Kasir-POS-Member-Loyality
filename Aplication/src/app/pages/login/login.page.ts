@@ -57,13 +57,17 @@ login() {
       localStorage.setItem('user', JSON.stringify(user));
 
       // ⬇️ REDIRECT ROLE
-      if (user.role_id == 1) {
-        this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
-      } else if (user.role_id == 2) {
-        this.router.navigate(['/kasir/dashboard'], { replaceUrl: true });
-      } else {
-        this.router.navigate(['/member/home'], { replaceUrl: true });
+      if (Number(user.role_id) === 1) {
+        this.router.navigate(['/admin/dashboard']);
+
+      } else if (Number(user.role_id) === 2) {
+        this.router.navigate(['/kasir/dashboard']);
+
+      } else if (Number(user.role_id) === 3) {
+        this.router.navigate(['/member/home']);
       }
+
+
     },
     
     error: () => {

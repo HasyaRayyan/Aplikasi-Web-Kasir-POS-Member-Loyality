@@ -1,75 +1,236 @@
-<ion-content
-  fullscreen
-  style="--background: #f7f7f5;"
->
-  <div class="p-5 space-y-8">
+dashboard.page.html
+<div class="space-y-8">
 
-    <!-- METRIC CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+  <!-- METRIC CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
 
-      <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <p class="text-sm text-gray-500">Total Member</p>
-        <div class="flex items-center justify-between mt-3">
-          <h2 class="text-3xl font-bold text-gray-800">1.250</h2>
-          <div class="w-11 h-11 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 text-lg">
-            👤
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <p class="text-sm text-gray-500">Total Produk</p>
-        <div class="flex items-center justify-between mt-3">
-          <h2 class="text-3xl font-bold text-gray-800">320</h2>
-          <div class="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 text-lg">
-            📦
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <p class="text-sm text-gray-500">Transaksi Hari Ini</p>
-        <div class="flex items-center justify-between mt-3">
-          <h2 class="text-3xl font-bold text-gray-800">87</h2>
-          <div class="w-11 h-11 flex items-center justify-center rounded-full bg-yellow-50 text-yellow-600 text-lg">
-            💳
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-        <p class="text-sm text-gray-500">Poin Digunakan</p>
-        <div class="flex items-center justify-between mt-3">
-          <h2 class="text-3xl font-bold text-gray-800">4.500</h2>
-          <div class="w-11 h-11 flex items-center justify-center rounded-full bg-red-50 text-red-600 text-lg">
-            ⭐
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- QUICK ACTION -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-      <h3 class="text-base font-semibold text-gray-800 mb-5">
-        Menu Cepat
-      </h3>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button class="h-12 rounded-full border border-blue-500 text-blue-600 hover:bg-blue-50 transition">
-          Produk
-        </button>
-        <button class="h-12 rounded-full border border-emerald-500 text-emerald-600 hover:bg-emerald-50 transition">
-          Member
-        </button>
-        <button class="h-12 rounded-full border border-yellow-500 text-yellow-600 hover:bg-yellow-50 transition">
-          Transaksi
-        </button>
-        <button class="h-12 rounded-full border border-gray-600 text-gray-700 hover:bg-gray-100 transition">
-          Laporan
-        </button>
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Total Member</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">1.250</h2>
+        <ion-icon
+          name="people-outline"
+          class="text-4xl text-gray-300"
+        ></ion-icon>
       </div>
     </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Total Produk</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">320</h2>
+        <ion-icon
+          name="cube-outline"
+          class="text-4xl text-gray-300"
+        ></ion-icon>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Transaksi Hari Ini</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">87</h2>
+        <ion-icon
+          name="card-outline"
+          class="text-4xl text-gray-300"
+        ></ion-icon>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+      <p class="text-sm text-gray-500">Poin Digunakan</p>
+      <div class="flex items-center justify-between mt-3">
+        <h2 class="text-3xl font-bold text-gray-800">4.500</h2>
+        <ion-icon
+          name="star-outline"
+          class="text-4xl text-gray-300"
+        ></ion-icon>
+      </div>
+    </div>
+
+
 
   </div>
-</ion-content>
+
+  <!-- CHART + PRODUK TERBARU -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <!-- CHART PENJUALAN -->
+    <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">
+        Grafik Penjualan Mingguan
+      </h3>
+
+      <div class="relative h-[300px]">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+
+    <!-- PRODUK TERBARU -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">
+          Produk Terbaru
+        </h3>
+        <a
+          routerLink="/admin/produk"
+          class="text-sm text-indigo-600 hover:underline"
+        >
+          Lihat Semua
+        </a>
+      </div>
+
+      <ul class="space-y-4">
+        <!-- ITEM -->
+        <li class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold"
+          >
+            P
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              Produk A
+            </p>
+            <p class="text-xs text-gray-500">
+              Rp 25.000
+            </p>
+          </div>
+        </li>
+
+        <li class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold">
+            P
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              Produk B
+            </p>
+            <p class="text-xs text-gray-500">
+              Rp 40.000
+            </p>
+          </div>
+        </li>
+
+        <li class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 font-semibold">
+            P
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              Produk C
+            </p>
+            <p class="text-xs text-gray-500">
+              Rp 18.000
+            </p>
+          </div>
+        </li>
+        
+        <li class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 font-semibold">
+            P
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              Produk C
+            </p>
+            <p class="text-xs text-gray-500">
+              Rp 18.000
+            </p>
+          </div>
+        </li>
+        
+        <li class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 font-semibold">
+            P
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              Produk C
+            </p>
+            <p class="text-xs text-gray-500">
+              Rp 18.000
+            </p>
+          </div>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+  <!-- TRANSAKSI TERBARU -->
+<div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-800">
+      Transaksi Terbaru
+    </h3>
+    <a
+      routerLink="/admin/transaksi"
+      class="text-sm text-indigo-600 hover:underline"
+    >
+      Lihat Semua
+    </a>
+  </div>
+
+  <!-- TABLE -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-3">Invoice</th>
+          <th class="pb-3">Member</th>
+          <th class="pb-3">Total</th>
+          <th class="pb-3">Metode</th>
+          <th class="pb-3">Status</th>
+          <th class="pb-3">Tanggal</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y">
+        <tr class="hover:bg-gray-50">
+          <td class="py-3 font-medium text-gray-800">INV-00123</td>
+          <td class="py-3">Budi</td>
+          <td class="py-3">Rp 120.000</td>
+          <td class="py-3">Cash</td>
+          <td class="py-3">
+            <span class="px-3 py-1 rounded-full text-xs bg-emerald-100 text-emerald-700">
+              Selesai
+            </span>
+          </td>
+          <td class="py-3 text-gray-500">30 Jan 2026</td>
+        </tr>
+
+        <tr class="hover:bg-gray-50">
+          <td class="py-3 font-medium text-gray-800">INV-00124</td>
+          <td class="py-3">Siti</td>
+          <td class="py-3">Rp 75.000</td>
+          <td class="py-3">QRIS</td>
+          <td class="py-3">
+            <span class="px-3 py-1 rounded-full text-xs bg-amber-100 text-amber-700">
+              Pending
+            </span>
+          </td>
+          <td class="py-3 text-gray-500">30 Jan 2026</td>
+        </tr>
+
+        <tr class="hover:bg-gray-50">
+          <td class="py-3 font-medium text-gray-800">INV-00125</td>
+          <td class="py-3">Andi</td>
+          <td class="py-3">Rp 230.000</td>
+          <td class="py-3">Transfer</td>
+          <td class="py-3">
+            <span class="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">
+              Batal
+            </span>
+          </td>
+          <td class="py-3 text-gray-500">29 Jan 2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+</div>

@@ -1,4 +1,4 @@
-<ion-content
+<ion-content 
   fullscreen
   class="bg-white"
   style="--background: #ededed;"
@@ -22,13 +22,6 @@
       <div class="w-full md:w-1/2 flex items-center justify-center py-12">
         <div class="w-full max-w-sm text-center px-6">
 
-          <!-- LOGO -->
-          <img
-            src="assets/fourtyPOS.png"
-            alt="FourtyPOS"
-            class="mx-auto mb-10 w-36"
-          />
-
           <h2 class="text-xl font-semibold text-gray-800 mb-2">
             Selamat Datang Kembali
           </h2>
@@ -39,28 +32,32 @@
 
           <!-- USERNAME -->
           <div class="mb-5">
-<ion-input
-  [(ngModel)]="username"
-  placeholder="Username"
-  class="bg-gray-100 rounded-full px-6 py-4 text-black"
-></ion-input>
-
+            <ion-input
+              [(ngModel)]="username"
+              placeholder="Username"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
           </div>
 
           <!-- PASSWORD -->
           <div class="mb-4">
-<ion-input
-  type="password"
-  [(ngModel)]="password"
-  placeholder="Password"
-  class="bg-gray-100 rounded-full px-6 py-4 text-black"
-></ion-input>
-
+            <ion-input
+              type="password"
+              [(ngModel)]="password"
+              placeholder="Password"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
           </div>
 
           <div class="text-right mb-8">
             <a
-              class="text-xs text-gray-600 cursor-pointer hover:text-emerald-500 transition"
+              class="
+                text-xs
+                text-gray-600
+                cursor-pointer
+                hover:text-gray-800
+                transition
+              "
             >
               Lupa kata sandi?
             </a>
@@ -70,7 +67,16 @@
           <button
             type="button"
             (click)="login()"
-            class="w-full h-14 bg-emerald-500 rounded-full text-white font-semibold"
+            class="
+              w-full
+              h-14
+              bg-gray-800
+              hover:bg-gray-900
+              rounded-full
+              text-white
+              font-semibold
+              transition
+            "
           >
             {{ loading ? 'Loading...' : 'SIGN IN' }}
           </button>
@@ -83,9 +89,7 @@
           hidden
           md:flex
           w-1/2
-          bg-gradient-to-br
-          from-emerald-400
-          to-emerald-600
+          bg-gray-900
           items-center
           justify-center
           text-white
@@ -97,7 +101,7 @@
             Halo, Teman!
           </h1>
 
-          <p class="text-sm leading-relaxed mb-10 text-emerald-100">
+          <p class="text-sm leading-relaxed mb-10 text-gray-300">
             Daftarkan diri Anda dan mulai gunakan layanan kami segera
           </p>
 
@@ -109,7 +113,7 @@
               font-semibold
               tracking-wide
               hover:bg-white
-              hover:text-emerald-600
+              hover:text-gray-900
               active:scale-[0.97]
               transition-all
             "

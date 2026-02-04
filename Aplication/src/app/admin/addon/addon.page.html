@@ -1,0 +1,363 @@
+<div class="min-h-screen bg-white p-4 md:p-8">
+
+  <!-- HEADER SECTION -->
+  <div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+          Daftar Addon
+        </h1>
+        <p class="text-gray-600 mt-2">Kelola tambahan untuk produk anda</p>
+      </div>
+      <button
+        (click)="openAddModal()"
+        class="group inline-flex items-center justify-center gap-2 bg-gray-900 
+              hover:bg-black text-white font-semibold px-6 py-3.5 rounded-lg 
+              transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 
+              w-full md:w-auto">
+
+        <ion-icon name="add-outline" class="text-xl"></ion-icon>
+        <span>Tambah Addon Baru</span>
+
+      </button>
+
+    </div>
+
+    <!-- SEARCH & FILTERS -->
+    <div class="bg-white rounded-xl p-5 mb-8 shadow-sm border border-gray-200">
+      <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
+
+        <!-- SEARCH -->
+        <div class="flex-1 relative group">
+          <ion-icon name="search-outline" 
+                   class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 
+                          group-hover:text-gray-600 transition-colors text-xl">
+          </ion-icon>
+
+          <input type="text"
+                [(ngModel)]="search"
+                (keyup.enter)="loadData()"
+                placeholder="Cari addon berdasarkan nama..."
+                class="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 
+                        rounded-lg text-black
+                        focus:border-gray-800 focus:ring-2 focus:ring-gray-200 
+                        outline-none transition-all duration-300 
+                        hover:border-gray-400">
+
+          <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <kbd class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-md border border-gray-300">Enter</kbd>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SPINNER OVERLAY -->
+  <div *ngIf="loading"
+       class="fixed inset-0 bg-white/80 backdrop-blur-sm 
+              flex items-center justify-center z-50">
+
+  <ion-spinner name="crescent" class="spinner-black"></ion-spinner>
+
+  </div>
+
+  <!-- MAIN ADDON TABLE -->
+  <div *ngIf="!loading"
+       class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+
+    <!-- TABLE HEADER -->
+    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
+      <div class="col-span-3">
+        <span class="font-semibold text-gray-700">ADDON</span>
+      </div>
+      <div class="col-span-3 font-semibold text-gray-700">PRODUK UTAMA</div>
+      <div class="col-span-2 font-semibold text-gray-700">HARGA</div>
+      <div class="col-span-2 font-semibold text-gray-700">STOK</div>
+      <div class="col-span-2 font-semibold text-gray-700 text-right">AKSI</div>
+    </div>
+
+    <div *ngFor="let addon of addons" 
+         class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+      
+      <!-- DESKTOP VIEW -->
+      <div class="hidden md:grid md:grid-cols-12 gap-4 px-6 py-5 items-center">
+        
+        <!-- ADDON INFO -->
+        <div class="col-span-3">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+              <span class="text-xl font-bold text-gray-800">
+                {{ addon.addon_name[0] }}
+              </span>
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-1">{{ addon.addon_name }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRODUCT -->
+        <div class="col-span-3">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+              <ion-icon name="cube-outline"></ion-icon>
+            </div>
+            <span class="font-medium text-gray-700">{{ addon.product_name }}</span>
+          </div>
+        </div>
+
+        <!-- PRICE -->
+        <div class="col-span-2">
+          <div class="flex flex-col">
+            <span class="font-bold text-gray-900">
+              Rp {{ formatPrice(addon.addon_price) }}
+            </span>
+            <span *ngIf="addon.addon_price == '0.00'" class="text-xs text-green-600 font-medium">
+              Gratis
+            </span>
+          </div>
+        </div>
+
+        <!-- STOCK -->
+        <div class="col-span-2">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-700 font-medium">{{ addon.qty }}</span>
+          </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="col-span-2 flex justify-end gap-1">
+          <!-- EDIT -->
+          <button
+            (click)="openEditModal(addon)"
+            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition">
+            <ion-icon name="create-outline" class="text-lg"></ion-icon>
+          </button>
+
+          <!-- DELETE -->
+          <button
+            (click)="confirmDelete(+addon.id)"
+            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+            <ion-icon name="trash-outline" class="text-lg"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- MOBILE VIEW -->
+      <div class="md:hidden p-5">
+        <div class="flex items-start gap-4 mb-3">
+          <div class="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center">
+            <span class="text-xl font-bold text-gray-800">
+              {{ addon.addon_name[0] }}
+            </span>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h3 class="font-bold text-gray-900">{{ addon.addon_name }}</h3>
+              </div>
+              <span class="px-3 py-1 text-xs rounded-lg font-medium"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': addon.qty > 10,
+                      'bg-yellow-100 text-yellow-700': addon.qty <= 10 && addon.qty > 0,
+                      'bg-red-100 text-red-700': addon.qty == 0
+                    }">
+                {{ addon.qty > 10 ? 'Tersedia' : addon.qty > 0 ? 'Terbatas' : 'Habis' }}
+              </span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Produk Utama</p>
+                <div class="flex items-center gap-2">
+                  <ion-icon name="cube-outline" class="text-blue-500"></ion-icon>
+                  <p class="font-medium text-gray-900">{{ addon.product_name }}</p>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">Harga</p>
+                <p class="font-bold text-gray-900">
+                  Rp {{ formatPrice(addon.addon_price) }}
+                  <span *ngIf="addon.addon_price == '0.00'" class="text-xs text-green-600">(Gratis)</span>
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+                <span class="text-sm text-gray-600">Stok: {{ addon.qty }}</span>
+              </div>
+              <div class="flex gap-2">
+                <button (click)="openEditModal(addon)"
+                        class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
+                  <ion-icon name="create-outline"></ion-icon>
+                </button>
+                <button (click)="confirmDelete(+addon.id)"
+                        class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between 
+                gap-4 px-6 py-4 bg-gray-50 border-t border-gray-200">
+      <div class="flex items-center gap-3">
+        <span class="text-gray-700">
+          Menampilkan <span class="font-bold text-gray-900">{{ addons.length }}</span> dari 
+          <span class="font-bold text-gray-900">{{ meta?.total || 0 }}</span> addon
+        </span>
+      </div>
+      
+      <div class="flex items-center gap-6">
+        
+        <div class="flex items-center gap-2">
+          <button (click)="prevPage()"
+                  class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300 
+                        rounded-lg hover:border-gray-800 hover:bg-gray-50 transition-colors
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                  [disabled]="page <= 1">
+            <ion-icon name="chevron-back-outline" class="text-gray-600"></ion-icon>
+          </button>
+          
+          <span class="px-3 py-1 text-sm text-gray-700">
+            {{ page }} / {{ totalPages }}
+          </span>
+          
+          <button (click)="nextPage()"
+                  class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300 
+                        rounded-lg hover:border-gray-800 hover:bg-gray-50 transition-colors
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                  [disabled]="page >= totalPages">
+            <ion-icon name="chevron-forward-outline" class="text-gray-600"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+                        
+
+
+
+
+
+    
+  
+  
+  
+  
+  
+  
+  
+
+
+
+  <!-- MODAL TAMBAH / EDIT ADDON -->
+<div *ngIf="showAddModal"
+     class="fixed inset-0 bg-black/40 backdrop-blur-sm 
+            flex items-center justify-center z-[9999] p-4">
+
+  <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gray-900 text-white rounded-lg flex items-center justify-center">
+          <ion-icon name="add-outline"></ion-icon>
+        </div>
+
+        <h2 class="text-lg font-bold text-gray-900">
+          {{ isEdit ? 'Edit Addon' : 'Tambah Addon' }}
+        </h2>
+      </div>
+
+      <button (click)="closeAddModal()"
+              class="text-gray-500 hover:text-black transition">
+        <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- NAMA ADDON -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Nama Addon
+        </label>
+        <input type="text"
+          [(ngModel)]="newAddon.addon_name"
+          placeholder="Contoh: Extra Keju"
+          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
+                 text-black placeholder-gray-400
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
+                 outline-none transition">
+      </div>
+
+      <!-- PRODUK -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Produk Utama
+        </label>
+        <select [(ngModel)]="newAddon.product_id"
+          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
+                 text-black focus:border-gray-900 focus:ring-2 
+                 focus:ring-gray-200 outline-none transition">
+          <option value="">Pilih Produk</option>
+          <option *ngFor="let p of productsList" [value]="p.id">
+            {{ p.product_name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- HARGA -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Harga Addon
+        </label>
+        <input type="number"
+          [(ngModel)]="newAddon.addon_price"
+          placeholder="0"
+          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
+                 text-black focus:border-gray-900 focus:ring-2 
+                 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- QTY -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Stok
+        </label>
+        <input type="number"
+          [(ngModel)]="newAddon.qty"
+          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
+                 text-black focus:border-gray-900 focus:ring-2 
+                 focus:ring-gray-200 outline-none transition">
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+      <button (click)="closeAddModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg 
+                     text-gray-700 hover:bg-gray-100 transition">
+        Batal
+      </button>
+
+      <button
+        (click)="isEdit ? updateAddon() : saveAddon()"
+        class="px-6 py-2 bg-gray-900 text-white rounded-lg 
+               hover:bg-black transition shadow-sm">
+        {{ isEdit ? 'Update Addon' : 'Simpan Addon' }}
+      </button>
+    </div>
+
+  </div>
+</div>

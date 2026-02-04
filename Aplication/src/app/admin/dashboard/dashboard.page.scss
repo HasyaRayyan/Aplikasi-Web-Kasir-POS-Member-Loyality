@@ -1,3 +1,49 @@
-.ion-contenr{
-  --background: #f7f7f5;
+// /* ===== WELCOME CARD ===== */
+// .welcome-card {
+//   background: #ffffff;
+//   border-radius: 24px;
+//   padding: 20px 24px;
+//   border: 1px solid #f1f5f9;
+//   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// }
+
+// /* LEFT */
+// .welcome-subtitle {
+//   font-size: 13px;
+//   color: #6b7280;
+//   margin: 0;
+// }
+
+// .welcome-name {
+//   font-size: 26px;
+//   font-weight: 700;
+//   color: #1f2937;
+//   margin-top: 4px;
+// }
+
+// /* RIGHT (DATE) */
+// .welcome-right {
+//   display: flex;
+//   align-items: center;
+//   gap: 8px;
+
+//   font-size: 13px;
+//   font-weight: 500;
+//   color: #6b7280;
+// }
+
+// .welcome-right ion-icon {
+//   font-size: 18px;
+//   color: #9ca3af;
+// }
+
+
+ion-content {
+  --background: #ffffff !important;
+  background: #ffffff !important;
 }
+

@@ -1,0 +1,73 @@
+
+<ion-menu contentId="main-content" type="overlay" class="sidebar z-50" side="start">
+
+  
+
+  <ion-header>
+    <ion-toolbar>
+      <ion-title class="sidebar-logo">
+        <span class="logo-text">TheFourtyFour</span>
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <ion-list *ngFor="let group of menu" class="menu-group">
+      <ion-list-header>
+        <ion-label class="menu-title">{{ group.title }}</ion-label>
+      </ion-list-header>
+
+      <ion-menu-toggle
+        auto-hide="true"
+        *ngFor="let item of group.items; let i = index"
+      >
+        <ion-item
+          class="menu-item"
+          [routerLink]="['/', basePath, item.path]"
+          routerLinkActive="active"
+          lines="none"
+          detail="false"
+          [style.--delay]="i"
+        >
+          <!-- ICON (FIX) -->
+          <ion-icon
+            slot="start"
+            [name]="item.icon"
+            aria-hidden="true"
+          ></ion-icon>
+
+          <ion-label>{{ item.label }}</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ion-list>
+  </ion-content>
+
+  <!-- USER PROFILE -->
+  <div class="user-profile">
+    <div class="avatar">{{ username[0] }}</div>
+
+    <div class="user-info">
+      <h6>{{ username }}</h6>
+      <p>{{ roleName }}</p>
+    </div>
+
+    <ion-button fill="clear" size="small" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+    </ion-button>
+  </div>
+  
+</ion-menu>
+
+  <!-- MAIN CONTENT
+  <div id="main-content">
+    <ion-router-outlet></ion-router-outlet>
+  </div> -->
+
+ <!-- SIDEBAR INDICATOR (PANAH) -->
+<div
+  class="sidebar-indicator"
+  (click)="toggleMenu()"
+>
+  <ion-icon name="chevron-forward-outline"></ion-icon>
+</div>
+
