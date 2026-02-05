@@ -55,4 +55,11 @@ updateProduct(id: number | null, data: FormData) {
   return this.http.post(`${environment.apiBaseUrl}/api/updateproduct/${id}`, data);
 }
 
+getKasir(search='', category='', page=1, limit=9){
+  return this.http.get<any>(
+    `${environment.apiBaseUrl}/api/kasir?search=${search}&category=${category}&page=${page}&limit=${limit}`
+  );
+}
+
+
 }

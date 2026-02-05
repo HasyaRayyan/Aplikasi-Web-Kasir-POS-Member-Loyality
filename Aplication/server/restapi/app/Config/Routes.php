@@ -32,6 +32,8 @@ $routes->group('api', function ($routes) {
     $routes->post('addons/update/(:num)', 'AddonController::update/$1');
     $routes->delete('addons/(:num)', 'AddonController::delete/$1');
 
+    $routes->get('kasir', 'Kasir::index');
+
 
 
 

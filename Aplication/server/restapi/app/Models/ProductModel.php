@@ -156,5 +156,55 @@ public function updateProduct($id, $data)
 }
 
 
+public function getKasirProducts($search = '', $category = '', $limit = 9, $page = 1)
+{
+    $offset = ($page - 1) * $limit;
+
+    $builder = $this->db->table('products p')
+        ->select('
+            p.id,
+            p.product_code,
+            p.product_name,
+            p.image,
+            p.price,
+            p.qty,
+            p.is_active,
+            p.category_id,
+            c.category_name
+        ')
+        ->join('categories c', 'c.id = p.category_id', 'left')
+        ->where('p.is_active', 1);
+
+    if (!empty($search)) {
+        $builder->like('p.product_name', $search);
+    }
+
+    if (!empty($category)) {
+        $builder->where('p.category_id', $category);
+    }
+
+    // TOTAL DATA
+    $total = $builder->countAllResults(false);
+
+    $products = $builder
+        ->orderBy('p.product_name', 'ASC')
+        ->limit($limit, $offset)
+        ->get()
+        ->getResultArray();
+
+    foreach ($products as &$p) {
+        $p['addons'] = $this->db->table('product_addons')
+            ->select('id, addon_name, addon_price, qty')
+            ->where('product_id', $p['id'])
+            ->get()
+            ->getResultArray();
+    }
+
+    return [
+        'data' => $products,
+        'total' => $total,
+        'total_pages' => ceil($total / $limit)
+    ];
+}
 
 }
