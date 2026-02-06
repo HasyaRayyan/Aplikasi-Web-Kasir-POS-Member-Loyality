@@ -20,7 +20,7 @@ $routes->post('auth/login', 'Auth::login');
 
 $routes->group('api', function ($routes) {
     $routes->get('products', 'ProductController::index');
-    $routes->get('addons', 'ProductController::addons');
+    // $routes->get('addons', 'ProductController::addons');
     $routes->post('products', 'ProductController::create');
     $routes->get('categories', 'ProductController::categories');
     $routes->delete('products/(:num)', 'ProductController::delete/$1');

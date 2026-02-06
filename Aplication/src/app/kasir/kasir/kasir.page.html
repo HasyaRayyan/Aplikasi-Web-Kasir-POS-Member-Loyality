@@ -37,17 +37,18 @@
 
           <input type="text"
             [(ngModel)]="search"
-            (keyup.enter)="loadKasir()"
+            (ngModelChange)="onSearchChange()"
             placeholder="Cari produk atau kode..."
             class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl
-                   text-gray-900 placeholder-gray-400
-                   focus:bg-white focus:border-gray-900
-                   focus:ring-2 focus:ring-gray-200
-                   hover:border-gray-400 shadow-sm outline-none transition">
+                  text-gray-900 placeholder-gray-400
+                  focus:bg-white focus:border-gray-900
+                  focus:ring-2 focus:ring-gray-200
+                  hover:border-gray-400 shadow-sm outline-none transition">
+
         </div>
 
         <!-- CATEGORY TABS -->
-        <div class="flex gap-2 overflow-x-auto pb-1">
+      <div class="flex gap-2 overflow-x-auto pb-2 category-scroll">
 
           <button
             (click)="setCategory('')"
@@ -71,83 +72,164 @@
         </div>
       </div>
 
+<!-- LIST PRODUK HABIS -->
+<div *ngIf="outOfStockProducts.length > 0"
+     class="bg-gradient-to-r from-red-50 to-white
+            border border-red-200 rounded-2xl
+            p-4 shadow-sm space-y-3">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 flex items-center justify-center
+                  rounded-lg bg-red-100 text-red-600">
+        <ion-icon name="alert-outline" class="text-lg"></ion-icon>
+      </div>
+
+      <div>
+        <p class="font-semibold text-red-700 text-sm">
+          Produk Habis
+        </p>
+        <p class="text-[11px] text-red-500">
+          {{ outOfStockProducts.length }} produk Sold
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LIST CHIP -->
+  <div class="flex gap-2 overflow-x-auto pb-1">
+
+    <div *ngFor="let p of outOfStockProducts"
+         class="group flex items-center gap-2
+                px-3 py-1.5 rounded-full
+                bg-white border border-red-200
+                text-xs font-semibold text-red-700
+                whitespace-nowrap shadow-sm
+                hover:bg-red-50 transition">
+
+      <span class="w-2 h-2 rounded-full bg-red-500"></span>
+      {{ p.product_name }}
+
+    </div>
+
+  </div>
+</div>
+
+
       <!-- GRID PRODUK -->
       <div *ngIf="!loading"
            class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
 
-        <div *ngFor="let p of products"
-          (click)="addToCart(p)"
-          class="group bg-white border border-gray-200 rounded-2xl p-4
-                 shadow-sm hover:shadow-xl hover:-translate-y-1
-                 hover:border-gray-900 transition cursor-pointer relative">
+<div *ngFor="let p of products"
+  (click)="p.qty > 0 && addToCart(p)"
+  [ngClass]="p.qty == 0
+    ? 'bg-gray-50 border-red-300 opacity-70 cursor-not-allowed'
+    : 'cursor-pointer hover:border-gray-900 hover:shadow-md'"
+  class="group border rounded-xl p-3 transition relative">
 
-          <!-- BADGE STOK -->
-          <div class="absolute top-3 right-3 text-[11px] font-semibold
-                      px-2 py-1 rounded-full bg-gray-900 text-white">
-            Stok {{ p.qty }}
-          </div>
 
-          <!-- IMAGE -->
-          <div class="w-full h-28 bg-gray-100 rounded-xl
-                      flex items-center justify-center mb-3 overflow-hidden
-                      group-hover:bg-gray-200 transition">
 
-            <img *ngIf="p.image"
-              [src]="'http://localhost:8080/uploads/products/' + p.image"
-              class="w-full h-full object-cover">
+<!-- IMAGE -->
+<div class="w-full aspect-square bg-gray-50 rounded-lg
+            flex items-center justify-center mb-2 overflow-hidden relative">
 
-            <span *ngIf="!p.image"
-              class="text-3xl font-bold text-gray-700">
-              {{ p.product_name[0] }}
-            </span>
-          </div>
+  <img *ngIf="p.image"
+    [src]="'http://localhost:8080/uploads/products/' + p.image"
+    class="w-full h-full object-cover">
 
-          <h3 class="font-semibold text-gray-900 text-sm line-clamp-1 mb-1">
-            {{ p.product_name }}
-          </h3>
+  <span *ngIf="!p.image"
+    class="text-2xl font-bold text-gray-400">
+    {{ p.product_name[0] }}
+  </span>
 
-          <p class="text-[11px] text-gray-400 mb-2 flex items-center gap-1">
-            <ion-icon name="pricetag-outline" class="text-xs"></ion-icon>
-            {{ p.category_name }}
-          </p>
+  <!-- OVERLAY HABIS -->
+  <div *ngIf="p.qty == 0"
+       class="absolute inset-0 bg-black/40
+              flex items-center justify-center">
+    <span class="bg-red-600 text-white text-xs font-bold
+                 px-3 py-1 rounded-md shadow">
+      PRODUK HABIS
+    </span>
+  </div>
 
-          <div class="flex items-center justify-between mt-2">
-            <p class="font-bold text-gray-900 text-base">
-              Rp {{ formatPrice(p.price) }}
-            </p>
+</div>
 
-            <div class="w-8 h-8 flex items-center justify-center
-                        rounded-full bg-gray-900 text-white
-                        group-hover:scale-110 transition">
-              <ion-icon name="add-outline"></ion-icon>
-            </div>
-          </div>
 
-        </div>
-      </div>
+  <!-- NAMA -->
+  <h3 class="font-medium text-gray-900 text-sm line-clamp-1">
+    {{ p.product_name }}
+  </h3>
 
-      <!-- PAGINATION -->
-      <div class="flex justify-center items-center gap-4 mt-6">
+  <!-- CATEGORY + STOK -->
+  <div class="flex justify-between items-center mt-1 text-[11px] text-gray-500">
+    <span>{{ p.category_name }}</span>
+    <span class="font-semibold">Stok {{ p.qty }}</span>
+  </div>
 
-        <button (click)="prevPage()" [disabled]="page <= 1"
-          class="px-4 py-2 rounded-lg font-semibold
-                 bg-gray-900 text-white hover:bg-black transition
-                 disabled:bg-gray-300 disabled:text-gray-500">
-          <
-        </button>
+  <!-- FOOTER -->
+  <div class="flex items-center justify-between mt-2">
 
-        <span class="font-bold text-gray-900 text-lg">
-          {{ page }} / {{ totalPages }}
-        </span>
+    <!-- HARGA -->
+    <p class="font-bold text-gray-900 text-sm">
+      Rp {{ formatPrice(p.price) }}
+    </p>
 
-        <button (click)="nextPage()" [disabled]="page >= totalPages"
-          class="px-4 py-2 rounded-lg font-semibold
-                 bg-gray-900 text-white hover:bg-black transition
-                 disabled:bg-gray-300 disabled:text-gray-500">
-          >
-        </button>
+    <!-- ADD BUTTON -->
+    <div class="w-7 h-7 flex items-center justify-center
+                rounded-md bg-gray-900 text-white
+                group-hover:bg-black transition">
+      <ion-icon name="add-outline" class="text-sm"></ion-icon>
+    </div>
+
+  </div>
+
+</div>
 
       </div>
+
+<!-- PAGINATION -->
+<div class="flex justify-center mt-8">
+
+  <div class="flex items-center gap-3 bg-white border border-gray-200
+              rounded-xl px-4 py-2 shadow-sm">
+
+    <!-- PREV -->
+    <button
+      (click)="prevPage()"
+      [disabled]="page <= 1"
+      class="w-9 h-9 flex items-center justify-center
+             rounded-lg border border-gray-950
+             hover:bg-gray-100 transition
+             disabled:opacity-40 disabled:cursor-not-allowed">
+
+      <ion-icon name="chevron-back-outline" class="text-lg text-black"></ion-icon>
+    </button>
+
+    <!-- PAGE INFO -->
+    <div class="px-3 py-1 rounded-lg bg-gray-900 text-white
+                font-semibold text-sm tracking-wide">
+      {{ page }} / {{ totalPages }}
+    </div>
+
+    <!-- NEXT -->
+    <button
+      (click)="nextPage()"
+      [disabled]="page >= totalPages"
+      class="w-9 h-9 flex items-center justify-center
+             rounded-lg border border-gray-950
+             hover:bg-gray-100 transition
+             disabled:opacity-40 disabled:cursor-not-allowed">
+
+      <ion-icon name="chevron-forward-outline" class="text-lg text-black"></ion-icon>
+    </button>
+
+  </div>
+
+</div>
+
 
     </div>
 
@@ -194,9 +276,9 @@
               <div *ngIf="c.selectedAddons?.length"
                    class="text-[11px] text-gray-500 mt-1 space-y-0.5">
                 <div *ngFor="let a of c.selectedAddons"
-                     class="flex justify-between gap-2">
+                     class="flex justify-end gap-2 ">
                   <span>{{ a.addon_name }} x{{ c.qty }}</span>
-                  <span>+Rp {{ formatPrice(a.addon_price * c.qty) }}</span>
+                  <span class="">+Rp {{ formatPrice(a.addon_price * c.qty) }}</span>
                 </div>
               </div>
             </div>
@@ -208,7 +290,7 @@
           </div>
 
           <div class="flex justify-between items-center text-sm">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 font-bold text-gray-900">
               <button (click)="minusQty(c)" class="w-7 h-7 border rounded-md">-</button>
               <span class="font-semibold">{{ c.qty }}</span>
               <button (click)="plusQty(c)" class="w-7 h-7 border rounded-md">+</button>
@@ -240,99 +322,138 @@
 
   </div>
 </div>
-
-<!-- MODAL ADDON -->
 <!-- MODAL ADDON -->
 <div *ngIf="showAddonModal"
   class="fixed inset-0 bg-black/40 backdrop-blur-sm 
          flex items-center justify-center z-50 p-4">
 
-  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+  <div class="bg-white rounded-3xl w-full max-w-md 
+              shadow-2xl overflow-hidden animate-fade-in">
 
     <!-- HEADER -->
-    <div class="flex items-center justify-between px-5 py-4 border-b">
+    <div class="px-6 py-5 border-b bg-gradient-to-r from-gray-50 to-white">
 
-      <div class="flex items-center gap-3">
-        <ion-icon name="add-circle-outline"
-          class="text-2xl text-gray-900"></ion-icon>
+      <div class="flex items-start justify-between">
 
-        <div>
-          <h2 class="font-bold text-lg text-gray-900">
-            Pilih Addon
-          </h2>
-          <p class="text-sm text-gray-600">
-            {{ selectedProduct?.product_name }}
-          </p>
+        <!-- TITLE -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex items-center justify-center
+                      rounded-xl bg-gray-900 text-white shadow">
+            <ion-icon name="add-outline" class="text-xl"></ion-icon>
+          </div>
+
+          <div>
+            <h2 class="font-bold text-lg text-gray-900">
+              Pilih Addon
+            </h2>
+            <p class="text-xs text-gray-500 line-clamp-1">
+              {{ selectedProduct?.product_name }}
+            </p>
+          </div>
         </div>
+
+        <!-- CLOSE -->
+        <button
+          (click)="closeAddonModal()"
+          class="w-9 h-9 flex items-center justify-center
+                 rounded-lg hover:bg-gray-100 transition">
+          <ion-icon name="close-outline"
+            class="text-xl text-gray-700"></ion-icon>
+        </button>
+
       </div>
-
-      <!-- CLOSE BUTTON -->
-      <button
-        (click)="closeAddonModal()"
-        class="w-9 h-9 flex items-center justify-center
-               rounded-lg hover:bg-gray-100 transition">
-
-        <ion-icon name="close-outline"
-          class="text-xl text-gray-700"></ion-icon>
-      </button>
-
     </div>
 
     <!-- LIST ADDON -->
-    <div class="p-5 space-y-3 max-h-64 overflow-y-auto">
+    <div class="p-5 space-y-3 max-h-72 overflow-y-auto">
 
-      <div *ngFor="let a of selectedProduct?.addons"
-        (click)="toggleTempAddon(a)"
-        class="flex justify-between items-center 
-               border rounded-xl px-3 py-3 
-               cursor-pointer transition
-               hover:bg-gray-50 hover:border-gray-400">
+<div *ngFor="let group of selectedProduct?.addons" class="space-y-2">
 
-        <!-- LEFT -->
-        <div class="flex items-center gap-3">
+  <!-- GROUP TITLE -->
+  <div class="flex justify-between items-center">
+    <p class="font-semibold text-gray-800 text-sm">
+      {{ group.group_name }}
+    </p>
+
+    <span class="text-[11px] text-gray-500">
+      {{ group.selection_type === 'single' ? 'Pilih 1' : 'Boleh banyak' }}
+    </span>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="space-y-2">
+
+    <div *ngFor="let a of group.items"
+      (click)="toggleTempAddon(group, a)"
+      [ngClass]="isTempAddonSelected(group, a) 
+        ? 'border-gray-900 bg-gray-50 shadow-sm' 
+        : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'"
+      class="flex justify-between items-center 
+             border rounded-xl px-4 py-3 
+             cursor-pointer transition">
+
+      <div class="flex items-center gap-3">
+
+        <!-- ICON -->
+        <div class="w-6 h-6 flex items-center justify-center
+                    rounded-md border"
+          [ngClass]="isTempAddonSelected(group, a)
+            ? 'bg-gray-900 text-white border-gray-900'
+            : 'border-gray-300 text-gray-400'">
+
           <ion-icon
-            [name]="isTempAddonSelected(a) ? 'checkbox' : 'square-outline'"
-            class="text-xl text-gray-900">
+            [name]="group.selection_type === 'single'
+              ? 'radio-button-on-outline'
+              : 'checkbox-outline'">
           </ion-icon>
 
-          <span class="font-medium text-gray-900">
-            {{ a.addon_name }}
-          </span>
         </div>
 
-        <!-- RIGHT PRICE -->
-        <span class="font-semibold text-gray-800">
-          +Rp {{ formatPrice(a.addon_price) }}
-        </span>
+        <div>
+          <p class="font-medium text-gray-900 text-sm">
+            {{ a.addon_name }}
+          </p>
+
+          <p class="text-[11px]"
+            [ngClass]="a.qty == 0 ? 'text-red-500' : 'text-gray-500'">
+            Stok {{ a.qty }}
+          </p>
+        </div>
 
       </div>
+
+      <span class="font-bold text-gray-900 text-sm">
+        +Rp {{ formatPrice(a.addon_price) }}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
 
     </div>
 
     <!-- FOOTER -->
-    <div class="flex justify-between items-center gap-3 px-5 py-4 border-t bg-gray-50">
+    <div class="flex gap-3 px-5 py-4 border-t bg-gray-50">
 
       <!-- TANPA ADDON -->
       <button
         (click)="skipAddon()"
-        class="flex items-center gap-2 px-4 py-2
-               border border-gray-300 rounded-lg
+        class="flex-1 py-2.5 rounded-xl
+               border border-gray-300
                text-gray-800 font-semibold
                hover:bg-gray-100 transition">
-
-        <ion-icon name="remove-outline" class="text-lg"></ion-icon>
         Tanpa Addon
       </button>
 
       <!-- TAMBAHKAN -->
       <button
         (click)="confirmAddon()"
-        class="flex items-center gap-2 px-5 py-2
+        class="flex-1 py-2.5 rounded-xl
                bg-gray-900 text-white font-semibold
-               rounded-lg shadow-md
-               hover:bg-black transition">
-
-        <ion-icon name="checkmark-outline" class="text-lg"></ion-icon>
+               shadow hover:bg-black transition">
         Tambahkan
       </button>
 

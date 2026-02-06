@@ -36,22 +36,20 @@ export class AddonPage implements OnInit {
   loading = true;
 
   search = '';
-  filterProduct = '';
-  uniqueProducts: string[] = [];
   meta: any = null;
 
   showAddModal = false;
   isEdit = false;
   editId: number | null = null;
+groupNames: string[] = [];
 
   newAddon: any = {
     product_id: '',
+    group_name: '',
+    selection_type: 'single',
     addon_name: '',
     addon_price: 0,
-    qty: 0,
-    is_active: 1,
-    addon_type: 'optional',
-    description: ''
+    qty: 0
   };
 
   constructor(
@@ -64,25 +62,60 @@ export class AddonPage implements OnInit {
     this.loadData();
   }
 
-  loadData() {
-    this.loading = true;
+loadData() {
+  this.loading = true;
 
-    this.addonService.getAddons(this.page, this.limit, this.search)
-      .subscribe({
-        next: (res: any) => {
-          this.addons = res.data ?? [];
-          this.meta = res.meta;
-          this.totalPages = res.meta?.total_pages ?? 1;
-          this.loading = false;
+  this.addonService.getAddons(this.page, this.limit, this.search)
+    .subscribe({
+      next: (res: any) => {
 
-          // unique produk untuk filter
-          this.uniqueProducts = [
-            ...new Set(this.addons.map((a: any) => a.product_name))
-          ];
-        },
-        error: () => this.loading = false
-      });
-  }
+        console.log('RES:', res);
+
+        let allAddons: any[] = [];
+
+        // ===== CASE 1: BACKEND RETURN ADDON LANGSUNG =====
+        if (Array.isArray(res.data) && res.data.length && res.data[0].addon_name) {
+          allAddons = res.data;
+        }
+
+        // ===== CASE 2: BACKEND RETURN PRODUK + ADDONS =====
+        else if (Array.isArray(res.data) && res.data.length && res.data[0].addons) {
+          res.data.forEach((p: any) => {
+            (p.addons || []).forEach((a: any) => {
+              allAddons.push({
+                id: a.id,
+                addon_name: a.addon_name,
+                addon_price: a.addon_price,
+                qty: a.qty,
+                product_name: p.product_name
+              });
+            });
+          });
+        }
+
+        this.addons = allAddons;
+
+        this.meta = res.meta ?? null;
+        this.totalPages = res.meta?.total_pages ?? 1;
+
+        // GROUP AUTO
+        const groups = this.addons.map((a: any) =>
+          a.addon_name.toLowerCase().includes('level') ? 'Level' : 'Topping'
+        );
+
+        this.groupNames = [...new Set(groups)];
+
+        console.log('ADDONS FINAL:', this.addons);
+
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
+}
+
+
+
+
 
   loadProducts() {
     this.productService.getProducts(1, 999, '')
@@ -91,45 +124,35 @@ export class AddonPage implements OnInit {
       });
   }
 
+  // ================= MODAL =================
   openAddModal() {
     this.isEdit = false;
     this.showAddModal = true;
 
     this.newAddon = {
       product_id: '',
+      group_name: '',
+      selection_type: 'single',
       addon_name: '',
       addon_price: 0,
-      qty: 0,
-      is_active: 1,
-      addon_type: 'optional',
-      description: ''
+      qty: 0
     };
   }
-openEditModal(a: any) {
-  this.isEdit = true;
-  this.showAddModal = true;
-  this.editId = a.id;
 
-  // cari produk berdasarkan nama
-  const foundProduct = this.productsList.find(
-    p => p.product_name === a.product_name
-  );
+  openEditModal(a: any) {
+    this.isEdit = true;
+    this.showAddModal = true;
+    this.editId = a.id;
 
-  this.newAddon = {
-    addon_name: a.addon_name,
-    addon_price: a.addon_price,
-    qty: a.qty,
-    is_active: 1,
-    addon_type: 'optional',
-    description: '',
-
-    // ambil id dari hasil pencarian
-    product_id: foundProduct ? foundProduct.id : ''
-  };
-
-  console.log('FOUND PRODUCT:', foundProduct);
-}
-
+    this.newAddon = {
+      product_id: a.product_id,
+      group_name: a.group_name,
+      selection_type: a.selection_type,
+      addon_name: a.addon_name,
+      addon_price: a.addon_price,
+      qty: a.qty
+    };
+  }
 
   closeAddModal() {
     this.showAddModal = false;

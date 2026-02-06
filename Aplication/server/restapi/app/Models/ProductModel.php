@@ -176,28 +176,68 @@ public function getKasirProducts($search = '', $category = '', $limit = 9, $page
         ->where('p.is_active', 1);
 
     if (!empty($search)) {
-        $builder->like('p.product_name', $search);
+        $builder->groupStart()
+            ->like('p.product_name', $search)
+            ->orLike('p.product_code', $search)
+        ->groupEnd();
     }
 
     if (!empty($category)) {
         $builder->where('p.category_id', $category);
     }
 
-    // TOTAL DATA
+    // ===== TOTAL DATA =====
     $total = $builder->countAllResults(false);
 
+    // ===== GET PRODUK =====
     $products = $builder
+        ->orderBy('p.qty = 0', 'ASC', false) // stok 0 di bawah
         ->orderBy('p.product_name', 'ASC')
         ->limit($limit, $offset)
         ->get()
         ->getResultArray();
 
+    // ===== GET ADDONS =====
     foreach ($products as &$p) {
-        $p['addons'] = $this->db->table('product_addons')
-            ->select('id, addon_name, addon_price, qty')
+
+        $addonsRaw = $this->db->table('product_addons')
+            ->select('
+                id,
+                group_name,
+                selection_type,
+                addon_name,
+                addon_price,
+                qty
+            ')
             ->where('product_id', $p['id'])
+            ->orderBy('group_name', 'ASC')
             ->get()
             ->getResultArray();
+
+        // ===== GROUPING ADDONS =====
+        $groupedAddons = [];
+
+        foreach ($addonsRaw as $a) {
+            $group = $a['group_name'];
+
+            if (!isset($groupedAddons[$group])) {
+                $groupedAddons[$group] = [
+                    'group_name' => $group,
+                    'selection_type' => $a['selection_type'],
+                    'items' => []
+                ];
+            }
+
+            $groupedAddons[$group]['items'][] = [
+                'id' => $a['id'],
+                'addon_name' => $a['addon_name'],
+                'addon_price' => $a['addon_price'],
+                'qty' => $a['qty']
+            ];
+        }
+
+        // reset index biar array biasa
+        $p['addons'] = array_values($groupedAddons);
     }
 
     return [

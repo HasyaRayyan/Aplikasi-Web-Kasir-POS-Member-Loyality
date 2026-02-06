@@ -67,7 +67,7 @@
        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
 
     <!-- TABLE HEADER -->
-    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
+  <div class="hidden md:grid md:grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
       <div class="col-span-3">
         <span class="font-semibold text-gray-700">ADDON</span>
       </div>
@@ -93,8 +93,16 @@
             </div>
             
             <div>
-              <h3 class="font-semibold text-gray-900 mb-1">{{ addon.addon_name }}</h3>
+              <h3 class="font-semibold text-gray-900 mb-1">
+                {{ addon.addon_name }}
+              </h3>
+
+              <p class="text-xs text-gray-500">
+                {{ addon.group_name }} • 
+                {{ addon.selection_type === 'single' ? 'Pilih 1' : 'Bisa Banyak' }}
+              </p>
             </div>
+
           </div>
         </div>
 
@@ -185,22 +193,35 @@
               </div>
             </div>
             
-            <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
-                <span class="text-sm text-gray-600">Stok: {{ addon.qty }}</span>
-              </div>
-              <div class="flex gap-2">
-                <button (click)="openEditModal(addon)"
-                        class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
-                  <ion-icon name="create-outline"></ion-icon>
-                </button>
-                <button (click)="confirmDelete(+addon.id)"
-                        class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                  <ion-icon name="trash-outline"></ion-icon>
-                </button>
-              </div>
-            </div>
+<div class="pt-3 border-t border-gray-100 space-y-2">
+
+  <!-- GROUP INFO -->
+  <p class="text-xs text-gray-500">
+    Group: {{ addon.group_name }} • 
+    {{ addon.selection_type === 'single' ? 'Pilih 1' : 'Bisa Banyak' }}
+  </p>
+
+  <!-- FOOTER ACTION -->
+  <div class="flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+      <span class="text-sm text-gray-600">Stok: {{ addon.qty }}</span>
+    </div>
+
+    <div class="flex gap-2">
+      <button (click)="openEditModal(addon)"
+              class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
+        <ion-icon name="create-outline"></ion-icon>
+      </button>
+      <button (click)="confirmDelete(+addon.id)"
+              class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+        <ion-icon name="trash-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+</div>
+
           </div>
         </div>
       </div>
@@ -257,9 +278,7 @@
   
   
 
-
-
-  <!-- MODAL TAMBAH / EDIT ADDON -->
+<!-- MODAL TAMBAH / EDIT ADDON -->
 <div *ngIf="showAddModal"
      class="fixed inset-0 bg-black/40 backdrop-blur-sm 
             flex items-center justify-center z-[9999] p-4">
@@ -287,6 +306,75 @@
     <!-- BODY -->
     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
 
+      <!-- PRODUK -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Produk Utama
+        </label>
+        <select [(ngModel)]="newAddon.product_id"
+          class="w-full bg-white text-black border border-gray-300 
+                 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
+                 outline-none transition">
+          <option value="">Pilih Produk</option>
+          <option *ngFor="let p of productsList" [value]="p.id">
+            {{ p.product_name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- GROUP -->
+<!-- GROUP -->
+<div class="space-y-1">
+  <label class="text-sm font-semibold text-gray-700 block">
+    Nama Group
+  </label>
+
+  <div class="relative">
+    <!-- ICON -->
+    <ion-icon name="layers-outline"
+      class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+    </ion-icon>
+
+    <input type="text"
+      [(ngModel)]="newAddon.group_name"
+      list="groupList"
+      placeholder="Pilih group atau ketik baru..."
+      class="w-full bg-white text-black border border-gray-300 
+            rounded-xl pl-10 pr-4 py-3
+            focus:border-gray-900 focus:ring-2 focus:ring-gray-200
+            outline-none transition
+            placeholder-gray-400 hover:border-gray-400">
+  </div>
+
+  <!-- HINT -->
+  <p class="text-xs text-gray-500">
+    Contoh: Level, Topping, Ukuran
+  </p>
+
+  <!-- LIST GROUP -->
+  <datalist id="groupList">
+    <option *ngFor="let g of groupNames" [value]="g"></option>
+  </datalist>
+</div>
+
+
+
+      <!-- SELECTION -->
+      <div>
+        <label class="text-sm font-semibold text-gray-700 mb-1 block">
+          Tipe Pilihan
+        </label>
+        <select [(ngModel)]="newAddon.selection_type"
+          class="w-full bg-white text-black border border-gray-300 
+                 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
+                 outline-none transition">
+          <option value="single">Hanya 1</option>
+          <option value="multiple">Bisa Banyak</option>
+        </select>
+      </div>
+
       <!-- NAMA ADDON -->
       <div>
         <label class="text-sm font-semibold text-gray-700 mb-1 block">
@@ -294,27 +382,10 @@
         </label>
         <input type="text"
           [(ngModel)]="newAddon.addon_name"
-          placeholder="Contoh: Extra Keju"
-          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
-                 text-black placeholder-gray-400
+          class="w-full bg-white text-black border border-gray-300 
+                 rounded-lg px-4 py-2.5
                  focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
                  outline-none transition">
-      </div>
-
-      <!-- PRODUK -->
-      <div>
-        <label class="text-sm font-semibold text-gray-700 mb-1 block">
-          Produk Utama
-        </label>
-        <select [(ngModel)]="newAddon.product_id"
-          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
-                 text-black focus:border-gray-900 focus:ring-2 
-                 focus:ring-gray-200 outline-none transition">
-          <option value="">Pilih Produk</option>
-          <option *ngFor="let p of productsList" [value]="p.id">
-            {{ p.product_name }}
-          </option>
-        </select>
       </div>
 
       <!-- HARGA -->
@@ -324,23 +395,25 @@
         </label>
         <input type="number"
           [(ngModel)]="newAddon.addon_price"
-          placeholder="0"
-          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
-                 text-black focus:border-gray-900 focus:ring-2 
-                 focus:ring-gray-200 outline-none transition">
+          class="w-full bg-white text-black border border-gray-300 
+                 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
+                 outline-none transition">
       </div>
 
-      <!-- QTY -->
+      <!-- STOK -->
       <div>
         <label class="text-sm font-semibold text-gray-700 mb-1 block">
           Stok
         </label>
         <input type="number"
           [(ngModel)]="newAddon.qty"
-          class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 
-                 text-black focus:border-gray-900 focus:ring-2 
-                 focus:ring-gray-200 outline-none transition">
+          class="w-full bg-white text-black border border-gray-300 
+                 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 
+                 outline-none transition">
       </div>
+
     </div>
 
     <!-- FOOTER -->

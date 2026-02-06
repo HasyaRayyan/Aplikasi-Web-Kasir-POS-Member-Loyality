@@ -16,6 +16,8 @@ export class KasirPage implements OnInit {
   products: any[] = [];
   categories: any[] = [];
   cart: any[] = [];
+  allProducts: any[] = [];
+
 
   search = '';
   category = '';
@@ -25,36 +27,141 @@ export class KasirPage implements OnInit {
   limit = 9;
   totalPages = 1;
 
+  cacheProducts: any = {};
+
+  searchTimeout: any;
+
+
+
   // ===== MODAL ADDON =====
   showAddonModal = false;
   selectedProduct: any = null;
-  tempSelectedAddons: any[] = [];
+tempSelectedAddons: any = {}; 
 
   constructor(private productService: ProductService) {}
 
+  
+
   ngOnInit() {
     this.loadKasir();
+    this.loadAllProducts();
+  }
+
+  
+
+  onSearchChange() {
+
+  // reset ke page 1 setiap search
+  this.page = 1;
+
+  clearTimeout(this.searchTimeout);
+
+  this.searchTimeout = setTimeout(() => {
+    this.loadKasirLive();
+  }, 300); // 300ms debounce
+}
+
+loadAllProducts() {
+  this.productService
+    .getKasir('', '', 1, 9999) // limit besar
+    .subscribe(res => {
+      this.allProducts = res.products;
+    });
+}
+
+
+
+loadKasirLive() {
+  const key = this.makeCacheKey();
+
+  // CEK CACHE
+  if (this.cacheProducts[key]) {
+    const cached = this.cacheProducts[key];
+    this.products = cached.products;
+    this.totalPages = cached.totalPages;
+    return;
+  }
+
+  this.productService
+    .getKasir(this.search, this.category, this.page, this.limit)
+    .subscribe(res => {
+
+      this.products = res.products;
+      this.totalPages = res.meta.total_pages || 1;
+
+      // simpan cache
+      this.cacheProducts[key] = {
+        products: res.products,
+        totalPages: this.totalPages
+      };
+    });
+}
+
+
+  makeCacheKey() {
+    return `${this.search}_${this.category}_${this.page}_${this.limit}`;
   }
 
   // ================= LOAD DATA =================
-  loadKasir() {
-    this.loading = true;
+loadKasir() {
+  const key = this.makeCacheKey();
 
-    this.productService
-      .getKasir(this.search, this.category, this.page, this.limit)
-      .subscribe(res => {
-        this.products = res.products;
-        this.categories = res.categories;
-        this.totalPages = res.meta.total_pages || 1;
-        this.loading = false;
-      });
+  // ==== CEK CACHE ====
+  if (this.cacheProducts[key]) {
+    const cached = this.cacheProducts[key];
+    this.products = cached.products;
+    this.categories = cached.categories;
+    this.totalPages = cached.totalPages;
+    this.loading = false;
+    return;
   }
+
+  // ==== JIKA BELUM ADA CACHE ====
+  this.loading = true;
+
+  this.productService
+    .getKasir(this.search, this.category, this.page, this.limit)
+    .subscribe(res => {
+
+      // ==== SORT PRODUK ====
+      const sortedProducts = res.products.sort((a: any, b: any) => {
+        const stockA = Number(a.qty);
+        const stockB = Number(b.qty);
+
+        // stok ada di atas
+        if (stockA === 0 && stockB > 0) return 1;
+        if (stockA > 0 && stockB === 0) return -1;
+
+        // kalau sama-sama ada stok / sama-sama habis → urut nama
+        return a.product_name.localeCompare(b.product_name);
+      });
+
+      this.products = sortedProducts;
+      this.categories = res.categories;
+      this.totalPages = res.meta.total_pages || 1;
+
+      // ==== SIMPAN KE CACHE (SUDAH SORT) ====
+      this.cacheProducts[key] = {
+        products: sortedProducts,
+        categories: res.categories,
+        totalPages: this.totalPages
+      };
+
+      this.loading = false;
+    });
+}
+
 
   // ================= CLICK PRODUK =================
   addToCart(p: any) {
+    if (p.qty <= 0) {
+      alert('Stok habis');
+      return;
+    }
+
     if (p.addons && p.addons.length > 0) {
       this.selectedProduct = p;
-      this.tempSelectedAddons = [];
+this.tempSelectedAddons = {};
       this.showAddonModal = true;
       return;
     }
@@ -62,84 +169,180 @@ export class KasirPage implements OnInit {
     this.pushToCart(p, []);
   }
 
+
   // ================= PUSH CART =================
-  pushToCart(p: any, addons: any[]) {
+pushToCart(p: any, addons: any[]) {
 
-    const addonKey = this.makeAddonKey(addons);
-
-    const found = this.cart.find(
-      x => x.id === p.id && x.addonKey === addonKey
-    );
-
-    const addonTotal = addons.reduce(
-      (a, b) => a + Number(b.addon_price),
-      0
-    );
-
-    if (found) {
-      found.qty++;
-      this.recalcSubtotal(found);
-      return;
-    }
-
-    const newItem = {
-      ...p,
-      qty: 1,
-      selectedAddons: [...addons], // ⬅️ clone biar tidak nempel reference
-      addonKey: addonKey,
-      subtotal: Number(p.price) + addonTotal
-    };
-
-    this.cart.push(newItem);
+  // ==== CEK STOK ====
+  if (p.qty <= 0) {
+    alert('Stok habis');
+    return;
   }
+
+  // ==== KURANGI STOK PRODUK ====
+  p.qty = Number(p.qty) - 1;
+
+  // ==== KURANGI STOK ADDON ====
+addons.forEach(a => {
+  a.qty = Number(a.qty) - 1;
+});
+
+
+  const addonKey = this.makeAddonKey(addons);
+
+  const found = this.cart.find(
+    x => x.id === p.id && x.addonKey === addonKey
+  );
+
+  const addonTotal = addons.reduce(
+    (a, b) => a + Number(b.addon_price),
+    0
+  );
+
+  // ==== JIKA SUDAH ADA DI CART ====
+  if (found) {
+    found.qty++;
+    this.recalcSubtotal(found);
+    return;
+  }
+
+  // ==== JIKA BELUM ADA ====
+  const newItem = {
+    id: p.id,
+    product_name: p.product_name,
+    price: p.price,
+    image: p.image,
+    category_name: p.category_name,
+
+    qty: 1,
+    selectedAddons: [...addons], // clone
+    addonKey: addonKey,
+    subtotal: Number(p.price) + addonTotal
+  };
+
+  this.cart.push(newItem);
+}
+
 
   // ================= MODAL ADDON =================
-  toggleTempAddon(a: any) {
-    const idx = this.tempSelectedAddons.findIndex(x => x.id === a.id);
+toggleTempAddon(group: any, item: any) {
 
-    if (idx > -1) {
-      this.tempSelectedAddons.splice(idx, 1);
-    } else {
-      this.tempSelectedAddons.push(a);
-    }
+  if (item.qty <= 0) {
+    alert('Stok addon habis');
+    return;
   }
 
-  isTempAddonSelected(a: any) {
-    return this.tempSelectedAddons.some(x => x.id === a.id);
+  const groupName = group.group_name;
+
+  if (!this.tempSelectedAddons[groupName]) {
+    this.tempSelectedAddons[groupName] = [];
   }
 
-  confirmAddon() {
-    this.pushToCart(this.selectedProduct, this.tempSelectedAddons);
-    this.closeAddonModal();
+  // SINGLE
+  if (group.selection_type === 'single') {
+    this.tempSelectedAddons[groupName] = [item];
+    return;
   }
+
+  // MULTIPLE
+  const idx = this.tempSelectedAddons[groupName]
+    .findIndex((x: any) => x.id === item.id);
+
+  if (idx > -1) {
+    this.tempSelectedAddons[groupName].splice(idx, 1);
+  } else {
+    this.tempSelectedAddons[groupName].push(item);
+  }
+}
+
+
+
+isTempAddonSelected(group: any, item: any) {
+  const list = this.tempSelectedAddons[group.group_name] || [];
+  return list.some((x: any) => x.id === item.id);
+}
+
+confirmAddon() {
+
+  const flatAddons: any[] = Object.values(this.tempSelectedAddons)
+    .reduce((acc: any[], val: any) => {
+      return acc.concat(val);
+    }, []);
+
+  this.pushToCart(this.selectedProduct, flatAddons);
+  this.closeAddonModal();
+}
+
 
   skipAddon() {
     this.pushToCart(this.selectedProduct, []);
     this.closeAddonModal();
   }
 
-  closeAddonModal() {
-    this.showAddonModal = false;
-    this.selectedProduct = null;
-    this.tempSelectedAddons = [];
-  }
+closeAddonModal() {
+  this.showAddonModal = false;
+  this.selectedProduct = null;
+  this.tempSelectedAddons = {};
+}
+
 
   // ================= CART =================
-  removeItem(c: any) {
-    this.cart = this.cart.filter(x => x !== c);
+removeItem(c: any) {
+
+  const prod = this.products.find(p => p.id === c.id);
+  if (prod) prod.qty += c.qty;
+
+  // BALIKIN ADDON
+  c.selectedAddons?.forEach((a: any) => {
+    const prod2 = this.products.find(p => p.id === c.id);
+    const addon = prod2?.addons?.find((x: any) => x.id === a.id);
+    if (addon) addon.qty += c.qty;
+  });
+
+  this.cart = this.cart.filter(x => x !== c);
+}
+
+
+plusQty(c: any) {
+
+  const prod = this.products.find(p => p.id === c.id);
+  if (!prod || prod.qty <= 0) {
+    alert('Stok habis');
+    return;
   }
 
-  plusQty(c: any) {
-    c.qty++;
-    this.recalcSubtotal(c);
-  }
-
-  minusQty(c: any) {
-    if (c.qty > 1) {
-      c.qty--;
-      this.recalcSubtotal(c);
+  // CEK ADDON STOK
+  for (let a of c.selectedAddons || []) {
+    if (a.qty <= 0) {
+      alert('Stok addon habis');
+      return;
     }
   }
+
+  prod.qty--;
+
+  // KURANGI ADDON
+  c.selectedAddons?.forEach((a: any) => a.qty--);
+
+  c.qty++;
+  this.recalcSubtotal(c);
+}
+
+
+
+minusQty(c: any) {
+  if (c.qty > 1) {
+
+    const prod = this.products.find(p => p.id === c.id);
+    if (prod) prod.qty++;
+
+    c.selectedAddons?.forEach((a: any) => a.qty++);
+
+    c.qty--;
+    this.recalcSubtotal(c);
+  }
+}
+
 
   recalcSubtotal(c: any) {
     const addonTotal = (c.selectedAddons || []).reduce(
@@ -158,6 +361,12 @@ export class KasirPage implements OnInit {
   formatPrice(v: number | string) {
     return Number(v).toLocaleString('id-ID');
   }
+
+
+  get outOfStockProducts() {
+    return this.allProducts.filter(p => Number(p.qty) === 0);
+  }
+
 
   // ================= ADDON KEY =================
   makeAddonKey(addons: any[]): string {
@@ -194,6 +403,18 @@ clearCart() {
 
   const confirmClear = confirm('Yakin ingin menghapus semua keranjang?');
   if (!confirmClear) return;
+
+  this.cart.forEach(c => {
+
+    const prod = this.products.find(p => p.id === c.id);
+    if (prod) prod.qty += c.qty;
+
+    c.selectedAddons?.forEach((a: any) => {
+      const addon = prod?.addons?.find((x: any) => x.id === a.id);
+      if (addon) addon.qty += c.qty;
+    });
+
+  });
 
   this.cart = [];
 }
