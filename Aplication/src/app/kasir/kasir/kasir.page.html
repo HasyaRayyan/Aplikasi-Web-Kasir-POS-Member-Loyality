@@ -234,91 +234,177 @@
     </div>
 
     <!-- ================= RIGHT : CART ================= -->
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-md
-                p-5 flex flex-col sticky top-6 h-[85vh]">
+   <div class="bg-white border border-gray-200 rounded-3xl shadow-md
+            p-5 flex flex-col sticky top-6 h-[85vh]">
 
-      <!-- HEADER -->
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="font-bold text-lg text-gray-900 flex items-center gap-2">
-          <ion-icon name="cart-outline"></ion-icon>
-          Keranjang
-        </h2>
+  <!-- HEADER -->
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+      <ion-icon name="cart-outline" class="text-xl"></ion-icon>
+      Keranjang
+    </h2>
 
-        <button (click)="clearCart()" [disabled]="cart.length===0"
-          class="flex items-center gap-1 px-3 py-1 text-xs
-                 border border-red-300 text-red-600 rounded-lg
-                 hover:bg-red-50 disabled:opacity-40">
-          <ion-icon name="trash-outline"></ion-icon>
-          Reset
-        </button>
-      </div>
+    <button (click)="clearCart()" [disabled]="cart.length===0"
+      class="flex items-center gap-1 px-3 py-1 text-xs
+             border border-gray-300 text-gray-800 rounded-lg
+             hover:bg-gray-100 disabled:opacity-40 transition">
+      <ion-icon name="trash-outline"></ion-icon>
+      Reset
+    </button>
+  </div>
 
-      <!-- EMPTY -->
-      <div *ngIf="cart.length === 0"
-           class="flex flex-col items-center justify-center text-gray-400 flex-1">
-        <ion-icon name="cart-outline" class="text-5xl mb-3"></ion-icon>
-        Keranjang kosong
-      </div>
+  <!-- EMPTY -->
+  <div *ngIf="cart.length === 0"
+       class="flex flex-col items-center justify-center text-gray-500 flex-1">
+    <ion-icon name="cart-outline" class="text-6xl mb-3"></ion-icon>
+    <p class="text-sm">Keranjang kosong</p>
+  </div>
 
-      <!-- ITEMS -->
-      <div *ngIf="cart.length > 0"
-           class="space-y-3 flex-1 overflow-y-auto pr-1">
+  <!-- ITEMS -->
+  <div *ngIf="cart.length > 0"
+       class="space-y-4 flex-1 overflow-y-auto pr-1">
 
-        <div *ngFor="let c of cart"
-          class="border border-gray-200 rounded-xl p-3 space-y-2">
+<div *ngFor="let c of cart" class="border-b pb-4 space-y-2">
 
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-semibold text-gray-900 text-sm">
-                {{ c.product_name }}
-              </h3>
+  <!-- PRODUK -->
+  <div class="grid grid-cols-[1fr_120px] items-start gap-2">
 
-              <div *ngIf="c.selectedAddons?.length"
-                   class="text-[11px] text-gray-500 mt-1 space-y-0.5">
-                <div *ngFor="let a of c.selectedAddons"
-                     class="flex justify-end gap-2 ">
-                  <span>{{ a.addon_name }} x{{ c.qty }}</span>
-                  <span class="">+Rp {{ formatPrice(a.addon_price * c.qty) }}</span>
-                </div>
-              </div>
-            </div>
+    <p class="font-semibold text-gray-900 text-sm">
+      {{ c.product_name }}
+    </p>
 
-            <button (click)="removeItem(c)"
-              class="text-gray-400 hover:text-red-500">
-              <ion-icon name="trash-outline"></ion-icon>
-            </button>
-          </div>
+    <div class="text-right flex justify-end items-center gap-2">
+      <span class="font-semibold text-gray-900 text-sm">
+        Rp {{ formatPrice(c.price) }}
+      </span>
+      <button (click)="removeItem(c)" class="text-gray-400 hover:text-red-600">
+        <ion-icon name="trash-outline"></ion-icon>
+      </button>
+    </div>
 
-          <div class="flex justify-between items-center text-sm">
-            <div class="flex items-center gap-2 font-bold text-gray-900">
-              <button (click)="minusQty(c)" class="w-7 h-7 border rounded-md">-</button>
-              <span class="font-semibold">{{ c.qty }}</span>
-              <button (click)="plusQty(c)" class="w-7 h-7 border rounded-md">+</button>
-            </div>
+  </div>
 
-            <span class="font-bold text-gray-900">
-              Rp {{ formatPrice(c.subtotal) }}
-            </span>
-          </div>
+  <!-- ADDONS -->
+  <div *ngIf="c.selectedAddons?.length"
+       class="space-y-1 text-xs text-gray-700">
 
-        </div>
-      </div>
+    <div *ngFor="let a of c.selectedAddons"
+         class="grid grid-cols-[1fr_120px] gap-2">
 
-      <!-- FOOTER -->
-      <div *ngIf="cart.length > 0" class="border-t pt-4 mt-4 space-y-3">
-        <div class="flex justify-between text-lg font-bold text-gray-900">
-          <span>Total</span>
-          <span>Rp {{ formatPrice(total) }}</span>
-        </div>
+      <span>
+        {{ a.addon_name }} x{{ c.qty }}
+      </span>
 
-        <button
-          class="w-full py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-black">
-          <ion-icon name="card-outline" class="mr-2"></ion-icon>
-          Bayar
-        </button>
-      </div>
+      <span class="text-right">
+        +Rp {{ formatPrice(a.addon_price * c.qty) }}
+      </span>
 
     </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="grid grid-cols-[1fr_120px] items-center gap-2 mt-1">
+
+    <!-- QTY -->
+    <div class="flex items-center gap-2">
+      <button (click)="minusQty(c)" class="w-7 h-7 border rounded-md text-black">−</button>
+      <span class="font-semibold text-sm text-black">{{ c.qty }}</span>
+      <button (click)="plusQty(c)" class="w-7 h-7 border rounded-md text-black">+</button>
+    </div>
+
+    <!-- SUBTOTAL -->
+    <span class="text-right font-bold text-gray-900 text-sm">
+      Rp {{ formatPrice(c.subtotal) }}
+    </span>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+<!-- FOOTER -->
+<div *ngIf="cart.length > 0"
+     class="border-t pt-4 mt-4 space-y-4">
+
+  <!-- TOTAL -->
+  <div class="flex justify-between text-lg font-bold text-gray-900">
+    <span>Total</span>
+    <span>Rp {{ formatPrice(total) }}</span>
+  </div>
+
+  <!-- PELANGGAN -->
+  <div class="space-y-3">
+
+    <p class="text-xs font-semibold text-gray-700">
+      Data Pelanggan (Opsional)
+    </p>
+
+    <!-- NAMA -->
+    <div class="space-y-1">
+      <label class="text-[11px] text-gray-600">Nama</label>
+      <input
+        [(ngModel)]="customerName"
+        [disabled]="memberData"
+        placeholder="Nama pelanggan..."
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+               disabled:bg-gray-100 disabled:text-gray-500">
+    </div>
+
+    <!-- TELEPON -->
+    <div class="space-y-1">
+      <label class="text-[11px] text-gray-600">Nomor Telepon Member</label>
+
+      <div class="flex gap-2">
+        <input
+          [(ngModel)]="memberPhone"
+          placeholder="08xxxxxxxx"
+          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+
+        <button
+          (click)="searchMember()"
+          class="px-3 py-2 text-sm bg-gray-900 text-white rounded-lg">
+          Cari
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT MEMBER -->
+    <div *ngIf="memberData"
+         class="border border-gray-200 rounded-lg p-3 text-xs text-gray-800 space-y-1 bg-gray-50">
+
+      <div class="flex justify-between">
+        <span><b>Member:</b> {{ memberData.name }}</span>
+        <button
+          (click)="clearMember()"
+          class="text-red-600 text-[11px]">
+          Hapus
+        </button>
+      </div>
+
+      <p><b>Level:</b> {{ memberData.membership_level }}</p>
+      <p><b>Poin:</b> {{ memberData.total_points }}</p>
+    </div>
+
+  </div>
+
+  <!-- BUTTON BAYAR -->
+  <button
+    (click)="processTransaction()"
+    class="w-full py-3 rounded-xl bg-gray-900 text-white
+           font-semibold hover:bg-black transition">
+    <ion-icon name="card-outline" class="mr-2"></ion-icon>
+    Proses Transaksi
+  </button>
+
+</div>
+
+
+
+</div>
+
 
   </div>
 </div>
@@ -461,3 +547,10 @@
 
   </div>
 </div>
+
+
+
+
+
+
+

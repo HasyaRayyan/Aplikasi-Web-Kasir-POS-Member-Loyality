@@ -33,10 +33,7 @@ $routes->group('api', function ($routes) {
     $routes->delete('addons/(:num)', 'AddonController::delete/$1');
 
     $routes->get('kasir', 'Kasir::index');
-
-
-
-
+    $routes->get('getmemberbyphone', 'Kasir::memberByPhone');
 
 });
 

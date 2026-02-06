@@ -3,6 +3,8 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from 'src/app/services/product.service';
+import { KasirService } from 'src/app/services/kasir.service';
+
 
 @Component({
   selector: 'app-kasir',
@@ -27,6 +29,26 @@ export class KasirPage implements OnInit {
   limit = 9;
   totalPages = 1;
 
+  showTransactionModal = false;
+
+memberPhone = '';
+memberData: any = null;
+memberLoading = false;
+
+
+openTransactionModal() {
+  if (this.cart.length === 0) {
+    alert('Keranjang kosong');
+    return;
+  }
+
+  this.showTransactionModal = true;
+  this.memberPhone = '';
+  this.memberData = null;
+}
+customerName = '';
+
+
   cacheProducts: any = {};
 
   searchTimeout: any;
@@ -38,7 +60,7 @@ export class KasirPage implements OnInit {
   selectedProduct: any = null;
 tempSelectedAddons: any = {}; 
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService, private kasirService: KasirService) {}
 
   
 
@@ -418,6 +440,70 @@ clearCart() {
 
   this.cart = [];
 }
+
+
+searchMember() {
+  if (!this.memberPhone) return;
+
+  this.memberLoading = true;
+
+  this.kasirService.findMember(this.memberPhone)
+    .subscribe((res: any) => {
+
+      this.memberData = res.data || null;
+
+      if (this.memberData) {
+        this.customerName = this.memberData.name;
+      }
+
+      this.memberLoading = false;
+    });
+}
+
+
+
+
+processTransaction() {
+
+  if (this.cart.length === 0) return;
+
+  const payload = {
+    cart: this.cart,
+    total: this.total,
+    customer_name: this.customerName || null,
+    member_id: this.memberData?.member_id || null
+  };
+
+  this.kasirService.createTransaction(payload)
+    .subscribe(() => {
+
+      alert('Transaksi berhasil');
+
+      this.cart = [];
+      this.customerName = '';
+      this.memberPhone = '';
+      this.memberData = null;
+
+      this.loadKasir();
+
+    });
+}
+
+
+
+
+closeTransactionModal() {
+  this.showTransactionModal = false;
+  this.memberPhone = '';
+  this.memberData = null;
+}
+
+clearMember() {
+  this.memberData = null;
+  this.memberPhone = '';
+  this.customerName = '';
+}
+
 
 
 
