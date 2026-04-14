@@ -1,0 +1,51 @@
+<ion-content [fullscreen]="true">
+
+  <!-- ROUTER VIEW -->
+  <router-outlet></router-outlet>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+
+    <a routerLink="/member/home"
+       routerLinkActive="active"
+       class="nav-item">
+      <div class="icon-wrapper">
+        <ion-icon name="home-outline" class="off"></ion-icon>
+        <ion-icon name="home" class="on"></ion-icon>
+      </div>
+      <span>Home</span>
+    </a>
+
+    <a routerLink="/member/pesanan-saya"
+       routerLinkActive="active"
+       class="nav-item">
+      <div class="icon-wrapper">
+        <ion-icon name="cart-outline" class="off"></ion-icon>
+        <ion-icon name="cart" class="on"></ion-icon>
+      </div>
+      <span>Pesanan</span>
+    </a>
+
+    <a routerLink="/member/riwayat"
+       routerLinkActive="active"
+       class="nav-item">
+      <div class="icon-wrapper">
+        <ion-icon name="receipt-outline" class="off"></ion-icon>
+        <ion-icon name="receipt" class="on"></ion-icon>
+      </div>
+      <span>Riwayat</span>
+    </a>
+
+    <a routerLink="/member/profile"
+       routerLinkActive="active"
+       class="nav-item">
+      <div class="icon-wrapper">
+        <ion-icon name="person-outline" class="off"></ion-icon>
+        <ion-icon name="person" class="on"></ion-icon>
+      </div>
+      <span>Profil</span>
+    </a>
+
+  </nav>
+
+</ion-content>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -28,12 +28,20 @@ export class LoginPage {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private toastCtrl: ToastController
   ) {}
+
+  async showToast(msg: string, color: string = 'danger') {
+    const t = await this.toastCtrl.create({
+      message: msg, duration: 2500, color: color, position: 'top', mode: 'ios'
+    });
+    t.present();
+  }
 
 login() {
   if (!this.username || !this.password) {
-    alert('Username dan password wajib diisi');
+    this.showToast('Gagal! Username dan password wajib diisi', 'warning');
     return;
   }
 
@@ -47,14 +55,19 @@ login() {
       this.loading = false;
 
       if (!res.success) {
-        alert(res.message);
+        this.showToast(res.message);
         return;
       }
-
       const user = res.data;
-      // localStorage.clear()
 
+      // simpan full object (optional)
       localStorage.setItem('user', JSON.stringify(user));
+
+      // WAJIB INI
+      localStorage.setItem('user_id', user.id);
+      localStorage.setItem('user_name', user.name);
+      localStorage.setItem('role_id', user.role_id);
+
 
       // ⬇️ REDIRECT ROLE
       if (Number(user.role_id) === 1) {
@@ -72,7 +85,7 @@ login() {
     
     error: () => {
       this.loading = false;
-      alert('Login gagal');
+      this.showToast('Gagal terhubung ke server! Cek jaringan Anda.');
     }
   });
 }

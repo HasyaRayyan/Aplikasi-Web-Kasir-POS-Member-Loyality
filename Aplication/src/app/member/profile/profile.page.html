@@ -1,0 +1,106 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home" text="" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Profil Saya</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-content">
+
+  <div class="wrapper">
+    
+    <!-- IDENTITY HEADER -->
+    <div class="identity-section">
+      <div class="avatar-wrapper">
+        <div class="avatar-main">
+          {{ getInitials(name) }}
+        </div>
+      </div>
+      <h2 class="user-name">{{ name }}</h2>
+      <p class="user-handle">@{{ username }}</p>
+      <div class="status-badge">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Verified Member
+      </div>
+    </div>
+
+    <!-- LOADER -->
+    <div *ngIf="loading" class="loader-state">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-body" *ngIf="!loading">
+      
+      <!-- IDENTITY FORM -->
+      <div class="form-card">
+        <div class="card-header">
+          <h3>Personal Details</h3>
+        </div>
+
+        <div class="input-item">
+          <label>Username</label>
+          <ion-input [(ngModel)]="username" placeholder="Username"></ion-input>
+        </div>
+
+        <div class="input-item">
+          <label>Full Name</label>
+          <ion-input [(ngModel)]="name" placeholder="Enter your name"></ion-input>
+        </div>
+
+        <div class="input-item">
+          <label>Email Address</label>
+          <ion-input [(ngModel)]="email" type="email" placeholder="Email"></ion-input>
+        </div>
+
+        <div class="input-item">
+          <label>Phone Number</label>
+          <ion-input [(ngModel)]="phone" type="tel" placeholder="Phone"></ion-input>
+        </div>
+
+        <button class="btn-save" (click)="updateProfile()">
+          Save Changes
+        </button>
+      </div>
+
+      <!-- SECURITY FORM -->
+      <div class="form-card">
+        <div class="card-header">
+          <h3>Security & Password</h3>
+        </div>
+
+        <div class="input-item">
+          <label>Current Password</label>
+          <ion-input [(ngModel)]="oldPassword" type="password" placeholder="••••••••"></ion-input>
+        </div>
+
+        <div class="input-item">
+          <label>New Password</label>
+          <ion-input [(ngModel)]="newPassword" type="password" placeholder="••••••••"></ion-input>
+        </div>
+
+        <button class="btn-outline" (click)="changePassword()">
+          Update Password
+        </button>
+      </div>
+
+      <!-- LOGOUT -->
+      <button class="btn-logout" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        Logout Securely
+      </button>
+
+    </div>
+  </div>
+
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMsg"
+    duration="2000"
+    mode="ios"
+    (didDismiss)="showToast=false">
+  </ion-toast>
+
+</ion-content>

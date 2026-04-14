@@ -37,12 +37,15 @@ class ProductController extends ResourceController
                 'product_name'  => $r['product_name'],
                 'image'         => $r['image'],
                 'price'         => $r['price'],
+                'point_price'   => $r['point_price'],
                 'qty'           => $r['qty'],
                 'is_active'     => $r['is_active'],
 
                 // ⬇️ TAMBAHAN KATEGORI
                 'category_id'   => $r['category_id'],
                 'category_name' => $r['category_name'],
+                
+                'created_at'    => $r['created_at'],
 
                 'addons'        => []
             ];
@@ -50,11 +53,31 @@ class ProductController extends ResourceController
         }
 
         if ($r['addon_id']) {
-            $products[$pid]['addons'][] = [
-                'id' => $r['addon_id'],
-                'addon_name' => $r['addon_name'],
+            $groupName = $r['group_name'];
+            $groupIndex = -1;
+
+            foreach ($products[$pid]['addons'] as $i => $g) {
+                if ($g['group_name'] === $groupName) {
+                    $groupIndex = $i;
+                    break;
+                }
+            }
+
+            if ($groupIndex === -1) {
+                $products[$pid]['addons'][] = [
+                    'group_name'     => $groupName,
+                    'selection_type' => $r['selection_type'],
+                    'is_required'    => $r['is_required'] == 1,
+                    'items'          => []
+                ];
+                $groupIndex = count($products[$pid]['addons']) - 1;
+            }
+
+            $products[$pid]['addons'][$groupIndex]['items'][] = [
+                'id'          => $r['addon_id'],
+                'addon_name'  => $r['addon_name'],
                 'addon_price' => $r['addon_price'],
-                'qty' => $r['addon_qty']
+                'qty'         => $r['addon_qty']
             ];
         }
     }
@@ -127,11 +150,15 @@ public function create()
         'product_name' => $this->request->getPost('product_name'),
         'image'        => $imageName,
         'price'        => $this->request->getPost('price'),
+        'point_price'  => $this->request->getPost('point_price'),
         'qty'          => $this->request->getPost('qty'),
         'is_active'    => $this->request->getPost('is_active')
     ];
 
-    $model->createProduct($data);
+    $addonsJson = $this->request->getPost('addons');
+    $addons = $addonsJson ? json_decode($addonsJson, true) : [];
+
+    $model->createProduct($data, $addons);
 
     return $this->respond([
         'success' => true,
@@ -193,11 +220,16 @@ public function updates($id)
         'product_name' => $this->request->getPost('product_name'),
         'image'        => $imageName,
         'price'        => $this->request->getPost('price'),
+        'point_price'  => $this->request->getPost('point_price'),
         'qty'          => $this->request->getPost('qty'),
         'is_active'    => $this->request->getPost('is_active')
     ];
 
-    $model->updateProduct($id, $data);
+    $addonsJson = $this->request->getPost('addons');
+    // kalau string kosong / tidak dikirim, anggap array kosong
+    $addons = ($addonsJson !== null && $addonsJson !== '') ? json_decode($addonsJson, true) : [];
+
+    $model->updateProduct($id, $data, $addons);
 
     return $this->respond([
         'success' => true,

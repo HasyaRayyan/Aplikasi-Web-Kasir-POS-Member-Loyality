@@ -10,6 +10,7 @@ export interface Product {
   category_name: string; // ⬅️ WAJIB
   image: string | null;
   price: string;
+  point_price: number;
   qty: string;
   is_active: string;
   addons: any[];

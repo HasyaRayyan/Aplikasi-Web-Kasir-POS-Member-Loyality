@@ -9,8 +9,9 @@ class ProductModel extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
 
-public function getProductsWithAddons($limit, $offset, $search)
+public function getProductsWithAddons($limit, $offset, $search = '')
 {
+    // 1. Ambil Produk Saja (Agar limit dan offset akurat pada produk)
     $builder = $this->db->table('products p')
         ->select('
             p.id,
@@ -18,18 +19,14 @@ public function getProductsWithAddons($limit, $offset, $search)
             p.product_name,
             p.image,
             p.price,
+            p.point_price,
             p.qty,
             p.is_active,
             p.category_id,
-            c.category_name,
-
-            a.id as addon_id,
-            a.addon_name,
-            a.addon_price,
-            a.qty as addon_qty
+            p.created_at,
+            c.category_name
         ')
-        ->join('categories c', 'c.id = p.category_id', 'left') // ⬅️ TAMBAH INI
-        ->join('product_addons a', 'a.product_id = p.id', 'left');
+        ->join('categories c', 'c.id = p.category_id', 'left');
 
     if ($search) {
         $builder->groupStart()
@@ -38,11 +35,62 @@ public function getProductsWithAddons($limit, $offset, $search)
                 ->groupEnd();
     }
 
-    return $builder
+    $products = $builder
         ->orderBy('p.id', 'DESC')
         ->limit($limit, $offset)
         ->get()
         ->getResultArray();
+
+    if (empty($products)) {
+        return [];
+    }
+
+    $productIds = array_column($products, 'id');
+
+    // 2. Ambil Addons khusus untuk produk-produk di atas
+    $addons = $this->db->table('product_addons a')
+        ->select('
+            a.product_id,
+            a.id as addon_id,
+            a.group_name,
+            a.selection_type,
+            a.is_required,
+            a.addon_name,
+            a.addon_price,
+            a.point_price as addon_point_price,
+            a.qty as addon_qty
+        ')
+        ->whereIn('a.product_id', $productIds)
+        ->get()
+        ->getResultArray();
+
+    // 3. Gabungkan manual seperti layaknya LEFT JOIN
+    $flatResult = [];
+
+    foreach ($products as $p) {
+        $hasAddon = false;
+        foreach ($addons as $a) {
+            if ($a['product_id'] == $p['id']) {
+                $hasAddon = true;
+                $row = array_merge($p, $a);
+                $flatResult[] = $row;
+            }
+        }
+        
+        if (!$hasAddon) {
+            $p['addon_id'] = null;
+            $p['group_name'] = null;
+            $p['selection_type'] = null;
+            $p['is_required'] = null;
+            $p['addon_name'] = null;
+            $p['addon_price'] = null;
+            $p['addon_point_price'] = null;
+            $p['addon_qty'] = null;
+            $flatResult[] = $p;
+        }
+    }
+
+    return $flatResult;
 }
 
     public function countProducts($search)
@@ -102,17 +150,26 @@ public function countAddons($search)
     return $builder->countAllResults();
 }
 
-public function createProduct($data)
+public function createProduct($data, $addons = [])
 {
-    return $this->db->table('products')->insert([
+    $this->db->table('products')->insert([
         'product_code' => $data['product_code'],
         'category_id'  => $data['category_id'],
         'product_name' => $data['product_name'],
         'image'        => $data['image'],
         'price'        => $data['price'],
+        'point_price'  => $data['point_price'] ?? 0,
         'qty'          => $data['qty'],
         'is_active'    => $data['is_active']
     ]);
+
+    $productId = $this->db->insertID();
+
+    if (!empty($addons)) {
+        $this->saveAddons($productId, $addons);
+    }
+
+    return $productId;
 }
 
 
@@ -148,11 +205,50 @@ public function generateProductCode()
     return 'PROD-' . str_pad($newNum, 4, '0', STR_PAD_LEFT);
 }
 
-public function updateProduct($id, $data)
+public function updateProduct($id, $data, $addons = null)
 {
-    return $this->db->table('products')
+    $this->db->table('products')
         ->where('id', $id)
         ->update($data);
+
+    if ($addons !== null) {
+        $this->saveAddons($id, $addons);
+    }
+
+    return true;
+}
+
+private function saveAddons($productId, $addonGroups) {
+    if (!$productId) return;
+
+    // Hapus addon lama
+    $this->db->table('product_addons')->where('product_id', $productId)->delete();
+    
+    $insertData = [];
+    foreach ($addonGroups as $group) {
+        $groupName    = $group['group_name'] ?? '';
+        $type         = $group['selection_type'] ?? 'single';
+        // boolean mapping
+        $isRequired   = (!empty($group['is_required']) && ($group['is_required'] == 1 || $group['is_required'] == 'true')) ? 1 : 0;
+        
+        $items = $group['items'] ?? [];
+        foreach ($items as $item) {
+            $insertData[] = [
+                'product_id'     => $productId,
+                'group_name'     => $groupName,
+                'selection_type' => $type,
+                'is_required'    => $isRequired,
+                'addon_name'     => $item['addon_name'] ?? '',
+                'addon_price'    => $item['addon_price'] ?? 0,
+                'point_price'    => $item['point_price'] ?? 0,
+                'qty'            => $item['qty'] ?? 0
+            ];
+        }
+    }
+    
+    if (count($insertData) > 0) {
+        $this->db->table('product_addons')->insertBatch($insertData);
+    }
 }
 
 
@@ -167,6 +263,7 @@ public function getKasirProducts($search = '', $category = '', $limit = 9, $page
             p.product_name,
             p.image,
             p.price,
+            p.point_price,
             p.qty,
             p.is_active,
             p.category_id,
@@ -207,7 +304,9 @@ public function getKasirProducts($search = '', $category = '', $limit = 9, $page
                 selection_type,
                 addon_name,
                 addon_price,
-                qty
+                point_price,
+                qty,
+                is_required
             ')
             ->where('product_id', $p['id'])
             ->orderBy('group_name', 'ASC')
@@ -224,14 +323,21 @@ public function getKasirProducts($search = '', $category = '', $limit = 9, $page
                 $groupedAddons[$group] = [
                     'group_name' => $group,
                     'selection_type' => $a['selection_type'],
+                    'is_required' => false,
                     'items' => []
                 ];
+            }
+
+            // Jika ada salah satu item yg di set wajib, maka 1 grup wajib
+            if (isset($a['is_required']) && $a['is_required'] == 1) {
+                $groupedAddons[$group]['is_required'] = true;
             }
 
             $groupedAddons[$group]['items'][] = [
                 'id' => $a['id'],
                 'addon_name' => $a['addon_name'],
                 'addon_price' => $a['addon_price'],
+                'point_price' => $a['point_price'],
                 'qty' => $a['qty']
             ];
         }

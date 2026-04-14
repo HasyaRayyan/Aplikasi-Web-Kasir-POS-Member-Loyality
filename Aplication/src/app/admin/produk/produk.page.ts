@@ -42,6 +42,8 @@ addonTotalPages = 0;
 
 search = '';
 showAddModal = false;
+showDetailModal = false;
+detailProduct: any = null;
 categories: any[] = [];
 
 newProduct: any = {
@@ -50,8 +52,10 @@ newProduct: any = {
   product_name: '',
   image: null,
   price: 0,
+  point_price: 0,
   qty: 0,
-  is_active: 1
+  is_active: 1,
+  addons: []
   
 };
 
@@ -145,8 +149,10 @@ openAddModal() {
     product_name: '',
     image: null,
     price: 0,
+    point_price: 0,
     qty: 0,
-    is_active: 1
+    is_active: 1,
+    addons: []
   };
 
   this.imagePreview = null;
@@ -155,6 +161,15 @@ openAddModal() {
   this.generateProductCode();
 }
 
+openDetailModal(p: any) {
+  this.detailProduct = p;
+  this.showDetailModal = true;
+}
+
+closeDetailModal() {
+  this.showDetailModal = false;
+  this.detailProduct = null;
+}
 
 loadCategories() {
   this.productService.getCategories().subscribe(res => {
@@ -176,8 +191,10 @@ saveProduct() {
   formData.append('category_id', this.newProduct.category_id);
   formData.append('product_name', this.newProduct.product_name);
   formData.append('price', this.newProduct.price);
+  formData.append('point_price', this.newProduct.point_price);
   formData.append('qty', this.newProduct.qty);
   formData.append('is_active', this.newProduct.is_active);
+  formData.append('addons', JSON.stringify(this.newProduct.addons));
 
   // FILE WAJIB DIPISAH
   if (this.newProduct.image) {
@@ -272,8 +289,10 @@ openEditModal(p: any) {
     product_name: p.product_name,
     image: null,
     price: p.price,
+    point_price: p.point_price,
     qty: p.qty,
-    is_active: p.is_active
+    is_active: p.is_active,
+    addons: p.addons ? JSON.parse(JSON.stringify(p.addons)) : []
   };
 
   if (p.image) {
@@ -287,7 +306,9 @@ updateProduct() {
   const formData = new FormData();
 
   Object.keys(this.newProduct).forEach(key => {
-    if (this.newProduct[key] !== null) {
+    if (key === 'addons') {
+      formData.append('addons', JSON.stringify(this.newProduct.addons));
+    } else if (this.newProduct[key] !== null) {
       formData.append(key, this.newProduct[key]);
     }
   });
@@ -301,6 +322,28 @@ updateProduct() {
   });
 }
 
+  // ============ ADDON FORM LOGIC ============
+  addAddonGroup() {
+    this.newProduct.addons.push({
+      group_name: '',
+      selection_type: 'single',
+      is_required: false,
+      items: [
+        { addon_name: '', addon_price: 0, point_price: 0, qty: 0 }
+      ]
+    });
+  }
 
+  removeAddonGroup(index: number) {
+    this.newProduct.addons.splice(index, 1);
+  }
+
+  addAddonItem(groupIndex: number) {
+    this.newProduct.addons[groupIndex].items.push({ addon_name: '', addon_price: 0, point_price: 0, qty: 0 });
+  }
+
+  removeAddonItem(groupIndex: number, itemIndex: number) {
+    this.newProduct.addons[groupIndex].items.splice(itemIndex, 1);
+  }
 
 }

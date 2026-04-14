@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from 'src/app/services/product.service';
 import { KasirService } from 'src/app/services/kasir.service';
-
+import { LottieComponent } from 'ngx-lottie';
 
 @Component({
   selector: 'app-kasir',
   standalone: true,
   templateUrl: './kasir.page.html',
   styleUrls: ['./kasir.page.scss'],
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, LottieComponent]
 })
 export class KasirPage implements OnInit {
 
@@ -20,7 +20,11 @@ export class KasirPage implements OnInit {
   cart: any[] = [];
   allProducts: any[] = [];
 
+  paymentMethod = 'cash'; // default
+  cashPaid: number = 0;
+  change: number = 0;
 
+  showPaymentModal = false;
   search = '';
   category = '';
   loading = true;
@@ -30,376 +34,387 @@ export class KasirPage implements OnInit {
   totalPages = 1;
 
   showTransactionModal = false;
+  showSuccessModal = false;
 
-memberPhone = '';
-memberData: any = null;
-memberLoading = false;
+  memberPhone = '';
+  memberData: any = null;
+  memberLoading = false;
+  redemptions: any[] = [];
 
+  pointRule: any = null;
+  estimatedPoint = 0;
 
-openTransactionModal() {
-  if (this.cart.length === 0) {
-    alert('Keranjang kosong');
-    return;
-  }
-
-  this.showTransactionModal = true;
-  this.memberPhone = '';
-  this.memberData = null;
-}
-customerName = '';
-
+  customerName = '';
 
   cacheProducts: any = {};
-
   searchTimeout: any;
 
+  lottieOptions = {
+    path: '/assets/success.json',
+    autoplay: true,
+    loop: false
+  };
 
-
-  // ===== MODAL ADDON =====
   showAddonModal = false;
   selectedProduct: any = null;
-tempSelectedAddons: any = {}; 
+  tempSelectedAddons: any = {}; 
 
-  constructor(private productService: ProductService, private kasirService: KasirService) {}
+  constructor(
+    private productService: ProductService, 
+    private kasirService: KasirService,
+    private toastCtrl: ToastController
+  ) {}
 
-  
+  async showToast(msg: string, color: string = 'danger') {
+    const t = await this.toastCtrl.create({
+      message: msg, duration: 2500, color: color, position: 'top', mode: 'ios'
+    });
+    t.present();
+  }
 
   ngOnInit() {
     this.loadKasir();
     this.loadAllProducts();
+    this.loadPointRule();
   }
 
-  
+  calculateChange() {
+    const bayar = Number(this.cashPaid) || 0;
+    const total = this.cart.reduce((a, b) => a + Number(b.subtotal), 0);
+    this.change = bayar - total;
+    if (this.change < 0) this.change = 0;
+  }
+
+  setPayment(method: string) {
+    this.paymentMethod = method;
+    this.cashPaid = 0;
+    this.change = 0;
+  }
+
+  openTransactionModal() {
+    if (this.cart.length === 0) {
+      this.showToast('Keranjang masih kosong!');
+      return;
+    }
+    this.showTransactionModal = true;
+    this.memberPhone = '';
+    this.memberData = null;
+  }
+
+  loadPointRule() {
+    this.kasirService.getActivePointRule()
+      .subscribe((res: any) => {
+        this.pointRule = res.data || null;
+        this.calculatePoint();
+      });
+  }
+
+  calculatePoint() {
+    if (!this.pointRule || !this.memberData) {
+      this.estimatedPoint = 0;
+      return;
+    }
+    const amountPerPoint = Number(this.pointRule.amount_per_point);
+    const pointValue = Number(this.pointRule.point_value);
+    const totalBelanja = this.total;
+    if (totalBelanja <= 0) {
+      this.estimatedPoint = 0;
+      return;
+    }
+    const multiplier = Math.floor(totalBelanja / amountPerPoint);
+    this.estimatedPoint = multiplier * pointValue;
+  }
 
   onSearchChange() {
-
-  // reset ke page 1 setiap search
-  this.page = 1;
-
-  clearTimeout(this.searchTimeout);
-
-  this.searchTimeout = setTimeout(() => {
-    this.loadKasirLive();
-  }, 300); // 300ms debounce
-}
-
-loadAllProducts() {
-  this.productService
-    .getKasir('', '', 1, 9999) // limit besar
-    .subscribe(res => {
-      this.allProducts = res.products;
-    });
-}
-
-
-
-loadKasirLive() {
-  const key = this.makeCacheKey();
-
-  // CEK CACHE
-  if (this.cacheProducts[key]) {
-    const cached = this.cacheProducts[key];
-    this.products = cached.products;
-    this.totalPages = cached.totalPages;
-    return;
+    this.page = 1;
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.loadKasirLive();
+    }, 300);
   }
 
-  this.productService
-    .getKasir(this.search, this.category, this.page, this.limit)
-    .subscribe(res => {
+  loadAllProducts() {
+    this.productService
+      .getKasir('', '', 1, 9999)
+      .subscribe(res => {
+        this.allProducts = res.products;
+      });
+  }
 
-      this.products = res.products;
-      this.totalPages = res.meta.total_pages || 1;
-
-      // simpan cache
-      this.cacheProducts[key] = {
-        products: res.products,
-        totalPages: this.totalPages
-      };
-    });
-}
-
+  loadKasirLive() {
+    const key = this.makeCacheKey();
+    if (this.cacheProducts[key]) {
+      const cached = this.cacheProducts[key];
+      this.products = cached.products;
+      this.totalPages = cached.totalPages;
+      return;
+    }
+    this.productService
+      .getKasir(this.search, this.category, this.page, this.limit)
+      .subscribe(res => {
+        this.products = res.products;
+        this.totalPages = res.meta.total_pages || 1;
+        this.cacheProducts[key] = {
+          products: res.products,
+          totalPages: this.totalPages
+        };
+      });
+  }
 
   makeCacheKey() {
     return `${this.search}_${this.category}_${this.page}_${this.limit}`;
   }
 
-  // ================= LOAD DATA =================
-loadKasir() {
-  const key = this.makeCacheKey();
-
-  // ==== CEK CACHE ====
-  if (this.cacheProducts[key]) {
-    const cached = this.cacheProducts[key];
-    this.products = cached.products;
-    this.categories = cached.categories;
-    this.totalPages = cached.totalPages;
-    this.loading = false;
-    return;
-  }
-
-  // ==== JIKA BELUM ADA CACHE ====
-  this.loading = true;
-
-  this.productService
-    .getKasir(this.search, this.category, this.page, this.limit)
-    .subscribe(res => {
-
-      // ==== SORT PRODUK ====
-      const sortedProducts = res.products.sort((a: any, b: any) => {
-        const stockA = Number(a.qty);
-        const stockB = Number(b.qty);
-
-        // stok ada di atas
-        if (stockA === 0 && stockB > 0) return 1;
-        if (stockA > 0 && stockB === 0) return -1;
-
-        // kalau sama-sama ada stok / sama-sama habis → urut nama
-        return a.product_name.localeCompare(b.product_name);
-      });
-
-      this.products = sortedProducts;
-      this.categories = res.categories;
-      this.totalPages = res.meta.total_pages || 1;
-
-      // ==== SIMPAN KE CACHE (SUDAH SORT) ====
-      this.cacheProducts[key] = {
-        products: sortedProducts,
-        categories: res.categories,
-        totalPages: this.totalPages
-      };
-
+  loadKasir() {
+    const key = this.makeCacheKey();
+    if (this.cacheProducts[key]) {
+      const cached = this.cacheProducts[key];
+      this.products = cached.products;
+      this.categories = cached.categories;
+      this.totalPages = cached.totalPages;
       this.loading = false;
-    });
-}
-
-
-  // ================= CLICK PRODUK =================
-  addToCart(p: any) {
-    if (p.qty <= 0) {
-      alert('Stok habis');
       return;
     }
+    this.loading = true;
+    this.productService
+      .getKasir(this.search, this.category, this.page, this.limit)
+      .subscribe(res => {
+        const sortedProducts = res.products.sort((a: any, b: any) => {
+          const stockA = Number(a.qty);
+          const stockB = Number(b.qty);
+          if (stockA === 0 && stockB > 0) return 1;
+          if (stockA > 0 && stockB === 0) return -1;
+          return a.product_name.localeCompare(b.product_name);
+        });
+        this.products = sortedProducts;
+        this.categories = res.categories;
+        this.totalPages = res.meta.total_pages || 1;
+        this.cacheProducts[key] = {
+          products: sortedProducts,
+          categories: res.categories,
+          totalPages: this.totalPages
+        };
+        this.loading = false;
+      });
+  }
 
+  addToCart(p: any) {
+    if (p.qty <= 0) {
+      this.showToast('Gagal! Stok habis');
+      return;
+    }
     if (p.addons && p.addons.length > 0) {
       this.selectedProduct = p;
-this.tempSelectedAddons = {};
+      this.tempSelectedAddons = {};
       this.showAddonModal = true;
       return;
     }
-
     this.pushToCart(p, []);
   }
 
-
-  // ================= PUSH CART =================
-pushToCart(p: any, addons: any[]) {
-
-  // ==== CEK STOK ====
-  if (p.qty <= 0) {
-    alert('Stok habis');
-    return;
+  pushToCart(p: any, addons: any[]) {
+    if (p.qty <= 0) {
+      this.showToast('Gagal! Stok habis');
+      return;
+    }
+    p.qty = Number(p.qty) - 1;
+    addons.forEach(a => { a.qty = Number(a.qty) - 1; });
+    const addonKey = this.makeAddonKey(addons);
+    const found = this.cart.find(x => x.id === p.id && x.addonKey === addonKey);
+    const addonTotal = addons.reduce((a, b) => a + Number(b.addon_price), 0);
+    if (found) {
+      found.qty++;
+      this.recalcSubtotal(found);
+      this.calculatePoint();
+      this.calculateChange();
+      return;
+    }
+    const newItem = {
+      id: p.id,
+      product_name: p.product_name,
+      price: p.price,
+      image: p.image,
+      category_name: p.category_name,
+      qty: 1,
+      selectedAddons: [...addons],
+      addonKey: addonKey,
+      subtotal: Number(p.price) + addonTotal
+    };
+    this.cart.push(newItem);
+    this.calculatePoint();
+    this.calculateChange();
   }
 
-  // ==== KURANGI STOK PRODUK ====
-  p.qty = Number(p.qty) - 1;
-
-  // ==== KURANGI STOK ADDON ====
-addons.forEach(a => {
-  a.qty = Number(a.qty) - 1;
-});
-
-
-  const addonKey = this.makeAddonKey(addons);
-
-  const found = this.cart.find(
-    x => x.id === p.id && x.addonKey === addonKey
-  );
-
-  const addonTotal = addons.reduce(
-    (a, b) => a + Number(b.addon_price),
-    0
-  );
-
-  // ==== JIKA SUDAH ADA DI CART ====
-  if (found) {
-    found.qty++;
-    this.recalcSubtotal(found);
-    return;
+  toggleTempAddon(group: any, item: any) {
+    if (item.qty <= 0) {
+      this.showToast('Gagal! Stok opsi tambahan habis', 'warning');
+      return;
+    }
+    const groupName = group.group_name;
+    if (!this.tempSelectedAddons[groupName]) {
+      this.tempSelectedAddons[groupName] = [];
+    }
+    if (group.selection_type === 'single') {
+      this.tempSelectedAddons[groupName] = [item];
+      return;
+    }
+    const idx = this.tempSelectedAddons[groupName].findIndex((x: any) => x.id === item.id);
+    if (idx > -1) {
+      this.tempSelectedAddons[groupName].splice(idx, 1);
+    } else {
+      this.tempSelectedAddons[groupName].push(item);
+    }
   }
 
-  // ==== JIKA BELUM ADA ====
-  const newItem = {
-    id: p.id,
-    product_name: p.product_name,
-    price: p.price,
-    image: p.image,
-    category_name: p.category_name,
-
-    qty: 1,
-    selectedAddons: [...addons], // clone
-    addonKey: addonKey,
-    subtotal: Number(p.price) + addonTotal
-  };
-
-  this.cart.push(newItem);
-}
-
-
-  // ================= MODAL ADDON =================
-toggleTempAddon(group: any, item: any) {
-
-  if (item.qty <= 0) {
-    alert('Stok addon habis');
-    return;
+  isTempAddonSelected(group: any, item: any) {
+    const list = this.tempSelectedAddons[group.group_name] || [];
+    return list.some((x: any) => x.id === item.id);
   }
 
-  const groupName = group.group_name;
-
-  if (!this.tempSelectedAddons[groupName]) {
-    this.tempSelectedAddons[groupName] = [];
+  confirmAddon() {
+    if (this.selectedProduct?.addons) {
+      for (const group of this.selectedProduct.addons) {
+        if (group.is_required) {
+          const selected = this.tempSelectedAddons[group.group_name];
+          if (!selected || selected.length === 0) {
+            this.showToast(`Opsi "${group.group_name}" wajib dipilih!`, 'warning');
+            return;
+          }
+        }
+      }
+    }
+    const flatAddons: any[] = Object.values(this.tempSelectedAddons).reduce((acc: any[], val: any) => acc.concat(val), []);
+    this.pushToCart(this.selectedProduct, flatAddons);
+    this.closeAddonModal();
   }
-
-  // SINGLE
-  if (group.selection_type === 'single') {
-    this.tempSelectedAddons[groupName] = [item];
-    return;
-  }
-
-  // MULTIPLE
-  const idx = this.tempSelectedAddons[groupName]
-    .findIndex((x: any) => x.id === item.id);
-
-  if (idx > -1) {
-    this.tempSelectedAddons[groupName].splice(idx, 1);
-  } else {
-    this.tempSelectedAddons[groupName].push(item);
-  }
-}
-
-
-
-isTempAddonSelected(group: any, item: any) {
-  const list = this.tempSelectedAddons[group.group_name] || [];
-  return list.some((x: any) => x.id === item.id);
-}
-
-confirmAddon() {
-
-  const flatAddons: any[] = Object.values(this.tempSelectedAddons)
-    .reduce((acc: any[], val: any) => {
-      return acc.concat(val);
-    }, []);
-
-  this.pushToCart(this.selectedProduct, flatAddons);
-  this.closeAddonModal();
-}
-
 
   skipAddon() {
+    if (this.selectedProduct?.addons) {
+      for (const group of this.selectedProduct.addons) {
+        if (group.is_required) {
+          this.showToast(`Opsi "${group.group_name}" wajib dipilih!`, 'warning');
+          return;
+        }
+      }
+    }
     this.pushToCart(this.selectedProduct, []);
     this.closeAddonModal();
   }
 
-closeAddonModal() {
-  this.showAddonModal = false;
-  this.selectedProduct = null;
-  this.tempSelectedAddons = {};
-}
-
-
-  // ================= CART =================
-removeItem(c: any) {
-
-  const prod = this.products.find(p => p.id === c.id);
-  if (prod) prod.qty += c.qty;
-
-  // BALIKIN ADDON
-  c.selectedAddons?.forEach((a: any) => {
-    const prod2 = this.products.find(p => p.id === c.id);
-    const addon = prod2?.addons?.find((x: any) => x.id === a.id);
-    if (addon) addon.qty += c.qty;
-  });
-
-  this.cart = this.cart.filter(x => x !== c);
-}
-
-
-plusQty(c: any) {
-
-  const prod = this.products.find(p => p.id === c.id);
-  if (!prod || prod.qty <= 0) {
-    alert('Stok habis');
-    return;
+  closeAddonModal() {
+    this.showAddonModal = false;
+    this.selectedProduct = null;
+    this.tempSelectedAddons = {};
   }
 
-  // CEK ADDON STOK
-  for (let a of c.selectedAddons || []) {
-    if (a.qty <= 0) {
-      alert('Stok addon habis');
+  removeItem(c: any) {
+    if (c.is_redemption) {
+      if (c.redemption_original) {
+        this.redemptions.push(c.redemption_original);
+      }
+    } else {
+      const prod = this.allProducts.find(p => p.id === c.id);
+      if (prod) prod.qty += c.qty;
+      c.selectedAddons?.forEach((a: any) => {
+        const addon = prod?.addons?.find((x: any) => x.id === a.id);
+        if (addon) addon.qty += c.qty;
+      });
+    }
+    this.cart = this.cart.filter(x => x !== c);
+    this.calculatePoint();
+    this.calculateChange();
+  }
+
+  plusQty(c: any) {
+    if (c.is_redemption) {
+      this.showToast('Item penukaran poin tidak dapat ditambah jumlahnya', 'warning');
       return;
+    }
+    const prod = this.allProducts.find(p => p.id === c.id);
+    if (!prod || prod.qty <= 0) {
+      this.showToast('Gagal! Stok habis');
+      return;
+    }
+    for (let a of c.selectedAddons || []) {
+      if (a.qty <= 0) {
+        this.showToast('Gagal! Stok opsi tambahan habis', 'warning');
+        return;
+      }
+    }
+    prod.qty--;
+    c.selectedAddons?.forEach((a: any) => a.qty--);
+    c.qty++;
+    this.recalcSubtotal(c);
+    this.calculatePoint();
+    this.calculateChange();
+  }
+
+  minusQty(c: any) {
+    if (c.is_redemption) return;
+    if (c.qty > 1) {
+      const prod = this.allProducts.find(p => p.id === c.id);
+      if (prod) prod.qty++;
+      c.selectedAddons?.forEach((a: any) => a.qty++);
+      c.qty--;
+      this.recalcSubtotal(c);
+      this.calculatePoint();
+      this.calculateChange();
     }
   }
 
-  prod.qty--;
-
-  // KURANGI ADDON
-  c.selectedAddons?.forEach((a: any) => a.qty--);
-
-  c.qty++;
-  this.recalcSubtotal(c);
-}
-
-
-
-minusQty(c: any) {
-  if (c.qty > 1) {
-
-    const prod = this.products.find(p => p.id === c.id);
-    if (prod) prod.qty++;
-
-    c.selectedAddons?.forEach((a: any) => a.qty++);
-
-    c.qty--;
-    this.recalcSubtotal(c);
+  claimItem(r: any) {
+    const product = this.allProducts.find(p => p.id == r.product_id);
+    if (!product) {
+      this.showToast('Data produk tidak ditemukan di kasir', 'danger');
+      return;
+    }
+    const cartItem = {
+      id: product.id,
+      product_name: `[REDEEM] ${product.product_name}`,
+      price: 0,
+      qty: 1,
+      subtotal: 0,
+      selectedAddons: [],
+      is_redemption: true,
+      redemption_id: r.id,
+      redemption_original: r
+    };
+    this.cart.push(cartItem);
+    this.redemptions = this.redemptions.filter(x => x.id !== r.id);
+    this.showToast(`${product.product_name} masuk ke keranjang (Rp 0)`, 'success');
+    this.calculateChange();
   }
-}
-
 
   recalcSubtotal(c: any) {
-    const addonTotal = (c.selectedAddons || []).reduce(
-      (a: number, b: any) => a + Number(b.addon_price),
-      0
-    );
-
+    if (c.is_redemption) {
+      c.subtotal = 0;
+      return;
+    }
+    const addonTotal = (c.selectedAddons || []).reduce((a: number, b: any) => a + Number(b.addon_price), 0);
     c.subtotal = (Number(c.price) + addonTotal) * c.qty;
   }
 
-  // ================= TOTAL =================
   get total() {
     return this.cart.reduce((a, b) => a + Number(b.subtotal), 0);
+  }
+
+  recalculateAll() {
+    this.calculatePoint();
   }
 
   formatPrice(v: number | string) {
     return Number(v).toLocaleString('id-ID');
   }
 
-
   get outOfStockProducts() {
     return this.allProducts.filter(p => Number(p.qty) === 0);
   }
 
-
-  // ================= ADDON KEY =================
   makeAddonKey(addons: any[]): string {
     if (!addons || addons.length === 0) return 'no-addon';
-    return addons
-      .map(a => a.id)
-      .sort()
-      .join('-');
+    return addons.map(a => a.id).sort().join('-');
   }
 
-  // ================= PAGINATION =================
   nextPage() {
     if (this.page < this.totalPages) {
       this.page++;
@@ -420,91 +435,198 @@ minusQty(c: any) {
     this.loadKasir();
   }
 
-clearCart() {
-  if (this.cart.length === 0) return;
-
-  const confirmClear = confirm('Yakin ingin menghapus semua keranjang?');
-  if (!confirmClear) return;
-
-  this.cart.forEach(c => {
-
-    const prod = this.products.find(p => p.id === c.id);
-    if (prod) prod.qty += c.qty;
-
-    c.selectedAddons?.forEach((a: any) => {
-      const addon = prod?.addons?.find((x: any) => x.id === a.id);
-      if (addon) addon.qty += c.qty;
-    });
-
-  });
-
-  this.cart = [];
-}
-
-
-searchMember() {
-  if (!this.memberPhone) return;
-
-  this.memberLoading = true;
-
-  this.kasirService.findMember(this.memberPhone)
-    .subscribe((res: any) => {
-
-      this.memberData = res.data || null;
-
-      if (this.memberData) {
-        this.customerName = this.memberData.name;
+  clearCart() {
+    if (this.cart.length === 0) return;
+    const confirmClear = confirm('Yakin ingin menghapus semua keranjang?');
+    if (!confirmClear) return;
+    this.cart.forEach(c => {
+      if (!c.is_redemption) {
+        const prod = this.allProducts.find(p => p.id === c.id);
+        if (prod) prod.qty += c.qty;
+        c.selectedAddons?.forEach((a: any) => {
+          const addon = prod?.addons?.find((x: any) => x.id === a.id);
+          if (addon) addon.qty += c.qty;
+        });
+      } else if (c.redemption_original) {
+        this.redemptions.push(c.redemption_original);
       }
-
-      this.memberLoading = false;
     });
-}
+    this.cart = [];
+    this.calculateChange();
+  }
 
+  searchMember() {
+    if (!this.memberPhone) return;
+    this.memberLoading = true;
+    this.kasirService.findMember(this.memberPhone)
+      .subscribe((res: any) => {
+        this.memberData = res.data || null;
+        const inCartIds = this.cart.filter(x => x.is_redemption).map(x => x.redemption_id);
+        this.redemptions = (res.redemptions || []).filter((r: any) => !inCartIds.includes(r.id));
+        if (this.memberData) {
+          this.customerName = this.memberData.name;
+          this.calculatePoint();
+        }
+        this.memberLoading = false;
+      }, () => {
+        this.memberLoading = false;
+      });
+  }
 
+  processTransaction() {
+    if (this.cart.length === 0 || !this.validateCustomer()) return;
+    if (this.paymentMethod === 'cash' && this.cashPaid < this.total) {
+      this.showToast('Gagal! Uang pembayaran kurang dari total tagihan.', 'danger');
+      return;
+    }
+    const payload = {
+      cart: this.cart,
+      total: this.total,
+      customer_name: this.customerName || 'Umum',
+      member_id: this.memberData?.member_id || null,
+      estimated_point: this.estimatedPoint,
+      payment_method: this.paymentMethod,
+      cash_paid: this.paymentMethod === 'cash' ? this.cashPaid : 0,
+      change_money: this.paymentMethod === 'cash' ? this.change : 0
+    };
+    this.kasirService.createTransaction(payload).subscribe(() => {
+      this.showToast('Transaksi berhasil disimpan!', 'success');
+      this.resetAfterTransaction();
+    });
+  }
 
+  closeTransactionModal() {
+    this.showTransactionModal = false;
+    this.memberPhone = '';
+    this.memberData = null;
+  }
 
-processTransaction() {
+  clearMember() {
+    this.memberData = null;
+    this.memberPhone = '';
+    this.customerName = '';
+    this.calculatePoint();
+  }
 
-  if (this.cart.length === 0) return;
-
-  const payload = {
-    cart: this.cart,
-    total: this.total,
-    customer_name: this.customerName || null,
-    member_id: this.memberData?.member_id || null
-  };
-
-  this.kasirService.createTransaction(payload)
-    .subscribe(() => {
-
-      alert('Transaksi berhasil');
-
-      this.cart = [];
-      this.customerName = '';
-      this.memberPhone = '';
+  onCustomerNameChange() {
+    if (this.memberData) {
       this.memberData = null;
+      this.memberPhone = '';
+    }
+  }
 
-      this.loadKasir();
+  validateCustomer() {
+    if (!this.memberData && !this.customerName) {
+      this.showToast('Gagal! Masukkan nama pelanggan terlebih dahulu.', 'warning');
+      return false;
+    }
+    return true;
+  }
 
+  openPaymentModal() {
+    if (this.cart.length === 0 || !this.validateCustomer()) return;
+    if (this.paymentMethod === 'cash' && this.cashPaid < this.total) {
+      this.showToast('Gagal! Uang pembayaran kurang.', 'danger');
+      return;
+    }
+    this.showPaymentModal = true;
+  }
+
+  confirmPayment() {
+    const payload = {
+      cart: this.cart,
+      total: this.total,
+      customer_name: this.customerName || 'Umum',
+      member_id: this.memberData?.member_id || null,
+      estimated_point: this.estimatedPoint,
+      payment_method: this.paymentMethod,
+      cash_paid: this.paymentMethod === 'cash' ? this.cashPaid : 0,
+      change_money: this.paymentMethod === 'cash' ? this.change : 0
+    };
+    this.kasirService.createTransaction(payload).subscribe((res: any) => {
+      this.printStruk(res);
+      this.showPaymentModal = false;
+      this.showSuccessModal = true;
+      setTimeout(() => {
+        this.showSuccessModal = false;
+        this.resetAfterTransaction();
+      }, 5000);
     });
-}
+  }
 
+  printStruk(res: any) {
+    const win = window.open('', '', 'width=380,height=650');
+    const date = new Date().toLocaleString('id-ID');
+    const trxId = res?.transaction_id || Math.floor(Math.random() * 999999);
+    let itemsHtml = '';
+    this.cart.forEach(c => {
+      itemsHtml += `
+        <div class="item">
+          <div class="row bold">
+            <span>${c.product_name}</span>
+            <span>Rp ${this.formatPrice(c.price)}</span>
+          </div>
+          <div class="row small">
+            <span>Qty ${c.qty}</span>
+            <span>Rp ${this.formatPrice(c.subtotal)}</span>
+          </div>`;
+      if (c.selectedAddons?.length) {
+        c.selectedAddons.forEach((a: any) => {
+          itemsHtml += `
+            <div class="row addon">
+              <span>+ ${a.addon_name}</span>
+              <span>Rp ${this.formatPrice(a.addon_price * c.qty)}</span>
+            </div>`;
+        });
+      }
+      itemsHtml += `</div>`;
+    });
+    win!.document.write(`
+    <html>
+      <head>
+        <title>Struk</title>
+        <style>
+          body { font-family: 'Courier New', monospace; width: 300px; margin: auto; font-size: 12px; color: #000; }
+          .center { text-align: center; }
+          .bold { font-weight: bold; }
+          .small { font-size: 11px; color:#555; }
+          .divider { border-top: 1px dashed #000; margin: 6px 0; }
+          .row { display: flex; justify-content: space-between; margin: 2px 0; }
+          .addon { font-size: 11px; color: #666; padding-left: 10px; }
+          .item { margin-bottom: 6px; }
+        </style>
+      </head>
+      <body>
+        <div class="center bold" style="font-size:16px;">THE FOURTYFOUR</div>
+        <div class="center small">Cafe & Cloth <br/> Jl. P. Rohjoyo Banaran Bumiaji <br/> Kota Batu – Jawa Timur</div>
+        <div class="divider"></div>
+        <div class="row small"><span>Trx</span><span>#${trxId}</span></div>
+        <div class="row small"><span>Tanggal</span><span>${date}</span></div>
+        <div class="row small"><span>Pelanggan</span><span>${this.customerName || 'Umum'}</span></div>
+        <div class="divider"></div>
+        ${itemsHtml}
+        <div class="divider"></div>
+        <div class="row bold"><span>TOTAL</span><span>Rp ${this.formatPrice(this.total)}</span></div>
+        <div class="row"><span>Metode</span><span>${this.paymentMethod.toUpperCase()}</span></div>
+        ${this.paymentMethod === 'cash' ? `
+          <div class="row"><span>Dibayar</span><span>Rp ${this.formatPrice(this.cashPaid)}</span></div>
+          <div class="row bold"><span>Kembali</span><span>Rp ${this.formatPrice(this.change)}</span></div>` : ''}
+        <div class="divider"></div>
+        <div class="center small">Terima Kasih 🙏 <br/> Barang yang sudah dibeli <br/> tidak dapat dikembalikan</div>
+      </body>
+    </html>`);
+    win!.print();
+  }
 
-
-
-closeTransactionModal() {
-  this.showTransactionModal = false;
-  this.memberPhone = '';
-  this.memberData = null;
-}
-
-clearMember() {
-  this.memberData = null;
-  this.memberPhone = '';
-  this.customerName = '';
-}
-
-
-
-
+  resetAfterTransaction() {
+    this.cart = [];
+    this.customerName = '';
+    this.memberPhone = '';
+    this.memberData = null;
+    this.cashPaid = 0;
+    this.change = 0;
+    this.paymentMethod = 'cash';
+    this.showPaymentModal = false;
+    this.loadKasir();
+  }
 }

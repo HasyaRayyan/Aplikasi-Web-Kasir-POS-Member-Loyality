@@ -1,13 +1,164 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>home</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="home-content">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">home</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+  <div class="wrapper">
+
+    <!-- HEADER: Immersive & Clean -->
+    <div class="header">
+      <div class="user-intro">
+        <p class="greeting">{{ getGreeting() }},</p>
+        <h1 class="name">{{ user?.name || 'Member' }}</h1>
+      </div>
+      <div class="header-actions">
+        <div class="icon-btn" [class.has-dot]="hasNotification">
+          <ion-icon name="notifications-outline"></ion-icon>
+        </div>
+        <div class="avatar-box" routerLink="/member/profile">
+          <img *ngIf="false; else initialsAvatar" src="avatar-url" alt="avatar">
+          <ng-template #initialsAvatar>
+            <div class="initials">{{ getInitials(user?.name) }}</div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMART INTEGRATED MEMBERSHIP CARD -->
+    <div class="smart-card-container">
+      <div class="smart-card" [style.background]="getLevelColor()">
+        <div class="card-pattern"></div>
+        <div class="card-shimmer"></div>
+        
+        <!-- CARD TOP: Brand & Level -->
+        <div class="card-section top">
+          <div class="brand">
+            <ion-icon name="flash"></ion-icon>
+            <span>TheFourtyFour</span>
+          </div>
+          <div class="level-badge">
+            {{ user?.member_level || 'SILVER' }}
+          </div>
+        </div>
+
+        <!-- CARD MIDDLE: Points Primary Focus -->
+        <div class="card-section middle" routerLink="/member/poin-saya" style="cursor: pointer; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+          <div class="point-focus">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <p>Saldo Poin Aktif</p>
+              <ion-icon name="chevron-forward-outline" style="font-size: 14px; opacity: 0.8;"></ion-icon>
+            </div>
+            <div class="value-row">
+              <h2>{{ formatPoints(user?.total_point || 0) }}</h2>
+              <span>PTS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD BOTTOM: Integrated Progress & Identity -->
+        <div class="card-section bottom">
+          <div class="progress-integrated">
+            <div class="prog-text">
+              <span>Ke Level {{ getNextLevel() }}</span>
+              <small>{{ getNextLevelPoints() }} poin lagi</small>
+            </div>
+            <div class="prog-track">
+              <div class="prog-fill" [style.width.%]="getProgress()"></div>
+            </div>
+          </div>
+
+          <div class="identity-row">
+            <div class="holder">
+              <p>CARD HOLDER</p>
+              <h4>{{ user?.name | uppercase }}</h4>
+            </div>
+            <div class="number">
+              ID •••• {{ user.member_id }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS: Categorized Colors -->
+    <div class="action-grid">
+      <div class="action-item category-emerald" routerLink="/member/redeem-point">
+        <div class="icon-box">
+          <ion-icon name="gift"></ion-icon>
+        </div>
+        <span>Tukar Poin</span>
+      </div>
+      
+      <div class="action-item category-yellow" routerLink="/member/poin-saya">
+        <div class="icon-box">
+          <ion-icon name="star"></ion-icon>
+        </div>
+        <span>Poin Saya</span>
+      </div>
+      
+      <div class="action-item category-blue" routerLink="/member/pesanan-saya">
+        <div class="icon-box">
+          <ion-icon name="bag-check"></ion-icon>
+        </div>
+        <span>Pesanan</span>
+      </div>
+      
+      <div class="action-item category-purple" routerLink="/member/riwayat">
+        <div class="icon-box">
+          <ion-icon name="receipt"></ion-icon>
+        </div>
+        <span>Riwayat</span>
+      </div>
+      
+
+    </div>
+
+    <!-- PRODUCT SECTION -->
+    <div class="section-container">
+      <div class="section-header">
+        <h3>Catalog Produk</h3>
+        <button class="btn-text" routerLink="/member/catalog-produk">Semua <ion-icon name="arrow-forward"></ion-icon></button>
+      </div>
+
+      <div class="product-scroller">
+        <div class="product-tile" *ngFor="let p of products">
+          <div class="image-wrapper">
+            <div class="save-tag"><ion-icon name="heart-outline"></ion-icon></div>
+            <img *ngIf="p.image; else noImg" [src]="p.image" alt="p">
+            <ng-template #noImg>
+              <div class="empty-img"><ion-icon name="image-outline"></ion-icon></div>
+            </ng-template>
+          </div>
+          <div class="info">
+            <h4>{{ p.name }}</h4>
+            <p class="price">Rp {{ formatPrice(p.price) }}</p>
+            <div class="point-val" *ngIf="p.is_exchangeable">
+              <ion-icon name="star"></ion-icon> {{ formatPoints(p.point_price) }} Pts
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY SECTION -->
+    <div class="section-container">
+      <div class="section-header">
+        <h3>Aktivitas Terakhir</h3>
+      </div>
+
+      <div class="activity-stack">
+        <div class="activity-row" *ngFor="let activity of recentActivities; let i = index" [style.animation-delay]="(i * 0.1) + 's'">
+          <div class="icon-circle" [style.background]="activity.iconBg">
+            <ion-icon [name]="activity.icon"></ion-icon>
+          </div>
+          <div class="text">
+            <h5>{{ activity.title }}</h5>
+            <small>{{ activity.time }}</small>
+          </div>
+          <div class="points-gain" [class.minus]="activity.points < 0">
+            {{ activity.points > 0 ? '+' : '' }}{{ activity.points }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>

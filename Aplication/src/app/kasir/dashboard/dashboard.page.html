@@ -1,112 +1,134 @@
 <div class="space-y-8">
 
-  <!-- METRIC CARDS KASIR -->
+  <!-- ================= METRIC CARDS ================= -->
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
 
+    <!-- TRANSAKSI -->
     <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
       <p class="text-sm text-gray-500">Transaksi Hari Ini</p>
       <div class="flex items-center justify-between mt-3">
-        <h2 class="text-3xl font-bold text-gray-800">87</h2>
+        <h2 class="text-3xl font-bold text-gray-800">
+          {{ todayTransaction }}
+        </h2>
         <ion-icon name="receipt-outline" class="text-4xl text-gray-300"></ion-icon>
       </div>
     </div>
 
+    <!-- OMZET -->
     <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
       <p class="text-sm text-gray-500">Omzet Hari Ini</p>
       <div class="flex items-center justify-between mt-3">
-        <h2 class="text-3xl font-bold text-gray-800">Rp 2.350.000</h2>
+        <h2 class="text-3xl font-bold text-gray-800">
+          Rp {{ formatPrice(todayRevenue) }}
+        </h2>
         <ion-icon name="cash-outline" class="text-4xl text-gray-300"></ion-icon>
       </div>
     </div>
 
+    <!-- PRODUK -->
     <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
       <p class="text-sm text-gray-500">Produk Terjual</p>
       <div class="flex items-center justify-between mt-3">
-        <h2 class="text-3xl font-bold text-gray-800">143</h2>
+        <h2 class="text-3xl font-bold text-gray-800">
+          {{ todayProducts }}
+        </h2>
         <ion-icon name="cube-outline" class="text-4xl text-gray-300"></ion-icon>
       </div>
     </div>
 
+    <!-- MEMBER -->
     <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
       <p class="text-sm text-gray-500">Member Datang</p>
       <div class="flex items-center justify-between mt-3">
-        <h2 class="text-3xl font-bold text-gray-800">32</h2>
+        <h2 class="text-3xl font-bold text-gray-800">
+          {{ todayMembers }}
+        </h2>
         <ion-icon name="people-outline" class="text-4xl text-gray-300"></ion-icon>
       </div>
     </div>
 
   </div>
 
-<!-- CHART + PRODUK TERLARIS -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-  <!-- CHART -->
-  <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-      Grafik Transaksi Mingguan
-    </h3>
-    <div class="relative h-[300px]">
-      <canvas id="salesChart"></canvas>
-    </div>
-  </div>
+  <!-- ================= CHART + PRODUK ================= -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-  <!-- PRODUK TERLARIS -->
-  <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">
-        Produk Terlaris
+    <!-- CHART -->
+    <div class="xl:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">
+        Grafik Transaksi Mingguan
       </h3>
-      <a routerLink="/kasir/transaksi" class="text-sm text-indigo-600 hover:underline">
-        Lihat Semua
-      </a>
+
+      <div class="relative h-[300px]">
+        <canvas id="salesChart"></canvas>
+      </div>
     </div>
 
-    <ul class="space-y-4">
-      <li class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-semibold">1</div>
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800">Es Kopi Susu</p>
-          <p class="text-xs text-gray-500">Terjual 120x</p>
-        </div>
-        <span class="text-sm font-semibold text-gray-700">Rp 18.000</span>
-      </li>
 
-      <li class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold">2</div>
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800">Americano</p>
-          <p class="text-xs text-gray-500">Terjual 95x</p>
-        </div>
-        <span class="text-sm font-semibold text-gray-700">Rp 15.000</span>
-      </li>
+    <!-- PRODUK TERLARIS -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">
+          Produk Terlaris
+        </h3>
+      </div>
 
-      <li class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 font-semibold">3</div>
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800">Cappuccino</p>
-          <p class="text-xs text-gray-500">Terjual 80x</p>
-        </div>
-        <span class="text-sm font-semibold text-gray-700">Rp 22.000</span>
-      </li>
-    </ul>
+      <!-- EMPTY -->
+      <div *ngIf="bestProducts.length === 0"
+           class="text-sm text-gray-500 text-center py-6">
+        Belum ada data
+      </div>
+
+      <!-- LIST -->
+      <ul *ngIf="bestProducts.length > 0" class="space-y-4">
+
+        <li *ngFor="let p of bestProducts; let i = index"
+            class="flex items-center gap-3">
+
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center font-semibold"
+            [ngClass]="
+              i===0 ? 'bg-emerald-100 text-emerald-600' :
+              i===1 ? 'bg-indigo-100 text-indigo-600' :
+              'bg-amber-100 text-amber-600'
+            ">
+            {{ i + 1 }}
+          </div>
+
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-800">
+              {{ p.product_name }}
+            </p>
+            <p class="text-xs text-gray-500">
+              Terjual {{ p.total_sold }}x
+            </p>
+          </div>
+
+          <span class="text-sm font-semibold text-gray-700">
+            Rp {{ formatPrice(p.price) }}
+          </span>
+
+        </li>
+
+      </ul>
+    </div>
+
   </div>
 
-</div>
 
-
-  <!-- TRANSAKSI TERBARU -->
+  <!-- ================= TRANSAKSI TERBARU ================= -->
   <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-gray-800">
         Transaksi Terbaru
       </h3>
-      <a routerLink="/kasir/transaksi" class="text-sm text-indigo-600 hover:underline">
-        Lihat Semua
-      </a>
     </div>
 
     <div class="overflow-x-auto">
+
       <table class="w-full text-sm">
+
         <thead>
           <tr class="text-left text-gray-500 border-b">
             <th class="pb-3">Invoice</th>
@@ -118,19 +140,47 @@
         </thead>
 
         <tbody class="divide-y">
-          <tr class="hover:bg-gray-50">
-            <td class="py-3 font-medium text-gray-800">INV-0091</td>
-            <td class="py-3">Rp 120.000</td>
-            <td class="py-3">Cash</td>
+
+          <!-- EMPTY -->
+          <tr *ngIf="recentTransactions.length === 0">
+            <td colspan="5" class="py-6 text-center text-gray-500">
+              Belum ada transaksi
+            </td>
+          </tr>
+
+          <!-- DATA -->
+          <tr *ngFor="let t of recentTransactions"
+              class="hover:bg-gray-50">
+
+            <td class="py-3 font-medium text-gray-800">
+              {{ t.invoice_code }}
+            </td>
+
+            <td class="py-3 text-black">
+              Rp {{ formatPrice(t.total_price) }}
+            </td>
+
+            <td class="py-3 capitalize text-black">
+              {{ t.payment_method }}
+            </td>
+
             <td class="py-3">
-              <span class="px-3 py-1 rounded-full text-xs bg-emerald-100 text-emerald-700">
+              <span class="px-3 py-1 rounded-full text-xs
+                           bg-emerald-100 text-emerald-700">
                 Selesai
               </span>
             </td>
-            <td class="py-3 text-gray-500">Hari Ini</td>
+
+            <td class="py-3 text-black">
+              {{ t.created_at | date:'dd MMM yyyy HH:mm' }}
+            </td>
+
           </tr>
+
         </tbody>
+
       </table>
+
     </div>
   </div>
 

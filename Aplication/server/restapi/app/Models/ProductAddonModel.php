@@ -1,87 +1,87 @@
 <?php
 
-namespace App\Models;
+    namespace App\Models;
 
-use CodeIgniter\Model;
+    use CodeIgniter\Model;
 
-class ProductAddonModel extends Model
-{
-    protected $table = 'product_addons';
-    protected $primaryKey = 'id';
-
-    protected $allowedFields = [
-        'product_id',
-        'group_name',
-        'selection_type',
-        'addon_name',
-        'addon_price',
-        'qty'
-    ];
-
-    // ================= LIST =================
-    public function getAddons($limit, $offset, $search = '')
+    class ProductAddonModel extends Model
     {
-        $builder = $this->db->table('product_addons a')
-            ->select('
-                a.id,
-                a.product_id,
-                a.group_name,
-                a.selection_type,
-                a.addon_name,
-                a.addon_price,
-                a.qty,
-                p.product_name
-            ')
-            ->join('products p', 'p.id = a.product_id', 'left');
+        protected $table = 'product_addons';
+        protected $primaryKey = 'id';
 
-        if ($search) {
-            $builder->groupStart()
-                ->like('a.addon_name', $search)
-                ->orLike('a.group_name', $search)
-                ->orLike('p.product_name', $search)
-                ->groupEnd();
+        protected $allowedFields = [
+            'product_id',
+            'group_name',
+            'selection_type',
+            'addon_name',
+            'addon_price',
+            'qty'
+        ];
+
+        // ================= LIST =================
+        public function getAddons($limit, $offset, $search = '')
+        {
+            $builder = $this->db->table('product_addons a')
+                ->select('
+                    a.id,
+                    a.product_id,
+                    a.group_name,
+                    a.selection_type,
+                    a.addon_name,
+                    a.addon_price,
+                    a.qty,
+                    p.product_name
+                ')
+                ->join('products p', 'p.id = a.product_id', 'left');
+
+            if ($search) {
+                $builder->groupStart()
+                    ->like('a.addon_name', $search)
+                    ->orLike('a.group_name', $search)
+                    ->orLike('p.product_name', $search)
+                    ->groupEnd();
+            }
+
+            return $builder
+                ->orderBy('a.group_name', 'ASC')
+                ->orderBy('a.id', 'DESC')
+                ->limit($limit, $offset)
+                ->get()
+                ->getResultArray();
         }
 
-        return $builder
-            ->orderBy('a.group_name', 'ASC')
-            ->orderBy('a.id', 'DESC')
-            ->limit($limit, $offset)
-            ->get()
-            ->getResultArray();
-    }
+        // ================= COUNT =================
+        public function countAddons($search = '')
+        {
+            $builder = $this->db->table('product_addons a')
+                ->join('products p', 'p.id = a.product_id', 'left');
 
-    // ================= COUNT =================
-    public function countAddons($search = '')
-    {
-        $builder = $this->db->table('product_addons a')
-            ->join('products p', 'p.id = a.product_id', 'left');
+            if ($search) {
+                $builder->groupStart()
+                    ->like('a.addon_name', $search)
+                    ->orLike('a.group_name', $search)
+                    ->orLike('p.product_name', $search)
+                    ->groupEnd();
+            }
 
-        if ($search) {
-            $builder->groupStart()
-                ->like('a.addon_name', $search)
-                ->orLike('a.group_name', $search)
-                ->orLike('p.product_name', $search)
-                ->groupEnd();
+            return $builder->countAllResults();
         }
 
-        return $builder->countAllResults();
-    }
+        // ================= CREATE =================
+        public function createAddon($data)
+        {
+            return $this->insert($data);
+        }
 
-    // ================= CREATE =================
-    public function createAddon($data)
-    {
-        return $this->insert($data);
-    }
+        // ================= UPDATE =================
+        public function updateAddon($id, $data)
+        {
+            return $this->update($id, $data);
+        }
 
-    // ================= UPDATE =================
-    public function updateAddon($id, $data)
-    {
-        return $this->update($id, $data);
+        // ================= DELETE =================
+        public function deleteAddon($id)
+        {
+            return $this->delete($id);
+        }
     }
-
-    // ================= DELETE =================
-    public function deleteAddon($id)
-    {
-        return $this->delete($id);
-    }
-}

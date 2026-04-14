@@ -30,46 +30,80 @@ class Auth extends BaseController
     // =====================
     // POST /auth/login
     // =====================
-    public function login()
-    {
-        $data = $this->request->getJSON();
+public function login()
+{
+    $data = $this->request->getJSON(true);
 
-        $username = $data->username ?? null;
-        $password = $data->password ?? null;
+    $identity = $data['username'] ?? null; // bisa username/email/name/phone
+    $password = $data['password'] ?? null;
 
-        if (!$username || !$password) {
-            return $this->response->setStatusCode(400)->setJSON([
-                'success' => false,
-                'message' => 'Username dan password wajib diisi'
-            ]);
-        }
-
-        $user = $this->authModel->getByUsername($username);
-
-        if (!$user) {
-            return $this->response->setStatusCode(404)->setJSON([
-                'success' => false,
-                'message' => 'User tidak ditemukan'
-            ]);
-        }
-
-        // ⚠️ sementara plaintext (TA)
-        if ($password !== $user['password']) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'success' => false,
-                'message' => 'Password salah'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Login berhasil',
-            'data' => [
-                'id'       => $user['id'],
-                'name'     => $user['name'],
-                'username' => $user['username'],
-                'role_id'  => $user['role_id'], // 1=admin,2=kasir,3=member
-            ]
+    if (!$identity || !$password) {
+        return $this->response->setStatusCode(400)->setJSON([
+            'success' => false,
+            'message' => 'Username / Email / Phone wajib diisi'
         ]);
     }
+
+    // CARI USER DENGAN 4 OPSI
+    $user = $this->authModel->getByIdentity($identity);
+
+    if (!$user) {
+        return $this->response->setStatusCode(404)->setJSON([
+            'success' => false,
+            'message' => 'User tidak ditemukan'
+        ]);
+    }
+
+    /* ================= PASSWORD CHECK =================
+       SUPPORT PASSWORD LAMA PLAINTEXT + HASH BARU
+    */
+    $validPassword = false;
+
+    if ($user['password'] === $password) {
+        $validPassword = true;
+    }
+
+    if (password_verify($password, $user['password'])) {
+        $validPassword = true;
+    }
+
+    if (!$validPassword) {
+        return $this->response->setStatusCode(401)->setJSON([
+            'success' => false,
+            'message' => 'Password salah'
+        ]);
+    }
+
+    unset($user['password']);
+
+    return $this->response->setJSON([
+        'success' => true,
+        'message' => 'Login berhasil',
+        'data' => [
+            'id'       => $user['id'],
+            'name'     => $user['name'],
+            'username' => $user['username'],
+            'email'    => $user['email'],
+            'phone'    => $user['phone'],
+            'role_id'  => $user['role_id'],
+        ]
+    ]);
+}
+
+
+// =====================
+// POST /auth/logout
+// =====================
+public function logout()
+{
+    // kalau pakai session
+    session()->destroy();
+
+    return $this->response->setJSON([
+        'success' => true,
+        'message' => 'Logout berhasil'
+    ]);
+}
+
+
 }

@@ -36,50 +36,62 @@ class AddonController extends ResourceController
     }
 
     // ================= CREATE =================
-    public function create()
-    {
-        $model = new ProductAddonModel();
-        $json  = $this->request->getJSON(true);
+public function create()
+{
+    $model = new ProductAddonModel();
+    $json  = $this->request->getJSON(true);
 
+    $items = $json['items'] ?? [];
+
+    foreach ($items as $item) {
         $data = [
-            'product_id'     => $json['product_id'] ?? null,
-            'group_name'     => $json['group_name'] ?? '',
-            'selection_type' => $json['selection_type'] ?? 'single',
-            'addon_name'     => $json['addon_name'] ?? '',
-            'addon_price'    => $json['addon_price'] ?? 0,
-            'qty'            => $json['qty'] ?? 0
+            'product_id'     => $json['product_id'],
+            'group_name'     => $json['group_name'],
+            'selection_type' => $json['selection_type'],
+            'addon_name'     => $item['addon_name'],
+            'addon_price'    => $item['addon_price'],
+            'qty'            => $item['qty']
         ];
 
         $model->createAddon($data);
-
-        return $this->respond([
-            'success' => true,
-            'message' => 'Addon berhasil ditambahkan'
-        ]);
     }
+
+    return $this->respond([
+        'success' => true,
+        'message' => 'Addon berhasil ditambahkan'
+    ]);
+}
+
 
     // ================= UPDATE =================
-    public function update($id = null)
-    {
-        $model = new ProductAddonModel();
-        $json  = $this->request->getJSON(true);
+public function update($id = null)
+{
+    $model = new ProductAddonModel();
+    $json  = $this->request->getJSON(true);
 
+    // HAPUS GROUP LAMA
+    $old = $model->find($id);
+    $model->where('group_name', $old['group_name'])->delete();
+
+    // INSERT ULANG
+    foreach ($json['items'] as $item) {
         $data = [
-            'product_id'     => $json['product_id'] ?? null,
-            'group_name'     => $json['group_name'] ?? '',
-            'selection_type' => $json['selection_type'] ?? 'single',
-            'addon_name'     => $json['addon_name'] ?? '',
-            'addon_price'    => $json['addon_price'] ?? 0,
-            'qty'            => $json['qty'] ?? 0
+            'product_id'     => $json['product_id'],
+            'group_name'     => $json['group_name'],
+            'selection_type' => $json['selection_type'],
+            'addon_name'     => $item['addon_name'],
+            'addon_price'    => $item['addon_price'],
+            'qty'            => $item['qty']
         ];
 
-        $model->updateAddon($id, $data);
-
-        return $this->respond([
-            'success' => true,
-            'message' => 'Addon berhasil diupdate'
-        ]);
+        $model->insert($data);
     }
+
+    return $this->respond([
+        'success' => true,
+        'message' => 'Addon berhasil diupdate'
+    ]);
+}
 
     // ================= DELETE =================
     public function delete($id = null)

@@ -27,4 +27,16 @@ protected $useTimestamps = false;
     {
         return $this->where('username', $username)->first();
     }
+
+    public function getByIdentity(string $identity)
+{
+    return $this->groupStart()
+        ->where('username', $identity)
+        ->orWhere('email', $identity)
+        ->orWhere('phone', $identity)
+        ->orWhere('name', $identity)
+    ->groupEnd()
+    ->first();
+}
+
 }

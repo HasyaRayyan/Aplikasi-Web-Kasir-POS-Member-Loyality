@@ -1,0 +1,214 @@
+<div class="min-h-screen bg-slate-50 p-4 md:p-8">
+
+  <div class="animate-fade-in pb-20">
+
+    <!-- HEADER / TITLE -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex justify-center items-center">
+            <ion-icon name="documents" class="text-xl"></ion-icon>
+        </div>
+        Riwayat Transaksi
+      </h1>
+      <p class="text-slate-500 font-medium text-sm mt-2 ml-14">Temukan, pantau, dan evaluasi seluruh aliran transaksi member dan kasir.</p>
+    </div>
+
+    <!-- MAIN PANEL -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col min-h-[60vh]">
+      
+      <!-- TOOLBAR: SEARCH -->
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div class="relative w-full md:w-96 text-slate-600 group">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-emerald-500">
+             <ion-icon name="search"></ion-icon>
+          </div>
+          <input 
+            type="text" 
+            [(ngModel)]="search" 
+            (ngModelChange)="onSearchChange()"
+            placeholder="Cari Invoice atau Total Harga..." 
+            class="bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl focus:ring-emerald-500 focus:border-emerald-500 block w-full pl-10 p-3 font-medium transition-all shadow-sm hover:border-slate-300"
+          >
+        </div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="overflow-x-auto flex-1 custom-scrollbar">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-slate-400 border-b border-slate-100">
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold">Invoice</th>
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold">Total</th>
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold">Metode</th>
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold hidden sm:table-cell">Waktu</th>
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold text-center">Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-50 relative">
+            
+            <!-- Loading -->
+            <tr *ngIf="loading">
+              <td colspan="5" class="py-16 text-center text-emerald-500">
+                <ion-spinner name="crescent" class="scale-150"></ion-spinner>
+                <div class="mt-4 text-sm font-bold text-slate-400">Sinkronisasi Data...</div>
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="!loading && histories.length === 0">
+              <td colspan="5" class="py-16 text-center">
+                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                    <ion-icon name="folder-open" class="text-3xl"></ion-icon>
+                 </div>
+                 <p class="text-slate-500 font-medium">Buku catatan riwayat transaksi masih kosong</p>
+              </td>
+            </tr>
+
+            <!-- Data Map -->
+            <tr *ngFor="let h of histories" class="hover:bg-slate-50/70 transition-colors group">
+              <td class="py-4 px-2">
+                 <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors shadow-sm">
+                       <ion-icon name="receipt"></ion-icon>
+                    </div>
+                    <div>
+                      <div class="font-black text-slate-900 tracking-tight">{{ h.invoice_code }}</div>
+                      <div class="text-[10px] text-slate-400 font-bold sm:hidden">{{ h.created_at | date:'dd MMM yyyy, HH:mm' }}</div>
+                    </div>
+                 </div>
+              </td>
+              <td class="py-4 px-2">
+                 <div class="flex items-center gap-1.5">
+                    <span class="text-emerald-500 font-black text-[10px]">Rp</span>
+                    <span class="font-black text-slate-900 text-[15px] tracking-tight">{{ formatPrice(h.total_price) }}</span>
+                 </div>
+              </td>
+              <td class="py-4 px-2">
+                <span class="px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase border"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-600 border-emerald-100': h.payment_method === 'cash',
+                        'bg-indigo-50 text-indigo-600 border-indigo-100': h.payment_method === 'qris',
+                        'bg-blue-50 text-blue-600 border-blue-100': h.payment_method === 'transfer'
+                      }">
+                  {{ h.payment_method }}
+                </span>
+              </td>
+              <td class="py-4 px-2 text-slate-500 font-medium hidden sm:table-cell">{{ h.created_at | date:'dd MMM yyyy, HH:mm' }}</td>
+              <td class="py-4 px-2 text-center">
+                 <button (click)="openDetail(h)" class="bg-white border text-slate-400 border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm focus:ring-2 focus:ring-slate-200">
+                    Detail
+                 </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION BAR (BOTTOM) -->
+      <div class="flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 pt-5 mt-2 gap-4">
+         <span class="text-sm text-slate-500 font-medium whitespace-nowrap">Menampilkan halaman <span class="font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">{{ page }}</span> dari <span class="font-bold text-slate-900">{{ totalPages }}</span></span>
+         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button (click)="prevPage()" [disabled]="page === 1" class="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm flex items-center gap-1">
+              <ion-icon name="chevron-back"></ion-icon> Prev
+            </button>
+            <button (click)="nextPage()" [disabled]="page === totalPages" class="px-4 py-2 text-sm font-bold border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-sm flex items-center gap-1">
+              Next <ion-icon name="chevron-forward"></ion-icon>
+            </button>
+         </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL TRANSAKSI -->
+  <div *ngIf="showDetailModal && selectedHistory" class="fixed inset-0 z-50 flex items-center justify-center animate-fade-in p-4 sm:p-0">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeDetail()"></div>
+    
+    <div class="bg-white rounded-[2rem] w-full max-w-md relative z-10 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden transform transition-all scale-100 border border-slate-100">
+      
+      <!-- Head -->
+      <div class="p-6 pb-4 border-b border-slate-100 bg-slate-50/50">
+        <div class="flex items-center justify-between">
+           <div>
+              <p class="text-[10px] font-black text-emerald-500 tracking-widest uppercase mb-1">Struk Digital</p>
+              <h2 class="text-xl font-black text-slate-900 tracking-tight">{{ selectedHistory.invoice_code }}</h2>
+           </div>
+           <button (click)="closeDetail()" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm">
+             <ion-icon name="close" class="text-xl"></ion-icon>
+           </button>
+        </div>
+      </div>
+
+      <!-- Body / Items -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+        
+        <div class="flex items-center justify-between mb-6 pb-6 border-b border-dashed border-slate-200">
+           <div>
+             <p class="text-xs text-slate-400 font-medium mb-1">Tanggal & Waktu</p>
+             <p class="text-sm font-bold text-slate-900">{{ selectedHistory.created_at | date:'dd MMMM yyyy' }} <span class="text-slate-400 ml-1">{{ selectedHistory.created_at | date:'HH:mm' }}</span></p>
+           </div>
+           <div class="text-right">
+             <p class="text-xs text-slate-400 font-medium mb-1">Pembayaran</p>
+             <span class="px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase border inline-block"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-600 border-emerald-100': selectedHistory.payment_method === 'cash',
+                        'bg-indigo-50 text-indigo-600 border-indigo-100': selectedHistory.payment_method === 'qris',
+                        'bg-blue-50 text-blue-600 border-blue-100': selectedHistory.payment_method === 'transfer'
+                      }">
+                  {{ selectedHistory.payment_method }}
+             </span>
+           </div>
+        </div>
+
+        <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <ion-icon name="cube" class="text-slate-400 text-lg"></ion-icon> Rincian Item
+        </h3>
+        
+        <div class="space-y-4">
+          <div *ngFor="let item of selectedHistory.items" class="flex justify-between items-start group">
+            <div class="flex-1 pr-4">
+              <div class="flex items-baseline gap-2">
+                 <span class="text-sm font-black text-emerald-500">{{ item.qty }}x</span>
+                 <span class="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">{{ item.product_name }}</span>
+              </div>
+              <div *ngIf="item.addons && (item.addons | json) !== '[]'" class="text-xs text-slate-500 mt-1 pl-6 leading-relaxed">
+                <ng-container *ngFor="let addon of item.addons; let last = last">
+                  {{ addon.addon_name }} (+{{ formatPrice(addon.addon_price) }})<ng-container *ngIf="!last">, </ng-container>
+                </ng-container>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-bold text-slate-900">Rp {{ formatPrice(item.subtotal) }}</div>
+              <div class="text-[10px] text-slate-400 mt-1">@ Rp {{ formatPrice(item.price) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer / Total Box -->
+      <div class="p-6 bg-slate-900 text-white border-t border-slate-800">
+        
+        <div class="flex justify-between text-sm mb-2 text-slate-400 font-medium">
+          <span>Subtotal</span>
+          <span>Rp {{ formatPrice(selectedHistory.total_price) }}</span>
+        </div>
+        <div class="flex justify-between text-sm mb-4 text-slate-400 font-medium pb-4 border-b border-slate-700/50">
+          <span>Pajak (0%)</span>
+          <span>Rp 0</span>
+        </div>
+
+        <div class="flex justify-between items-end">
+          <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Total Bayar</span>
+          <div class="flex items-center gap-1.5 leading-none">
+             <span class="text-emerald-400 font-black text-lg">Rp</span>
+             <span class="text-4xl font-black tracking-tighter">{{ formatPrice(selectedHistory.total_price) }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

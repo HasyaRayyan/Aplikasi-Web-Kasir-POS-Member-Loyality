@@ -1,0 +1,157 @@
+<ion-content
+  fullscreen
+  class="bg-white"
+  style="--background: #ededed;"
+>
+  <div class="min-h-screen flex items-center justify-center px-4">
+
+    <div
+      class="
+        w-full
+        max-w-5xl
+        bg-white
+        rounded-3xl
+        shadow-2xl
+        flex
+        overflow-hidden
+        md:h-[620px]
+      "
+    >
+
+      <!-- LEFT (REGISTER FORM) -->
+      <div class="w-full md:w-1/2 flex items-center justify-center py-10">
+        <div class="w-full max-w-sm text-center px-6">
+
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            Buat Akun Baru
+          </h2>
+
+          <p class="text-sm text-gray-500 mb-8">
+            Daftarkan diri Anda untuk mulai menggunakan aplikasi
+          </p>
+
+          <!-- NAMA -->
+          <div class="mb-4">
+            <ion-input
+              [(ngModel)]="form.name"
+              placeholder="Nama Lengkap"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
+          </div>
+
+          <!-- USERNAME -->
+          <div class="mb-4">
+            <ion-input
+              [(ngModel)]="form.username"
+              placeholder="Username"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
+          </div>
+
+          <!-- EMAIL -->
+          <div class="mb-4">
+            <ion-input
+              type="email"
+              [(ngModel)]="form.email"
+              placeholder="Email"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
+          </div>
+
+          <!-- PHONE -->
+          <div class="mb-4">
+            <ion-input
+              type="tel"
+              [(ngModel)]="form.phone"
+              placeholder="No HP"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
+          </div>
+
+          <!-- PASSWORD -->
+          <div class="mb-6">
+            <ion-input
+              type="password"
+              [(ngModel)]="form.password"
+              placeholder="Password"
+              class="bg-gray-100 rounded-full px-6 py-4 text-black"
+            ></ion-input>
+          </div>
+
+          <!-- BUTTON -->
+          <button
+            type="button"
+            (click)="register()"
+            class="
+              w-full
+              h-14
+              bg-gray-800
+              hover:bg-gray-900
+              rounded-full
+              text-white
+              font-semibold
+              transition
+            "
+          >
+            {{ loading ? 'Loading...' : 'SIGN UP' }}
+          </button>
+
+          <p class="text-xs text-gray-500 mt-6">
+            Sudah punya akun?
+            <span
+              class="text-gray-800 font-semibold cursor-pointer hover:underline"
+              routerLink="/login"
+            >
+              Login
+            </span>
+          </p>
+
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div
+        class="
+          hidden
+          md:flex
+          w-1/2
+          bg-gray-900
+          items-center
+          justify-center
+          text-white
+        "
+      >
+        <div class="text-center max-w-xs px-6">
+
+          <h1 class="text-3xl font-extrabold mb-4">
+            Bergabung Sekarang!
+          </h1>
+
+          <p class="text-sm leading-relaxed mb-10 text-gray-300">
+            Buat akun untuk menikmati fitur lengkap dan kemudahan transaksi
+          </p>
+
+          <button
+            routerLink="/login"
+            class="
+              border-2 border-white
+              px-10 py-3
+              rounded-full
+              font-semibold
+              tracking-wide
+              hover:bg-white
+              hover:text-gray-900
+              active:scale-[0.97]
+              transition-all
+            "
+          >
+            SIGN IN
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

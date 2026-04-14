@@ -1,13 +1,269 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>riwayat</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="min-h-screen bg-white p-4 md:p-8">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">riwayat</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+  <!-- HEADER SECTION -->
+  <div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+          Riwayat Transaksi
+        </h1>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="bg-white rounded-xl p-5 mb-8 shadow-sm border border-gray-200">
+      <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
+
+        <div class="flex-1 relative group">
+          <ion-icon name="search-outline"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+          </ion-icon>
+
+          <input type="text"
+            [(ngModel)]="search"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Cari invoice / nama pelanggan..."
+            class="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 
+                   rounded-lg text-black focus:border-gray-800 focus:ring-2 
+                   focus:ring-gray-200 outline-none transition">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SPINNER -->
+  <div *ngIf="loading && histories.length === 0">
+    class="fixed inset-0 bg-white/80 backdrop-blur-sm 
+           flex items-center justify-center z-50">
+    <ion-spinner name="crescent" class="spinner-black"></ion-spinner>
+  </div>
+
+  <!-- MAIN TABLE -->
+  <div *ngIf="!loading"
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+
+    <!-- HEADER TABLE -->
+    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b">
+      <div class="col-span-2 font-semibold text-gray-700">INVOICE</div>
+      <div class="col-span-3 font-semibold text-gray-700">NAMA</div>
+      <div class="col-span-2 font-semibold text-gray-700">TOTAL</div>
+      <div class="col-span-2 font-semibold text-gray-700">METODE</div>
+      <div class="col-span-2 font-semibold text-gray-700">TANGGAL</div>
+      <div class="col-span-1 font-semibold text-gray-700 text-right">AKSI</div>
+    </div>
+
+    <!-- ROW -->
+    <div *ngFor="let h of histories"
+      class="border-b border-gray-100 hover:bg-gray-50 transition">
+
+      <!-- DESKTOP -->
+      <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-5 items-center">
+
+        <div class="col-span-2 font-semibold text-gray-900">
+          {{ h.invoice_code }}
+        </div>
+
+        <div class="col-span-3 text-gray-700">
+          {{ h.customer_name || 'Umum' }}
+        </div>
+
+        <div class="col-span-2 font-bold text-gray-900">
+          Rp {{ formatPrice(h.total_price) }}
+        </div>
+
+        <div class="col-span-2">
+          <span class="px-3 py-1 rounded-lg text-sm font-medium"
+            [ngClass]="{
+              'bg-emerald-100 text-emerald-700': h.payment_method=='cash',
+              'bg-blue-100 text-blue-700': h.payment_method=='qris',
+              'bg-purple-100 text-purple-700': h.payment_method=='transfer'
+            }">
+            {{ h.payment_method | uppercase }}
+          </span>
+        </div>
+
+        <div class="col-span-2 text-gray-600 text-sm">
+          {{ h.created_at | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+
+        <div class="col-span-1 flex justify-end">
+          <button
+            (click)="openDetail(h)"
+            class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition">
+            <ion-icon name="eye-outline" class="text-lg"></ion-icon>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- MOBILE -->
+      <div class="md:hidden p-5 space-y-2">
+
+        <div class="flex justify-between">
+          <p class="font-bold">{{ h.invoice_code }}</p>
+          <span class="text-sm font-semibold">
+            Rp {{ formatPrice(h.total_price) }}
+          </span>
+        </div>
+
+        <p class="text-sm text-gray-600">
+          {{ h.customer_name || 'Umum' }}
+        </p>
+
+        <div class="flex justify-between text-xs text-gray-500">
+          <span>{{ h.payment_method | uppercase }}</span>
+          <span>{{ h.created_at | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <button
+          (click)="openDetail(h)"
+          class="w-full mt-2 py-2 bg-gray-900 text-white rounded-lg text-sm">
+          Detail
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between 
+                gap-4 px-6 py-4 bg-gray-50 border-t border-gray-200">
+
+      <span class="text-gray-700">
+        Menampilkan <b>{{ histories.length }}</b> data
+      </span>
+
+      <div class="flex items-center gap-2">
+        <button (click)="prevPage()"
+          class="w-9 h-9 flex items-center justify-center bg-white border 
+                 rounded-lg disabled:opacity-50"
+          [disabled]="page<=1">
+          <ion-icon name="chevron-back-outline" class="text-black"></ion-icon>
+        </button>
+
+        <span class="text-black">{{ page }} / {{ totalPages }}</span>
+
+        <button (click)="nextPage()"
+          class="w-9 h-9 flex items-center justify-center bg-white border 
+                 rounded-lg disabled:opacity-50"
+          [disabled]="page>=totalPages">
+          <ion-icon name="chevron-forward-outline" class="text-black"></ion-icon>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div *ngIf="showDetailModal"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm
+         flex items-center justify-center z-[9999] p-4">
+
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+      <h2 class="font-bold text-lg text-gray-900">
+        Detail Transaksi
+      </h2>
+
+      <button (click)="closeDetail()"
+        class="text-gray-500 hover:text-black">
+        <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+<!-- BODY -->
+<div class="p-6 space-y-4 text-sm text-gray-800 max-h-[75vh] overflow-y-auto">
+
+  <!-- INFO UTAMA -->
+  <div class="grid grid-cols-2 gap-2">
+
+    <p><b>Invoice</b></p>
+    <p>{{ selectedHistory?.invoice_code }}</p>
+
+    <p><b>Tanggal</b></p>
+    <p>{{ selectedHistory?.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+
+    <p><b>Nama</b></p>
+    <p>{{ selectedHistory?.customer_name || 'Umum' }}</p>
+
+    <p><b>Metode</b></p>
+    <p>{{ selectedHistory?.payment_method | uppercase }}</p>
+
+    <p><b>Poin</b></p>
+    <p>+{{ selectedHistory?.total_point }}</p>
+
+  </div>
+
+  <hr class="my-2">
+
+  <!-- LIST ITEM -->
+  <div>
+    <p class="font-semibold mb-2">Item Dibeli</p>
+
+    <div *ngFor="let item of selectedHistory?.items"
+      class="border rounded-lg p-3 mb-2 space-y-1">
+
+      <!-- PRODUK -->
+      <div class="flex justify-between font-semibold">
+        <span>{{ item.product_name }} x{{ item.qty }}</span>
+        <span>Rp {{ formatPrice(item.subtotal) }}</span>
+      </div>
+
+      <!-- ADDON -->
+      <div *ngIf="item.addons?.length"
+        class="text-xs text-gray-600 mt-1 space-y-1">
+
+        <div *ngFor="let a of item.addons"
+          class="flex justify-between">
+          <span>↳ {{ a.addon_name }}</span>
+          <span>Rp {{ formatPrice(a.addon_price) }}</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="my-2">
+
+  <!-- TOTAL SECTION -->
+  <div class="space-y-1">
+
+    <div class="flex justify-between">
+      <span>Total</span>
+      <span class="font-bold">
+        Rp {{ formatPrice(selectedHistory?.total_price) }}
+      </span>
+    </div>
+
+    <!-- CASH DETAIL -->
+    <div *ngIf="selectedHistory?.payment_method === 'cash'"
+         class="text-gray-700 space-y-1">
+
+      <div class="flex justify-between">
+        <span>Dibayar</span>
+        <span>
+          Rp {{ formatPrice(selectedHistory?.cash_paid) }}
+        </span>
+      </div>
+
+      <div class="flex justify-between font-semibold text-green-700">
+        <span>Kembalian</span>
+        <span>
+          Rp {{ formatPrice(selectedHistory?.change_money) }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  </div>
+</div>

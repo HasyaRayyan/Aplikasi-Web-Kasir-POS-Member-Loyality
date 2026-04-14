@@ -1,0 +1,2 @@
+src/app/guards/auth-guard.spec.ts(8,43): error TS2348: Value of type 'typeof AuthGuard' is not callable. Did you mean to include 'new'?
+src/app/kasir/dashboard/dashboard.page.spec.ts(2,10): error TS2305: Module '"./dashboard.page"' has no exported member 'DashboardPage'.

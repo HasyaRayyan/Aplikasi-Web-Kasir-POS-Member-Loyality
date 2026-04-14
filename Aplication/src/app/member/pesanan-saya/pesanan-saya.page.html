@@ -1,0 +1,84 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Pesanan Saya</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadHistory()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- INSTRUCTION BANNER -->
+  <div class="info-card">
+    <div class="info-content">
+      <ion-icon name="information-circle"></ion-icon>
+      <div>
+        <h4>Ingin Mengambil Barang?</h4>
+        <p>Beritahu kasir <strong>Nomor HP</strong> Anda untuk melihat daftar barang yang siap diambil.</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Memuat riwayat...</p>
+  </div>
+
+  <div *ngIf="!loading && redemptions.length === 0" class="empty-state">
+    <ion-icon name="礼物-outline"></ion-icon>
+    <p>Anda belum memiliki riwayat penukaran poin.</p>
+    <ion-button fill="outline" routerLink="/member/redeem-point" color="dark">
+      Tukar Poin Sekarang
+    </ion-button>
+  </div>
+
+  <div class="redemption-list" *ngIf="!loading && redemptions.length > 0">
+    <div class="redemption-card" *ngFor="let r of redemptions">
+      <div class="card-header">
+        <span class="status-badge" [attr.data-status]="r.status">
+          {{ getStatusText(r.status) }}
+        </span>
+        <span class="date">{{ r.redeemed_at | date:'dd MMM yyyy, HH:mm' }}</span>
+      </div>
+
+      <div class="card-body">
+        <div class="product-thumb">
+          <img *ngIf="r.product_image; else noImg" [src]="r.product_image" alt="thumb">
+          <ng-template #noImg>
+            <div class="thumb-placeholder">
+              <ion-icon name="image-outline"></ion-icon>
+            </div>
+          </ng-template>
+        </div>
+        <div class="product-info">
+          <h3>{{ r.product_name }}</h3>
+          <p class="points-used">
+            <ion-icon name="star"></ion-icon>
+            {{ r.points_used }} Poin ditukar
+          </p>
+          
+          <div *ngIf="r.status === 'pending'" class="expiry-info">
+            Ambil sebelum: <span class="expiry-date">{{ r.expired_at | date:'dd MMM, HH:mm' }}</span>
+          </div>
+          <div *ngIf="r.status === 'claimed'" class="claim-info">
+            Diambil pada: <span class="claim-date">{{ r.claimed_at | date:'dd MMM, HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-footer" *ngIf="r.status === 'pending'">
+        <div class="direct-claim-tip">
+          <ion-icon name="id-card-outline"></ion-icon>
+          Cukup Beritahu Nomor HP ke Toko
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

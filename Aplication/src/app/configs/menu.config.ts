@@ -27,11 +27,6 @@ export const MENU: MenuGroup[] = [
         icon: 'cube-outline',
       },
       {
-        label: 'Addon',
-        path: 'addon',
-        icon: 'add-circle-outline',
-      },
-      {
         label: 'Point',
         path: 'point',
         icon: 'star-outline',
@@ -40,6 +35,16 @@ export const MENU: MenuGroup[] = [
         label: 'Member',
         path: 'member',
         icon: 'people-outline',
+      },
+      {
+        label: 'Category',
+        path: 'category',
+        icon: 'list-outline',
+      },
+      {
+        label: 'Riwayat Transaksi',
+        path: 'transaksi',
+        icon: 'receipt-outline',
       },
     ],
   },

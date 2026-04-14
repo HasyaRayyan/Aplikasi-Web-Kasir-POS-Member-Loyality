@@ -1,13 +1,320 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>member</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="min-h-screen bg-white p-4 md:p-8">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">member</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+  <!-- HEADER -->
+  <div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+          Member / User
+        </h1>
+        <p class="text-gray-600 mt-2">Kelola user dan membership</p>
+      </div>
+
+      <button (click)="openAddModal()"
+        class="group inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-6 py-3.5 rounded-lg hover:bg-black transition">
+        <ion-icon name="add-outline"></ion-icon>
+        Tambah User
+      </button>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="bg-white rounded-xl p-5 mb-8 shadow-sm border border-gray-200">
+      <div class="relative">
+        <ion-icon name="search-outline"
+          class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+
+        <input [(ngModel)]="search" (keyup.enter)="loadData()"
+          placeholder="Cari nama / username..."
+          class="w-full pl-12 pr-4 py-3.5 bg-white text-black
+                 border border-gray-300 rounded-lg
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200
+                 outline-none transition hover:border-gray-400">
+      </div>
+    </div>
+  </div>
+
+  <!-- SPINNER -->
+  <div *ngIf="loading"
+    class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <!-- TABLE -->
+  <div *ngIf="!loading"
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+    <!-- HEADER TABLE -->
+    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
+      <div class="col-span-3 font-semibold text-gray-700">NAMA</div>
+      <div class="col-span-3 font-semibold text-gray-700">USERNAME</div>
+      <div class="col-span-2 font-semibold text-gray-700">ROLE</div>
+      <div class="col-span-2 font-semibold text-gray-700">LEVEL</div>
+      <div class="col-span-2 font-semibold text-gray-700 text-right">AKSI</div>
+    </div>
+
+    <!-- ROW -->
+    <div *ngFor="let u of users" class="border-b border-gray-100 hover:bg-gray-50 transition">
+      <div class="hidden md:grid grid-cols-12 px-6 py-5 items-center">
+
+        <div class="col-span-3 font-semibold text-gray-900">{{ u.name }}</div>
+        <div class="col-span-3 text-gray-700">{{ u.username }}</div>
+        <div class="col-span-2 text-gray-700">
+          {{ u.role_id == 1 ? 'Admin':'Kasir' }}
+        </div>
+        <div class="col-span-2 text-gray-700">
+          {{ u.membership_level || '-' }}
+        </div>
+
+        <!-- AKSI -->
+        <div class="col-span-2 flex justify-end gap-1">
+
+          <!-- DETAIL -->
+          <button (click)="openDetailModal(u)"
+            class="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition">
+            <ion-icon name="eye-outline"></ion-icon>
+          </button>
+
+          <!-- EDIT -->
+          <button (click)="openEditModal(u)"
+            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition">
+            <ion-icon name="create-outline"></ion-icon>
+          </button>
+
+          <!-- DELETE -->
+          <button (click)="delete(u.id)"
+            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between 
+                gap-4 px-6 py-4 bg-gray-50 border-t border-gray-200">
+
+      <span class="text-gray-700">
+        Page <b>{{ page }}</b> / {{ totalPages }}
+      </span>
+
+      <div class="flex items-center gap-2">
+        <button (click)="prevPage()"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300 
+                 rounded-lg hover:border-gray-900 disabled:opacity-50"
+          [disabled]="page <= 1">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+
+        <button (click)="nextPage()"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300 
+                 rounded-lg hover:border-gray-900 disabled:opacity-50"
+          [disabled]="page >= totalPages">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- MODAL USER -->
+<div *ngIf="showModal"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm 
+         flex items-center justify-center z-[9999] p-4">
+
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+      <div>
+        <h2 class="font-bold text-lg text-gray-900">
+          {{ isEdit ? 'Edit User' : 'Tambah User' }}
+        </h2>
+        <p class="text-xs text-gray-500">
+          Membership otomatis dari transaksi
+        </p>
+      </div>
+
+      <button (click)="closeModal()"
+        class="text-gray-500 hover:text-black transition">
+        <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-4">
+
+      <!-- NAMA -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Nama</label>
+        <input [(ngModel)]="newUser.name"
+          placeholder="Nama Lengkap"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- USERNAME -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Username</label>
+        <input [(ngModel)]="newUser.username"
+          placeholder="Username"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- EMAIL -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Email</label>
+        <input [(ngModel)]="newUser.email"
+          type="email"
+          placeholder="email@email.com"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- PHONE -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">No HP</label>
+        <input [(ngModel)]="newUser.phone"
+          type="tel"
+          placeholder="08xxxxxxxx"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- PASSWORD -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Password</label>
+        <input [(ngModel)]="newUser.password"
+          type="password"
+          [placeholder]="isEdit ? 'Kosongkan jika tidak diubah' : 'Password'"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- ROLE -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Role</label>
+        <select [(ngModel)]="newUser.role_id"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+
+          <option [ngValue]="null">Pilih Role</option>
+          <option *ngFor="let r of roles" [ngValue]="r.id">
+            {{ r.name }}
+          </option>
+        </select>
+      </div>
+
+
+      <!-- POINT -->
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Total Point</label>
+        <input [(ngModel)]="newUser.total_points"
+          type="number"
+          placeholder="0"
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+      </div>
+
+      <!-- MEMBERSHIP INFO (READONLY) -->
+      <div *ngIf="isEdit"
+        class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700">
+        <span class="font-semibold">Membership:</span>
+        {{ newUser.membership_level }}
+        <p class="text-xs text-gray-500 mt-1">
+          Level otomatis berubah berdasarkan total point
+        </p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+      <button (click)="closeModal()"
+        class="px-4 py-2 border border-gray-300 rounded-lg 
+               text-gray-700 hover:bg-gray-100 transition">
+        Batal
+      </button>
+
+      <button (click)="isEdit ? update() : save()"
+        class="px-6 py-2 bg-gray-900 text-white 
+               rounded-lg hover:bg-black transition shadow-md">
+        Simpan
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- MODAL DETAIL USER -->
+<div *ngIf="showDetailModal"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm 
+         flex items-center justify-center z-[9999] p-4">
+
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+      <h2 class="font-bold text-lg text-gray-900">
+        Detail User
+      </h2>
+
+      <button (click)="closeDetailModal()"
+        class="text-gray-500 hover:text-black transition">
+        <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-3 text-sm text-gray-800">
+
+      <div class="grid grid-cols-2 gap-2">
+        <p class="font-semibold">Nama</p>
+        <p>{{ selectedUser?.name }}</p>
+
+        <p class="font-semibold">Username</p>
+        <p>{{ selectedUser?.username }}</p>
+
+        <p class="font-semibold">Email</p>
+        <p>{{ selectedUser?.email || '-' }}</p>
+
+        <p class="font-semibold">Phone</p>
+        <p>{{ selectedUser?.phone || '-' }}</p>
+
+        <p class="font-semibold">Role</p>
+        <p>{{ selectedUser?.role_id == 1 ? 'Admin':'Kasir' }}</p>
+
+        <p class="font-semibold">Point</p>
+        <p>{{ selectedUser?.total_points || 0 }}</p>
+
+        <p class="font-semibold">Membership</p>
+        <p>{{ selectedUser?.membership_level || 'Basic' }}</p>
+
+        <p class="font-semibold">Dibuat</p>
+        <p>{{ selectedUser?.created_at }}</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="px-6 py-4 border-t flex justify-end bg-gray-50">
+      <button (click)="closeDetailModal()"
+        class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition">
+        Tutup
+      </button>
+    </div>
+
+  </div>
+</div>
+<ion-alert
+  [isOpen]="showDeleteAlert"
+  header="Hapus User?"
+  message="Data user akan dihapus permanen"
+  [buttons]="deleteButtons">
+</ion-alert>

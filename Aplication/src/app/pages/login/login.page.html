@@ -1,130 +1,54 @@
-<ion-content 
-  fullscreen
-  class="bg-white"
-  style="--background: #ededed;"
->
-  <div class="min-h-screen flex items-center justify-center px-4">
+<ion-content fullscreen class="bg-black">
+  <div class="min-h-screen flex items-center justify-center p-8">
+    
+    <div class="w-full max-w-sm">
+      <div class="mb-16">
+        <h1 class="text-4xl font-bold text-white tracking-tighter leading-none mb-1">THE44</h1>
+        <p class="text-[10px] text-zinc-600 tracking-[0.4em] uppercase font-medium">System Access</p>
+      </div>
 
-    <div
-      class="
-        w-full
-        max-w-5xl
-        bg-white
-        rounded-3xl
-        shadow-2xl
-        flex
-        overflow-hidden
-        md:h-[560px]
-      "
-    >
+      <div class="space-y-10">
+        
+        <div class="relative">
+          <label class="text-[9px] text-zinc-500 uppercase tracking-widest absolute -top-5 left-0">Username</label>
+          <ion-input
+            [(ngModel)]="username"
+            placeholder="TYPE HERE"
+            class="input-plain"
+          ></ion-input>
+        </div>
 
-      <!-- LEFT (LOGIN) -->
-      <div class="w-full md:w-1/2 flex items-center justify-center py-12">
-        <div class="w-full max-w-sm text-center px-6">
+        <div class="relative">
+          <label class="text-[9px] text-zinc-500 uppercase tracking-widest absolute -top-5 left-0">Password</label>
+          <ion-input
+            type="password"
+            [(ngModel)]="password"
+            placeholder="********"
+            class="input-plain"
+          ></ion-input>
+          <a href="#" class="text-[9px] text-zinc-700 absolute right-0 -bottom-5 hover:text-white transition-colors">FORGOT?</a>
+        </div>
 
-          <h2 class="text-xl font-semibold text-gray-800 mb-2">
-            Selamat Datang Kembali
-          </h2>
-
-          <p class="text-sm text-gray-500 mb-10">
-            Masuk ke akun Anda untuk melanjutkan
-          </p>
-
-          <!-- USERNAME -->
-          <div class="mb-5">
-            <ion-input
-              [(ngModel)]="username"
-              placeholder="Username"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <!-- PASSWORD -->
-          <div class="mb-4">
-            <ion-input
-              type="password"
-              [(ngModel)]="password"
-              placeholder="Password"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <div class="text-right mb-8">
-            <a
-              class="
-                text-xs
-                text-gray-600
-                cursor-pointer
-                hover:text-gray-800
-                transition
-              "
-            >
-              Lupa kata sandi?
-            </a>
-          </div>
-
-          <!-- BUTTON -->
+        <div class="pt-4">
           <button
-            type="button"
             (click)="login()"
-            class="
-              w-full
-              h-14
-              bg-gray-800
-              hover:bg-gray-900
-              rounded-full
-              text-white
-              font-semibold
-              transition
-            "
+            class="btn-plain w-full"
+            [disabled]="loading"
           >
-            {{ loading ? 'Loading...' : 'SIGN IN' }}
+            <span *ngIf="!loading">SIGN IN</span>
+            <ion-spinner *ngIf="loading" name="lines-sharp" color="dark"></ion-spinner>
           </button>
         </div>
-      </div>
 
-      <!-- RIGHT (HIDDEN ON MOBILE) -->
-      <div
-        class="
-          hidden
-          md:flex
-          w-1/2
-          bg-gray-900
-          items-center
-          justify-center
-          text-white
-        "
-      >
-        <div class="text-center max-w-xs px-6">
-
-          <h1 class="text-3xl font-extrabold mb-4">
-            Halo, Teman!
-          </h1>
-
-          <p class="text-sm leading-relaxed mb-10 text-gray-300">
-            Daftarkan diri Anda dan mulai gunakan layanan kami segera
-          </p>
-
-          <button
-            class="
-              border-2 border-white
-              px-10 py-3
-              rounded-full
-              font-semibold
-              tracking-wide
-              hover:bg-white
-              hover:text-gray-900
-              active:scale-[0.97]
-              transition-all
-            "
-          >
-            SIGN UP
+        <div class="flex justify-between items-center pt-10">
+          <button class="text-[10px] text-white font-bold hover:underline decoration-1 underline-offset-4">
+            REGISTER
           </button>
-
+          <span class="text-zinc-800 text-[10px]">VER. 1.0.44</span>
         </div>
-      </div>
 
+      </div>
     </div>
-
+    
   </div>
 </ion-content>

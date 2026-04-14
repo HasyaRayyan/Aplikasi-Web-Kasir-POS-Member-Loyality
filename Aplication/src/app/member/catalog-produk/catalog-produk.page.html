@@ -1,0 +1,144 @@
+<ion-header class="ion-no-border shadow-none">
+  <ion-toolbar class="[--background:rgba(255,255,255,0.8)] backdrop-blur-xl border-b border-slate-100/50">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home" text="" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="text-[19px] font-[850] text-slate-900 tracking-[-0.5px]">Katalog Produk</ion-title>
+    <ion-buttons slot="end">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center mr-2 text-emerald-600 bg-emerald-50 active:scale-90 transition-all">
+        <ion-icon name="search-outline" class="text-xl"></ion-icon>
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
+  
+  <div class="bg-white/80 backdrop-blur-md px-5 pb-4 pt-1 border-b border-slate-100/50">
+    <div class="bg-slate-50 rounded-2xl flex items-center px-4 py-2 border border-slate-100 group focus-within:border-emerald-500/30 focus-within:bg-white transition-all">
+      <ion-icon name="search" class="text-slate-400 mr-3 text-lg group-focus-within:text-emerald-500"></ion-icon>
+      <input type="text" 
+             placeholder="Cari kopi favorit Anda..." 
+             (input)="handleSearch($event)"
+             class="bg-transparent border-none outline-none w-full text-sm font-bold text-slate-700 placeholder:text-slate-400">
+    </div>
+
+    <!-- CATEGORY FILTER BAR -->
+    <div class="mt-4 flex overflow-x-auto hide-scrollbar gap-2 pb-1">
+      <!-- Loading Categories -->
+      <ng-container *ngIf="loadingCategories">
+        <div *ngFor="let i of [1,2,3,4]" class="flex-shrink-0 w-20 h-7 bg-slate-100 rounded-full animate-pulse border border-slate-50"></div>
+      </ng-container>
+
+      <ng-container *ngIf="!loadingCategories">
+        <button 
+          (click)="selectCategory('all')" 
+          [class.bg-emerald-500]="selectedCategoryId === 'all'"
+          [class.text-white]="selectedCategoryId === 'all'"
+          [class.border-emerald-500]="selectedCategoryId === 'all'"
+          [class.bg-white]="selectedCategoryId !== 'all'"
+          [class.text-slate-500]="selectedCategoryId !== 'all'"
+          [class.border-slate-200]="selectedCategoryId !== 'all'"
+          class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black tracking-wide border transition-all shadow-sm">
+          SEMUA
+        </button>
+        
+        <button 
+          *ngFor="let cat of categories"
+          (click)="selectCategory(cat.id)"
+          [class.bg-emerald-500]="selectedCategoryId === cat.id"
+          [class.text-white]="selectedCategoryId === cat.id"
+          [class.border-emerald-500]="selectedCategoryId === cat.id"
+          [class.bg-white]="selectedCategoryId !== cat.id"
+          [class.text-slate-500]="selectedCategoryId !== cat.id"
+          [class.border-slate-200]="selectedCategoryId !== cat.id"
+          class="flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-black tracking-wide border transition-all shadow-sm">
+          {{ cat.category_name | uppercase }}
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="[--background:#f8fafc]">
+  
+  <div class="px-5 pt-8 pb-32 max-w-screen-xl mx-auto">
+    
+    <!-- HEADER INTRO -->
+    <div class="mb-10 px-1">
+      <div class="text-[10px] font-black text-emerald-500 uppercase tracking-[3px] mb-1.5">Collection 2026</div>
+      <h2 class="text-3xl font-black text-slate-900 tracking-tighter leading-none mb-3">Our Menu</h2>
+      <p class="text-xs text-slate-400 font-bold leading-relaxed max-w-[280px]">Temukan cita rasa kopi terbaik kami yang disiapkan khusus untuk Anda.</p>
+    </div>
+
+    <!-- SKELETON LOADING -->
+    <div *ngIf="loadingProducts" class="grid grid-cols-2 gap-5">
+      <div *ngFor="let s of [1,2,3,4,5,6]" class="bg-white rounded-[32px] p-4 border border-slate-100 shadow-sm">
+        <div class="w-full aspect-square rounded-2xl bg-slate-50 mb-4 animate-pulse"></div>
+        <div class="h-4 w-3/4 bg-slate-50 rounded-full mb-2 animate-pulse"></div>
+        <div class="h-3 w-1/2 bg-slate-50 rounded-full animate-pulse"></div>
+      </div>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div *ngIf="!loadingProducts && products.length > 0" class="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      
+      <div *ngFor="let p of products; let i = index" 
+           class="relative group animate-fade-in"
+           [style.animation-delay]="(i * 0.05) + 's'">
+        
+        <!-- NEW BADGE -->
+        <div *ngIf="p.isNew" 
+             class="absolute -top-1 -right-1 z-20 bg-emerald-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-emerald-500/40 ring-4 ring-white animate-bounce pointer-events-none">
+          NEW
+        </div>
+
+        <div class="bg-white rounded-[32px] p-4 border border-slate-100 shadow-[0_8px_20px_-10px_rgba(15,23,42,0.03)] hover:shadow-xl hover:border-emerald-100 active:scale-[0.97] transition-all duration-300 overflow-hidden cursor-pointer">
+          
+          <!-- IMAGE WRAPPER -->
+          <div class="relative w-full aspect-square rounded-[24px] bg-slate-50 overflow-hidden mb-5">
+            <img *ngIf="p.imageUrl; else noImg" 
+                 [src]="p.imageUrl" 
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                 alt="product">
+            <ng-template #noImg>
+              <div class="w-full h-full flex flex-col items-center justify-center text-slate-200">
+                <ion-icon name="image-outline" class="text-4xl mb-2"></ion-icon>
+                <span class="text-[8px] font-black uppercase tracking-widest text-slate-300">No Preview</span>
+              </div>
+            </ng-template>
+
+            <!-- QUICK REDEEM OVERLAY -->
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center" *ngIf="p.is_exchangeable">
+               <div class="bg-emerald-500 text-white text-[8px] font-black px-4 py-2 rounded-xl shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">REDEEM NOW</div>
+            </div>
+          </div>
+
+          <!-- INFO -->
+          <div class="px-1 text-center">
+            <h4 class="text-sm font-black text-slate-900 mb-1 leading-tight line-clamp-1">{{ p.product_name }}</h4>
+            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-3">TheFourtyFour Premium</div>
+            
+            <div class="flex flex-col items-center gap-1">
+              <span class="text-[15px] font-black text-slate-900 tracking-tighter leading-none">Rp {{ formatPrice(p.price) }}</span>
+              <div *ngIf="p.is_exchangeable" class="flex items-center gap-1.5 mt-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100/50">
+                 <ion-icon name="flash" class="text-[10px] text-emerald-500"></ion-icon>
+                 <span class="text-[10px] font-black text-emerald-600">{{ p.point_price }} <small class="text-[8px] opacity-50">XP</small></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loadingProducts && products.length === 0" class="flex flex-col items-center justify-center py-24 px-10 text-center">
+      <div class="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-3xl text-slate-200 mb-6 border border-slate-100">
+        <ion-icon name="search-outline"></ion-icon>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 mb-2">Produk Tidak Ditemukan</h3>
+      <p class="text-xs text-slate-400 font-bold leading-relaxed">Coba kata kunci lain atau bersihkan pecarian Anda.</p>
+    </div>
+
+  </div>
+
+</ion-content>

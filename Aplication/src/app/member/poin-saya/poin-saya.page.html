@@ -1,0 +1,87 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Poin Saya</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <div *ngIf="loading" class="loading-state">
+    <ion-spinner name="crescent" color="success"></ion-spinner>
+    <p>Memuat data poin...</p>
+  </div>
+
+  <div *ngIf="!loading" class="wrapper">
+    
+    <!-- CARD TOTAL POIN -->
+    <div class="points-hero-card">
+      <div class="card-pattern"></div>
+      <div class="hero-top">
+        <ion-icon name="star-half-outline" class="hero-icon"></ion-icon>
+        <span>Total Poin Aktif</span>
+      </div>
+      <div class="hero-center">
+        <h1>{{ totalPoints | number }}</h1>
+        <span class="pts-label">PTS</span>
+      </div>
+      <div class="hero-bottom">
+        <p>Gunakan poin Anda untuk menukarkan berbagai hadiah menarik di menu Tukar Poin.</p>
+      </div>
+    </div>
+
+    <!-- HISTORY SECTION -->
+    <div class="history-section">
+      <div class="section-header">
+        <h3>Riwayat Perolehan Poin</h3>
+      </div>
+
+      <div *ngIf="history.length === 0" class="empty-state">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <p>Belum ada riwayat perolehan poin.</p>
+      </div>
+
+      <div class="history-list" *ngIf="history.length > 0">
+        <div class="history-card" *ngFor="let item of history">
+          
+          <div class="card-header">
+            <div class="invoice">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>{{ item.invoice_code }}</span>
+            </div>
+            <div class="points-badge" [ngClass]="item.points > 0 ? 'points-plus' : 'points-minus'">
+              {{ item.points > 0 ? '+' : '' }}{{ item.points }} Pts
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="timeline-row">
+              <div class="timeline-item">
+                <small>Diperoleh</small>
+                <p>{{ formatDate(item.created_at) }}</p>
+              </div>
+              <div class="timeline-divider">
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+              </div>
+              <div class="timeline-item right">
+                <small>Kadaluwarsa</small>
+                <p [class.text-danger]="item.status === 'expired'">{{ formatDate(item.expired_at) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <span class="status-chip" [ngClass]="getStatusClass(item.status)">
+              {{ getStatusName(item.status) }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>

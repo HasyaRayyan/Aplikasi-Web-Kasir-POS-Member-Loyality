@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Redeem Point</ion-title>
+    <div slot="end" class="points-badge">
+      <ion-icon name="star" color="warning"></ion-icon>
+      <span>{{ userPoints.toLocaleString() }}</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <div class="promo-banner">
+    <div class="banner-content">
+      <h2>Tukar Poinmu!</h2>
+      <p>Dapatkan penawaran menarik hanya dengan poin loyalitas Anda.</p>
+    </div>
+    <div class="banner-icon">
+      <ion-icon name="gift-outline"></ion-icon>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h3>Pilihan Hadiah</h3>
+    <p>Pilih barang yang ingin Anda ambil di toko.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Memuat produk...</p>
+  </div>
+
+  <div *ngIf="!loading && products.length === 0" class="empty-state">
+    <ion-icon name="cube-outline"></ion-icon>
+    <p>Belum ada produk yang tersedia untuk ditukar poin saat ini.</p>
+  </div>
+
+  <div class="product-grid" *ngIf="!loading && products.length > 0">
+    <div class="product-card" *ngFor="let p of products">
+      <div class="product-image">
+        <img *ngIf="p.image_url; else noImg" [src]="p.image_url" alt="product">
+        <ng-template #noImg>
+          <div class="no-image-placeholder">
+            <ion-icon name="image-outline"></ion-icon>
+          </div>
+        </ng-template>
+      </div>
+      
+      <div class="product-info">
+        <h4>{{ p.product_name }}</h4>
+        <div class="point-requirement">
+          <ion-icon name="star"></ion-icon>
+          <span class="pts">{{ p.point_price }}</span>
+          <span class="lbl">Poin</span>
+        </div>
+        
+        <button class="redeem-action-btn" (click)="confirmRedeem(p)" [disabled]="userPoints < p.point_price">
+          <ion-icon name="gift-outline"></ion-icon>
+          {{ userPoints < p.point_price ? 'Poin Kurang' : 'Tukar Sekarang' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

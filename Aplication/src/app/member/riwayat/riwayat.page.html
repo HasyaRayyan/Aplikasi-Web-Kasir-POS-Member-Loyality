@@ -1,0 +1,227 @@
+<ion-header class="ion-no-border shadow-none">
+  <ion-toolbar class="[--background:rgba(255,255,255,0.8)] backdrop-blur-xl border-b border-slate-100/50">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/member/home" text="" color="dark"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="text-[19px] font-[850] text-slate-900 tracking-[-0.5px]">Riwayat Transaksi</ion-title>
+    <ion-buttons slot="end">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center mr-2 text-slate-400 bg-slate-50 border border-slate-100/50">
+        <ion-icon name="analytics-outline" class="text-xl"></ion-icon>
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="[--background:#f8fafc]">
+  
+  <!-- MAIN RESPONSIVE GRID -->
+  <div class="px-5 pb-32 max-w-screen-xl mx-auto lg:pt-10">
+    
+    <div class="lg:grid lg:grid-cols-12 lg:gap-11 lg:items-start">
+      
+      <!-- LEFT COLUMN: SIDEBAR DASHBOARD -->
+      <div class="lg:col-span-4 lg:sticky lg:top-10 flex flex-col gap-7">
+        
+        <!-- LUXURY SUMMARY DASHBOARD (Midnight Slate & Emerald) -->
+        <div class="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-[35px] p-8 text-white overflow-hidden shadow-2xl shadow-slate-900/20 active:scale-[0.98] transition-all group">
+          <div class="absolute -top-1/2 -right-1/4 w-72 h-72 bg-emerald-500/20 blur-[60px] group-hover:bg-emerald-400/30 transition-all z-0"></div>
+          
+          <div class="relative z-10 flex flex-col sm:flex-row lg:flex-col items-start gap-7 lg:gap-9">
+            <div class="w-full">
+              <small class="text-[10px] uppercase text-white/40 font-black tracking-[2px] block mb-2">Total Pengeluaran</small>
+              <h2 class="text-3xl font-black tracking-[-1px] leading-tight">Rp {{ formatPrice(totalSpent) }}</h2>
+            </div>
+            
+            <div class="w-full h-px bg-white/5 sm:hidden lg:block"></div>
+            <div class="hidden sm:block lg:hidden w-px h-14 bg-white/5 mx-4"></div>
+
+            <div class="w-full">
+              <small class="text-[10px] uppercase text-white/40 font-black tracking-[2px] block mb-2">Poin Terkumpul</small>
+              <div class="flex items-baseline gap-2">
+                <h2 class="text-3xl font-black tracking-[-1px] leading-tight text-emerald-400">+{{ formatPoints(earnedPoints) }}</h2>
+                <span class="text-xs font-black text-emerald-500/50 uppercase">XP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="relative z-10 flex items-center gap-2 pt-6 mt-7 border-t border-white/5 text-[11px] font-bold text-white/30" *ngIf="startDate || endDate">
+            <ion-icon name="time-outline" class="text-sm text-emerald-500/50"></ion-icon>
+            <span class="tracking-wide uppercase">Periode: {{ startDate ? formatDateShort(startDate) : 'Awal' }} — {{ endDate ? formatDateShort(endDate) : 'Sekarang' }}</span>
+          </div>
+        </div>
+
+        <!-- SMART FILTER PRESETS -->
+        <div class="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+          <div class="text-[10px] font-black text-slate-300 uppercase tracking-[2px] mb-5 ml-1">Kategori Transaksi</div>
+          <div class="flex flex-wrap lg:flex-col gap-2.5">
+            <button (click)="clearFilter()" 
+                 class="flex-1 lg:flex-none px-6 py-3.5 rounded-2xl text-xs font-black transition-all border outline-none"
+                 [ngClass]="(!startDate && !endDate) ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-it-900/20' : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100 active:scale-95'">
+              Semua Riwayat
+            </button>
+            <div class="grid grid-cols-2 gap-2.5 lg:grid-cols-1">
+              <button (click)="setToday()" class="px-6 py-3.5 rounded-2xl text-xs font-black bg-slate-50 text-slate-600 border border-transparent hover:border-slate-200 transition-all outline-none active:scale-95">Hari Ini</button>
+              <button (click)="setLast7Days()" class="px-6 py-3.5 rounded-2xl text-xs font-black bg-slate-50 text-slate-600 border border-transparent hover:border-slate-200 transition-all outline-none active:scale-95">7 Hari</button>
+            </div>
+            <button (click)="setThisMonth()" class="px-6 py-3.5 rounded-2xl text-xs font-black bg-slate-50 text-slate-600 border border-transparent hover:border-slate-200 transition-all outline-none active:scale-95">Bulan Ini</button>
+            
+            <button id="open-range-picker" class="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm hover:bg-emerald-100 active:scale-95 transition-all outline-none">
+              <ion-icon name="calendar-number" class="text-base text-emerald-500"></ion-icon>
+              Pilih Rentang Waktu
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: MAIN CONTENT -->
+      <div class="lg:col-span-8 mt-10 lg:mt-0">
+        
+        <!-- LOADING -->
+        <div *ngIf="loading" class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="w-11 h-11 border-4 border-slate-100 border-t-emerald-500 rounded-full animate-spin mb-6"></div>
+          <p class="text-[11px] font-black text-slate-300 uppercase tracking-widest">Menganalisis Riwayat...</p>
+        </div>
+
+        <!-- EMPTY -->
+        <div *ngIf="!loading && riwayat.length === 0" class="flex flex-col items-center justify-center py-20 px-10 text-center bg-white rounded-[35px] border border-slate-100 shadow-sm">
+          <div class="w-20 h-20 rounded-[30px] bg-slate-50 flex items-center justify-center text-4xl text-slate-200 mb-7">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <h3 class="text-xl font-black text-slate-900 mb-2">Riwayat Kosong</h3>
+          <p class="text-sm text-slate-400 font-bold leading-relaxed mb-8">Tidak ada transaksi ditemukan untuk filter ini.</p>
+          <button (click)="clearFilter()" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs tracking-[1px] shadow-xl active:scale-95 transition-all">
+            RESET FILTER
+          </button>
+        </div>
+
+        <!-- TRANSACTION LIST -->
+        <div class="history-stack" *ngIf="!loading && riwayat.length > 0">
+          <div class="flex items-center justify-between mb-6 px-1 lg:mt-2">
+            <div class="text-[11px] font-black text-slate-400 uppercase tracking-[2px]">Log Transaksi</div>
+            <div class="text-[10px] font-black text-slate-300 bg-white border border-slate-100 px-4 py-1.5 rounded-full uppercase tracking-wider">{{ riwayat.length }} Items</div>
+          </div>
+          
+          <ion-accordion-group class="space-y-4">
+            <ion-accordion *ngFor="let trx of riwayat; let i = index" 
+                           class="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-[0_4px_12px_rgba(15,23,42,0.02)] hover:shadow-xl hover:border-slate-200 transition-all outline-none"
+                           [style.animation-name]="'slide-up'"
+                           [style.animation-fill-mode]="'both'"
+                           [style.animation-duration]="'0.6s'"
+                           [style.animation-delay]="(i * 0.05) + 's'">
+              
+              <!-- CARD HEADER -->
+              <ion-item slot="header" class="[--padding-start:20px] [--padding-end:20px] [--inner-padding-end:0] [--min-height:95px] [--background:white] riwayat-item">
+                <div slot="start" 
+                     class="w-[52px] h-[52px] rounded-[18px] flex items-center justify-center mr-4 transition-all"
+                     [ngClass]="trx.payment_method === 'cash' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400'">
+                  <ion-icon [name]="trx.payment_method === 'cash' ? 'wallet' : 'card'" class="text-[22px]"></ion-icon>
+                </div>
+                
+                <ion-label class="m-0">
+                  <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-[15px] font-black text-slate-900 tracking-tight leading-none">{{ trx.invoice_code || 'TRX-8291' }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[9px] font-black text-slate-800 bg-slate-100 px-2 py-0.5 rounded uppercase tracking-wider">{{ trx.payment_method }}</span>
+                    <span class="text-[11px] text-slate-400 font-bold">{{ formatDateShort(trx.created_at) }}</span>
+                  </div>
+                </ion-label>
+
+                <div slot="end" class="text-right ml-4">
+                  <div class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full inline-block mb-1" *ngIf="trx.total_point > 0">+{{ trx.total_point }} XP</div>
+                  <div class="text-[17px] font-black text-slate-900 tracking-tighter leading-none">Rp {{ formatPrice(trx.total_price) }}</div>
+                </div>
+              </ion-item>
+
+              <!-- CARD CONTENT -->
+              <div slot="content" class="px-6 pb-6 bg-white border-t border-slate-50">
+                <div class="pt-5 flex flex-col gap-4">
+                  <div class="text-[10px] font-black text-slate-300 uppercase tracking-[2px] px-1">Detail Belanja</div>
+                  <div class="flex flex-col gap-4 px-1 pb-4">
+                    <div class="flex justify-between items-start" *ngFor="let item of trx.items">
+                      <div class="flex-1">
+                        <p class="text-sm font-bold text-slate-800 mb-0.5 leading-tight">{{ item.product_name }}</p>
+                        <small class="text-xs text-slate-400 font-bold uppercase tracking-wide">{{ item.qty }}x • Rp {{ formatPrice(item.price) }}</small>
+                      </div>
+                      <div class="text-sm font-black text-slate-900 ml-4">Rp {{ formatPrice(item.subtotal) }}</div>
+                    </div>
+                  </div>
+
+                  <div class="p-5 bg-slate-50/50 rounded-[24px] border border-slate-100 flex flex-col gap-3">
+                    <div class="flex justify-between items-center px-1">
+                      <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Waktu</span>
+                      <p class="text-xs text-slate-800 font-black">{{ formatDateLong(trx.created_at) }}</p>
+                    </div>
+                    <div class="flex justify-between items-center px-1 mt-1">
+                      <span class="text-sm text-slate-900 font-black">Total Pembayaran</span>
+                      <p class="text-lg text-emerald-600 font-black tracking-tighter">Rp {{ formatPrice(trx.total_price) }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </ion-accordion>
+          </ion-accordion-group>
+        </div>
+
+      </div>
+    
+    </div>
+
+  </div>
+
+  <!-- CUSTOM RANGE MODAL (Midnight Style) -->
+  <ion-modal trigger="open-range-picker" [initialBreakpoint]="0.65" [breakpoints]="[0, 0.65, 0.9]" class="lg:[--width:480px]">
+    <ng-template>
+      <ion-content class="ion-padding bg-white">
+        <div class="w-12 h-1.5 bg-slate-100 rounded-full mx-auto my-4 mb-8"></div>
+        <div class="text-center mb-10">
+          <h3 class="text-xl font-black text-slate-900 tracking-tighter mb-2">Tentukan Periode</h3>
+          <p class="text-sm text-slate-400 font-bold">Filter transaksi berdasarkan rentang waktu</p>
+        </div>
+
+        <div class="flex flex-col gap-4 mb-12">
+          <div class="w-full bg-slate-50 rounded-[28px] p-5 border border-slate-100 flex items-center justify-between shadow-sm active:bg-emerald-50 transition-all">
+            <div class="flex items-center gap-3">
+              <ion-icon name="calendar-outline" class="text-xl text-emerald-500 bg-emerald-50 p-2.5 rounded-xl shadow-md shadow-emerald-500/10"></ion-icon>
+              <label class="text-[9px] font-black text-slate-800 tracking-[2px] block">DARI TANGGAL</label>
+            </div>
+            <ion-datetime-button datetime="datetime-start" class="[--color:#0f172a] font-black text-base"></ion-datetime-button>
+          </div>
+
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime id="datetime-start" presentation="date" (ionChange)="setStartDate($event)"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+          
+          <div class="w-11 h-11 rounded-full bg-white border border-slate-100 flex items-center justify-center -my-8 z-10 text-slate-400 shadow-xl mx-auto ring-8 ring-white">
+            <ion-icon name="chevron-down" class="text-lg"></ion-icon>
+          </div>
+
+          <div class="w-full bg-slate-50 rounded-[28px] p-5 border border-slate-100 flex items-center justify-between shadow-sm active:bg-emerald-50 transition-all">
+            <div class="flex items-center gap-3">
+              <ion-icon name="flag-outline" class="text-xl text-emerald-500 bg-emerald-50 p-2.5 rounded-xl shadow-md shadow-emerald-500/10"></ion-icon>
+              <label class="text-[9px] font-black text-slate-800 tracking-[2px] block">HINGGA TANGGAL</label>
+            </div>
+            <ion-datetime-button datetime="datetime-end" class="[--color:#0f172a] font-black text-base"></ion-datetime-button>
+          </div>
+
+          <ion-modal [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime id="datetime-end" presentation="date" (ionChange)="setEndDate($event)"></ion-datetime>
+            </ng-template>
+          </ion-modal>
+        </div>
+
+        <button (click)="applyFilter()" class="w-full h-16 rounded-2xl bg-slate-900 text-white text-sm font-black tracking-[1px] shadow-2xl shadow-slate-900/10 active:scale-[0.97] transition-all flex items-center justify-center gap-2">
+          TERAPKAN FILTER
+        </button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
+t>
+

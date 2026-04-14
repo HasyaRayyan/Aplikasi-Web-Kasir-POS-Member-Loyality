@@ -39,518 +39,327 @@
             [(ngModel)]="search"
             (ngModelChange)="onSearchChange()"
             placeholder="Cari produk atau kode..."
-            class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl
-                  text-gray-900 placeholder-gray-400
+            class="w-full pl-12 pr-4 py-3.5
+                  bg-gray-50 border border-gray-200
+                  rounded-2xl text-gray-900
+                  placeholder-gray-400
                   focus:bg-white focus:border-gray-900
-                  focus:ring-2 focus:ring-gray-200
-                  hover:border-gray-400 shadow-sm outline-none transition">
-
+                  focus:ring-4 focus:ring-gray-200/60
+                  hover:border-gray-400
+                  shadow-sm outline-none transition">
         </div>
 
         <!-- CATEGORY TABS -->
-      <div class="flex gap-2 overflow-x-auto pb-2 category-scroll">
-
-          <button
-            (click)="setCategory('')"
-            [ngClass]="category === '' 
-              ? 'bg-gray-900 text-white' 
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+        <div class="flex gap-2 overflow-x-auto pb-2 category-scroll">
+          <button (click)="setCategory('')"
+            [ngClass]="category === '' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
             class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
             Semua
           </button>
-
-          <button
-            *ngFor="let c of categories"
-            (click)="setCategory(c.id)"
-            [ngClass]="category == c.id 
-              ? 'bg-gray-900 text-white' 
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+          <button *ngFor="let c of categories" (click)="setCategory(c.id)"
+            [ngClass]="category == c.id ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
             class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">
             {{ c.category_name }}
           </button>
-
         </div>
       </div>
 
-<!-- LIST PRODUK HABIS -->
-<div *ngIf="outOfStockProducts.length > 0"
-     class="bg-gradient-to-r from-red-50 to-white
-            border border-red-200 rounded-2xl
-            p-4 shadow-sm space-y-3">
-
-  <!-- HEADER -->
-  <div class="flex items-center justify-between">
-
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 flex items-center justify-center
-                  rounded-lg bg-red-100 text-red-600">
-        <ion-icon name="alert-outline" class="text-lg"></ion-icon>
+      <!-- LIST PRODUK HABIS -->
+      <div *ngIf="outOfStockProducts.length > 0"
+           class="bg-gradient-to-r from-red-50 to-white
+                  border border-red-200 rounded-2xl
+                  p-4 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600">
+              <ion-icon name="alert-outline" class="text-lg"></ion-icon>
+            </div>
+            <div>
+              <p class="font-semibold text-red-700 text-sm">Produk Habis</p>
+              <p class="text-[11px] text-red-500">{{ outOfStockProducts.length }} produk Sold</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          <div *ngFor="let p of outOfStockProducts"
+               class="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-red-200 text-xs font-semibold text-red-700 whitespace-nowrap shadow-sm hover:bg-red-50 transition">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            {{ p.product_name }}
+          </div>
+        </div>
       </div>
-
-      <div>
-        <p class="font-semibold text-red-700 text-sm">
-          Produk Habis
-        </p>
-        <p class="text-[11px] text-red-500">
-          {{ outOfStockProducts.length }} produk Sold
-        </p>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- LIST CHIP -->
-  <div class="flex gap-2 overflow-x-auto pb-1">
-
-    <div *ngFor="let p of outOfStockProducts"
-         class="group flex items-center gap-2
-                px-3 py-1.5 rounded-full
-                bg-white border border-red-200
-                text-xs font-semibold text-red-700
-                whitespace-nowrap shadow-sm
-                hover:bg-red-50 transition">
-
-      <span class="w-2 h-2 rounded-full bg-red-500"></span>
-      {{ p.product_name }}
-
-    </div>
-
-  </div>
-</div>
-
 
       <!-- GRID PRODUK -->
-      <div *ngIf="!loading"
-           class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-
-<div *ngFor="let p of products"
-  (click)="p.qty > 0 && addToCart(p)"
-  [ngClass]="p.qty == 0
-    ? 'bg-gray-50 border-red-300 opacity-70 cursor-not-allowed'
-    : 'cursor-pointer hover:border-gray-900 hover:shadow-md'"
-  class="group border rounded-xl p-3 transition relative">
-
-
-
-<!-- IMAGE -->
-<div class="w-full aspect-square bg-gray-50 rounded-lg
-            flex items-center justify-center mb-2 overflow-hidden relative">
-
-  <img *ngIf="p.image"
-    [src]="'http://localhost:8080/uploads/products/' + p.image"
-    class="w-full h-full object-cover">
-
-  <span *ngIf="!p.image"
-    class="text-2xl font-bold text-gray-400">
-    {{ p.product_name[0] }}
-  </span>
-
-  <!-- OVERLAY HABIS -->
-  <div *ngIf="p.qty == 0"
-       class="absolute inset-0 bg-black/40
-              flex items-center justify-center">
-    <span class="bg-red-600 text-white text-xs font-bold
-                 px-3 py-1 rounded-md shadow">
-      PRODUK HABIS
-    </span>
-  </div>
-
-</div>
-
-
-  <!-- NAMA -->
-  <h3 class="font-medium text-gray-900 text-sm line-clamp-1">
-    {{ p.product_name }}
-  </h3>
-
-  <!-- CATEGORY + STOK -->
-  <div class="flex justify-between items-center mt-1 text-[11px] text-gray-500">
-    <span>{{ p.category_name }}</span>
-    <span class="font-semibold">Stok {{ p.qty }}</span>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="flex items-center justify-between mt-2">
-
-    <!-- HARGA -->
-    <p class="font-bold text-gray-900 text-sm">
-      Rp {{ formatPrice(p.price) }}
-    </p>
-
-    <!-- ADD BUTTON -->
-    <div class="w-7 h-7 flex items-center justify-center
-                rounded-md bg-gray-900 text-white
-                group-hover:bg-black transition">
-      <ion-icon name="add-outline" class="text-sm"></ion-icon>
-    </div>
-
-  </div>
-
-</div>
-
+      <div *ngIf="!loading" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+        <div *ngFor="let p of products" (click)="p.qty > 0 && addToCart(p)"
+          [ngClass]="p.qty == 0 ? 'bg-gray-50 border-red-300 opacity-70 cursor-not-allowed' : 'cursor-pointer hover:border-gray-900 hover:shadow-md'"
+          class="group border rounded-xl p-3 transition relative">
+          <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center mb-2 overflow-hidden relative">
+            <img *ngIf="p.image" loading="lazy" [src]="'http://localhost:8080/uploads/products/' + p.image" class="w-full h-full object-cover">
+            <span *ngIf="!p.image" class="text-2xl font-bold text-gray-400">{{ p.product_name[0] }}</span>
+            <div *ngIf="p.qty == 0" class="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow">PRODUK HABIS</span>
+            </div>
+          </div>
+          <h3 class="font-medium text-gray-900 text-sm line-clamp-1">{{ p.product_name }}</h3>
+          <div class="flex justify-between items-center mt-1 text-[11px] text-gray-500">
+            <span>{{ p.category_name }}</span>
+            <span class="font-semibold">Stok {{ p.qty }}</span>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div>
+              <p class="font-bold text-gray-900 text-sm">Rp {{ formatPrice(p.price) }}</p>
+              <p *ngIf="p.point_price > 0" class="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
+                <ion-icon name="star"></ion-icon>
+                {{ p.point_price }} Poin
+              </p>
+            </div>
+            <div class="w-7 h-7 flex items-center justify-center rounded-md bg-gray-900 text-white group-hover:bg-black transition">
+              <ion-icon name="add-outline" class="text-sm"></ion-icon>
+            </div>
+          </div>
+        </div>
       </div>
 
-<!-- PAGINATION -->
-<div class="flex justify-center mt-8">
-
-  <div class="flex items-center gap-3 bg-white border border-gray-200
-              rounded-xl px-4 py-2 shadow-sm">
-
-    <!-- PREV -->
-    <button
-      (click)="prevPage()"
-      [disabled]="page <= 1"
-      class="w-9 h-9 flex items-center justify-center
-             rounded-lg border border-gray-950
-             hover:bg-gray-100 transition
-             disabled:opacity-40 disabled:cursor-not-allowed">
-
-      <ion-icon name="chevron-back-outline" class="text-lg text-black"></ion-icon>
-    </button>
-
-    <!-- PAGE INFO -->
-    <div class="px-3 py-1 rounded-lg bg-gray-900 text-white
-                font-semibold text-sm tracking-wide">
-      {{ page }} / {{ totalPages }}
-    </div>
-
-    <!-- NEXT -->
-    <button
-      (click)="nextPage()"
-      [disabled]="page >= totalPages"
-      class="w-9 h-9 flex items-center justify-center
-             rounded-lg border border-gray-950
-             hover:bg-gray-100 transition
-             disabled:opacity-40 disabled:cursor-not-allowed">
-
-      <ion-icon name="chevron-forward-outline" class="text-lg text-black"></ion-icon>
-    </button>
-
-  </div>
-
-</div>
-
-
+      <!-- PAGINATION -->
+      <div class="flex justify-center mt-8">
+        <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-2 shadow-sm">
+          <button (click)="prevPage()" [disabled]="page <= 1" class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-950 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            <ion-icon name="chevron-back-outline" class="text-lg text-black"></ion-icon>
+          </button>
+          <div class="px-3 py-1 rounded-lg bg-gray-900 text-white font-semibold text-sm tracking-wide">{{ page }} / {{ totalPages }}</div>
+          <button (click)="nextPage()" [disabled]="page >= totalPages" class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-950 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            <ion-icon name="chevron-forward-outline" class="text-lg text-black"></ion-icon>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- ================= RIGHT : CART ================= -->
-   <div class="bg-white border border-gray-200 rounded-3xl shadow-md
-            p-5 flex flex-col sticky top-6 h-[85vh]">
+    <div class="bg-white border border-gray-200 rounded-3xl shadow-md p-5 flex flex-col sticky top-6 h-[calc(100vh-40px)]">
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="font-bold text-lg text-gray-900 flex items-center gap-2">
-      <ion-icon name="cart-outline" class="text-xl"></ion-icon>
-      Keranjang
-    </h2>
-
-    <button (click)="clearCart()" [disabled]="cart.length===0"
-      class="flex items-center gap-1 px-3 py-1 text-xs
-             border border-gray-300 text-gray-800 rounded-lg
-             hover:bg-gray-100 disabled:opacity-40 transition">
-      <ion-icon name="trash-outline"></ion-icon>
-      Reset
-    </button>
-  </div>
-
-  <!-- EMPTY -->
-  <div *ngIf="cart.length === 0"
-       class="flex flex-col items-center justify-center text-gray-500 flex-1">
-    <ion-icon name="cart-outline" class="text-6xl mb-3"></ion-icon>
-    <p class="text-sm">Keranjang kosong</p>
-  </div>
-
-  <!-- ITEMS -->
-  <div *ngIf="cart.length > 0"
-       class="space-y-4 flex-1 overflow-y-auto pr-1">
-
-<div *ngFor="let c of cart" class="border-b pb-4 space-y-2">
-
-  <!-- PRODUK -->
-  <div class="grid grid-cols-[1fr_120px] items-start gap-2">
-
-    <p class="font-semibold text-gray-900 text-sm">
-      {{ c.product_name }}
-    </p>
-
-    <div class="text-right flex justify-end items-center gap-2">
-      <span class="font-semibold text-gray-900 text-sm">
-        Rp {{ formatPrice(c.price) }}
-      </span>
-      <button (click)="removeItem(c)" class="text-gray-400 hover:text-red-600">
-        <ion-icon name="trash-outline"></ion-icon>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- ADDONS -->
-  <div *ngIf="c.selectedAddons?.length"
-       class="space-y-1 text-xs text-gray-700">
-
-    <div *ngFor="let a of c.selectedAddons"
-         class="grid grid-cols-[1fr_120px] gap-2">
-
-      <span>
-        {{ a.addon_name }} x{{ c.qty }}
-      </span>
-
-      <span class="text-right">
-        +Rp {{ formatPrice(a.addon_price * c.qty) }}
-      </span>
-
-    </div>
-  </div>
-
-  <!-- BOTTOM -->
-  <div class="grid grid-cols-[1fr_120px] items-center gap-2 mt-1">
-
-    <!-- QTY -->
-    <div class="flex items-center gap-2">
-      <button (click)="minusQty(c)" class="w-7 h-7 border rounded-md text-black">−</button>
-      <span class="font-semibold text-sm text-black">{{ c.qty }}</span>
-      <button (click)="plusQty(c)" class="w-7 h-7 border rounded-md text-black">+</button>
-    </div>
-
-    <!-- SUBTOTAL -->
-    <span class="text-right font-bold text-gray-900 text-sm">
-      Rp {{ formatPrice(c.subtotal) }}
-    </span>
-
-  </div>
-
-</div>
-
-
-
-  </div>
-
-<!-- FOOTER -->
-<div *ngIf="cart.length > 0"
-     class="border-t pt-4 mt-4 space-y-4">
-
-  <!-- TOTAL -->
-  <div class="flex justify-between text-lg font-bold text-gray-900">
-    <span>Total</span>
-    <span>Rp {{ formatPrice(total) }}</span>
-  </div>
-
-  <!-- PELANGGAN -->
-  <div class="space-y-3">
-
-    <p class="text-xs font-semibold text-gray-700">
-      Data Pelanggan (Opsional)
-    </p>
-
-    <!-- NAMA -->
-    <div class="space-y-1">
-      <label class="text-[11px] text-gray-600">Nama</label>
-      <input
-        [(ngModel)]="customerName"
-        [disabled]="memberData"
-        placeholder="Nama pelanggan..."
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
-               disabled:bg-gray-100 disabled:text-gray-500">
-    </div>
-
-    <!-- TELEPON -->
-    <div class="space-y-1">
-      <label class="text-[11px] text-gray-600">Nomor Telepon Member</label>
-
-      <div class="flex gap-2">
-        <input
-          [(ngModel)]="memberPhone"
-          placeholder="08xxxxxxxx"
-          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-
-        <button
-          (click)="searchMember()"
-          class="px-3 py-2 text-sm bg-gray-900 text-white rounded-lg">
-          Cari
-        </button>
-      </div>
-    </div>
-
-    <!-- RESULT MEMBER -->
-    <div *ngIf="memberData"
-         class="border border-gray-200 rounded-lg p-3 text-xs text-gray-800 space-y-1 bg-gray-50">
-
-      <div class="flex justify-between">
-        <span><b>Member:</b> {{ memberData.name }}</span>
-        <button
-          (click)="clearMember()"
-          class="text-red-600 text-[11px]">
-          Hapus
+      <!-- HEADER -->
+      <div class="flex items-center justify-between mb-4 shrink-0">
+        <h2 class="font-bold text-lg text-gray-900 flex items-center gap-2">
+          <ion-icon name="cart-outline" class="text-xl"></ion-icon>
+          Keranjang
+        </h2>
+        <button (click)="clearCart()" [disabled]="cart.length===0" class="flex items-center gap-1 px-3 py-1 text-xs border border-gray-300 text-gray-800 rounded-lg hover:bg-gray-100 disabled:opacity-40 transition">
+          <ion-icon name="trash-outline"></ion-icon>
+          Reset
         </button>
       </div>
 
-      <p><b>Level:</b> {{ memberData.membership_level }}</p>
-      <p><b>Poin:</b> {{ memberData.total_points }}</p>
-    </div>
-
-  </div>
-
-  <!-- BUTTON BAYAR -->
-  <button
-    (click)="processTransaction()"
-    class="w-full py-3 rounded-xl bg-gray-900 text-white
-           font-semibold hover:bg-black transition">
-    <ion-icon name="card-outline" class="mr-2"></ion-icon>
-    Proses Transaksi
-  </button>
-
-</div>
-
-
-
-</div>
-
-
-  </div>
-</div>
-<!-- MODAL ADDON -->
-<div *ngIf="showAddonModal"
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm 
-         flex items-center justify-center z-50 p-4">
-
-  <div class="bg-white rounded-3xl w-full max-w-md 
-              shadow-2xl overflow-hidden animate-fade-in">
-
-    <!-- HEADER -->
-    <div class="px-6 py-5 border-b bg-gradient-to-r from-gray-50 to-white">
-
-      <div class="flex items-start justify-between">
-
-        <!-- TITLE -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 flex items-center justify-center
-                      rounded-xl bg-gray-900 text-white shadow">
-            <ion-icon name="add-outline" class="text-xl"></ion-icon>
+      <!-- MIDDLE SECTION -->
+      <div class="flex-1 overflow-y-auto pr-1 min-h-0 space-y-6 custom-scroll">
+        <div *ngIf="cart.length === 0" class="py-10 flex flex-col items-center justify-center text-center space-y-3 opacity-60">
+          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+            <ion-icon name="cart-outline" class="text-3xl text-gray-300"></ion-icon>
           </div>
+          <p class="text-xs text-gray-400 max-w-[180px] leading-relaxed">Pilih menu dari layar sebelah kiri untuk mengisi keranjang.</p>
+        </div>
 
-          <div>
-            <h2 class="font-bold text-lg text-gray-900">
-              Pilih Addon
-            </h2>
-            <p class="text-xs text-gray-500 line-clamp-1">
-              {{ selectedProduct?.product_name }}
-            </p>
+        <div *ngIf="cart.length > 0" class="space-y-4">
+          <div *ngFor="let c of cart" class="border-b border-gray-100 pb-4 space-y-2">
+            <div class="grid grid-cols-[1fr_110px] items-start gap-2">
+              <p class="font-semibold text-gray-900 text-sm leading-tight">{{ c.product_name }}</p>
+              <div class="text-right flex justify-end items-center gap-2">
+                <span class="font-semibold text-gray-900 text-sm">Rp {{ formatPrice(c.subtotal) }}</span>
+                <button (click)="removeItem(c)" class="text-gray-300 hover:text-red-600 transition">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="c.selectedAddons?.length" class="space-y-1 text-xs text-gray-500">
+              <div *ngFor="let a of c.selectedAddons" class="flex justify-between gap-2">
+                <span class="truncate">+ {{ a.addon_name }} x{{ c.qty }}</span>
+                <span class="shrink-0">+Rp {{ formatPrice(a.addon_price * c.qty) }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <button (click)="minusQty(c)" class="w-7 h-7 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition">−</button>
+              <span class="font-bold text-sm text-gray-900 min-w-[20px] text-center">{{ c.qty }}</span>
+              <button (click)="plusQty(c)" class="w-7 h-7 border border-gray-200 rounded-md text-gray-700 hover:bg-gray-50 transition">+</button>
+            </div>
           </div>
         </div>
 
-        <!-- CLOSE -->
-        <button
-          (click)="closeAddonModal()"
-          class="w-9 h-9 flex items-center justify-center
-                 rounded-lg hover:bg-gray-100 transition">
-          <ion-icon name="close-outline"
-            class="text-xl text-gray-700"></ion-icon>
+        <!-- MEMBER SECTION -->
+        <div class="pt-2 border-t border-gray-100">
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <p class="text-[11px] font-bold text-gray-900 uppercase tracking-wider">Data Pelanggan (Opsional)</p>
+              <div class="space-y-3">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold text-gray-500 uppercase">Nama</label>
+                  <input [(ngModel)]="customerName" (ngModelChange)="onCustomerNameChange()" [disabled]="memberData" placeholder="Nama pelanggan..." class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-gray-900 outline-none transition disabled:bg-gray-50">
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-semibold text-gray-500 uppercase">Nomor HP Member</label>
+                  <div class="flex gap-2">
+                    <input [(ngModel)]="memberPhone" placeholder="08xxxxxxxx" class="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-gray-900 outline-none transition">
+                    <button (click)="searchMember()" [disabled]="memberLoading" class="px-3 bg-gray-900 text-white rounded-xl text-xs font-bold transition hover:bg-black active:scale-95">
+                      <span *ngIf="!memberLoading">Cari</span>
+                      <ion-spinner *ngIf="memberLoading" name="dots" size="small"></ion-spinner>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="memberData" class="bg-gray-900 text-white rounded-2xl p-4 shadow-lg space-y-3 relative overflow-hidden">
+              <div class="relative z-10">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Membership Card</p>
+                    <h3 class="font-bold text-base leading-tight">{{ memberData.name }}</h3>
+                  </div>
+                  <button (click)="clearMember()" class="text-white/60 hover:text-white p-1">
+                    <ion-icon name="close-circle" class="text-xl"></ion-icon>
+                  </button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-yellow-400 text-gray-900 rounded text-[9px] font-black uppercase">{{ memberData.membership_level }}</span>
+                  <span class="text-[10px] text-gray-400">Pts: {{ formatPrice(memberData.active_points) }}</span>
+                </div>
+              </div>
+              <div class="absolute -right-4 -bottom-4 opacity-10">
+                <ion-icon name="card" class="text-8xl"></ion-icon>
+              </div>
+            </div>
+
+            <!-- REDEMPTION LIST -->
+            <div *ngIf="memberData && redemptions.length > 0" class="space-y-3">
+              <div class="flex items-center justify-between">
+                <p class="text-[10px] font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1">
+                  <ion-icon name="gift-outline"></ion-icon> Antrean Barang (Redeem)
+                </p>
+                <span class="bg-amber-100 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">{{ redemptions.length }} Item</span>
+              </div>
+              <div class="space-y-2">
+                <div *ngFor="let r of redemptions" class="bg-white border-l-4 border-amber-400 border border-gray-200 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                  <div class="min-w-0 flex-1 pr-2">
+                    <p class="font-bold text-gray-900 text-[11px] truncate">{{ r.product_name }}</p>
+                    <p class="text-[9px] text-gray-500 mt-0.5">{{ r.redemption_code }} • <span class="text-amber-600 font-semibold">{{ r.expired_at | date:'dd MMM, HH:mm' }}</span></p>
+                  </div>
+                  <button (click)="claimItem(r)" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition active:scale-95 shadow-sm">Klaim</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="border-t border-gray-100 pt-4 mt-auto space-y-4 shrink-0 bg-white">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-bold text-gray-500">Total Tagihan</span>
+          <span class="text-xl font-black text-gray-900">Rp {{ formatPrice(total) }}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button (click)="paymentMethod='cash'" [ngClass]="paymentMethod==='cash' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'" class="py-2.5 rounded-xl text-xs font-bold transition shadow-sm">Cash</button>
+          <button (click)="paymentMethod='qris'" [ngClass]="paymentMethod==='qris' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'" class="py-2.5 rounded-xl text-xs font-bold transition shadow-sm">QRIS</button>
+          <button (click)="paymentMethod='transfer'" [ngClass]="paymentMethod==='transfer' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'" class="py-2.5 rounded-xl text-xs font-bold transition shadow-sm">Bank</button>
+        </div>
+        <div *ngIf="paymentMethod === 'cash'" class="bg-gray-50 rounded-2xl p-4 space-y-3">
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Uang Pelanggan</label>
+            <input type="number" [(ngModel)]="cashPaid" (ngModelChange)="calculateChange()" placeholder="0" class="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:border-gray-900 text-lg font-bold text-gray-900 outline-none transition">
+          </div>
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-[11px] font-semibold text-gray-500">Kembalian</span>
+            <span class="font-bold text-sm" [ngClass]="cashPaid < total ? 'text-red-500' : 'text-green-600'">Rp {{ formatPrice(change) }}</span>
+          </div>
+        </div>
+        <div *ngIf="memberData && pointRule && cart.length > 0" class="bg-green-50 rounded-xl p-3 flex justify-between items-center border border-green-100">
+          <div class="flex items-center gap-2">
+            <ion-icon name="sparkles" class="text-green-600"></ion-icon>
+            <span class="text-[10px] font-bold text-green-700 uppercase">Poin Didapat</span>
+          </div>
+          <span class="text-sm font-black text-green-600">+{{ estimatedPoint }} Poin</span>
+        </div>
+        <button (click)="openPaymentModal()" [disabled]="cart.length === 0 || (paymentMethod==='cash' && cashPaid < total)" 
+          class="w-full py-4 rounded-2xl bg-gray-900 text-white font-bold text-sm shadow-xl active:scale-95 transition-all disabled:opacity-30 disabled:grayscale">
+          <div class="flex items-center justify-center gap-2">
+            <ion-icon name="receipt-outline" class="text-lg"></ion-icon>
+            <span>Proses Transaksi</span>
+          </div>
         </button>
-
       </div>
     </div>
-
-    <!-- LIST ADDON -->
-    <div class="p-5 space-y-3 max-h-72 overflow-y-auto">
-
-<div *ngFor="let group of selectedProduct?.addons" class="space-y-2">
-
-  <!-- GROUP TITLE -->
-  <div class="flex justify-between items-center">
-    <p class="font-semibold text-gray-800 text-sm">
-      {{ group.group_name }}
-    </p>
-
-    <span class="text-[11px] text-gray-500">
-      {{ group.selection_type === 'single' ? 'Pilih 1' : 'Boleh banyak' }}
-    </span>
   </div>
 
-  <!-- ITEMS -->
-  <div class="space-y-2">
-
-    <div *ngFor="let a of group.items"
-      (click)="toggleTempAddon(group, a)"
-      [ngClass]="isTempAddonSelected(group, a) 
-        ? 'border-gray-900 bg-gray-50 shadow-sm' 
-        : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'"
-      class="flex justify-between items-center 
-             border rounded-xl px-4 py-3 
-             cursor-pointer transition">
-
-      <div class="flex items-center gap-3">
-
-        <!-- ICON -->
-        <div class="w-6 h-6 flex items-center justify-center
-                    rounded-md border"
-          [ngClass]="isTempAddonSelected(group, a)
-            ? 'bg-gray-900 text-white border-gray-900'
-            : 'border-gray-300 text-gray-400'">
-
-          <ion-icon
-            [name]="group.selection_type === 'single'
-              ? 'radio-button-on-outline'
-              : 'checkbox-outline'">
-          </ion-icon>
-
+  <!-- MODAL ADDON -->
+  <div *ngIf="showAddonModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in">
+      <div class="px-6 py-5 border-b bg-gradient-to-r from-gray-50 to-white">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-900 text-white shadow"><ion-icon name="add-outline" class="text-xl"></ion-icon></div>
+            <div>
+              <h2 class="font-bold text-lg text-gray-900">Pilih Addon</h2>
+              <p class="text-xs text-gray-500 line-clamp-1">{{ selectedProduct?.product_name }}</p>
+            </div>
+          </div>
+          <button (click)="closeAddonModal()" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"><ion-icon name="close-outline" class="text-xl text-gray-700"></ion-icon></button>
         </div>
-
-        <div>
-          <p class="font-medium text-gray-900 text-sm">
-            {{ a.addon_name }}
-          </p>
-
-          <p class="text-[11px]"
-            [ngClass]="a.qty == 0 ? 'text-red-500' : 'text-gray-500'">
-            Stok {{ a.qty }}
-          </p>
-        </div>
-
       </div>
-
-      <span class="font-bold text-gray-900 text-sm">
-        +Rp {{ formatPrice(a.addon_price) }}
-      </span>
-
+      <div class="p-5 space-y-3 max-h-72 overflow-y-auto">
+        <div *ngFor="let group of selectedProduct?.addons" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <p class="font-semibold text-gray-800 text-sm">{{ group.group_name }}</p>
+              <span *ngIf="group.is_required" class="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-bold">WAJIB</span>
+            </div>
+            <span class="text-[11px] text-gray-500">{{ group.selection_type === 'single' ? 'Pilih 1' : 'Boleh banyak' }}</span>
+          </div>
+          <div class="space-y-2">
+            <div *ngFor="let a of group.items" (click)="toggleTempAddon(group, a)" [ngClass]="isTempAddonSelected(group, a) ? 'border-gray-900 bg-gray-50 shadow-sm' : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'" class="flex justify-between items-center border rounded-xl px-4 py-3 cursor-pointer transition">
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 flex items-center justify-center rounded-md border" [ngClass]="isTempAddonSelected(group, a) ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 text-gray-400'"><ion-icon [name]="group.selection_type === 'single' ? 'radio-button-on-outline' : 'checkbox-outline'"></ion-icon></div>
+                <div><p class="font-medium text-gray-900 text-sm">{{ a.addon_name }}</p><p class="text-[11px]" [ngClass]="a.qty == 0 ? 'text-red-500' : 'text-gray-500'">Stok {{ a.qty }}</p></div>
+              </div>
+              <div class="flex flex-col items-end"><span class="font-bold text-gray-900 text-sm">+Rp {{ formatPrice(a.addon_price) }}</span><span *ngIf="a.point_price > 0" class="text-[10px] font-bold text-amber-600">+ {{ a.point_price }} Poin</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 px-5 py-4 border-t bg-gray-50">
+        <button (click)="skipAddon()" class="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-800 font-semibold hover:bg-gray-100 transition">Tanpa Addon</button>
+        <button (click)="confirmAddon()" class="flex-1 py-2.5 rounded-xl bg-gray-900 text-white font-semibold shadow hover:bg-black transition">Tambahkan</button>
+      </div>
     </div>
-
   </div>
 
-</div>
-
-
+  <!-- MODAL PEMBAYARAN -->
+  <div *ngIf="showPaymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-xl p-6 space-y-4">
+      <h2 class="text-lg font-bold text-gray-900 text-center mb-2">Konfirmasi Pembayaran</h2>
+      <div class="max-h-52 overflow-y-auto space-y-3 py-3 border-y border-gray-100 custom-scroll pr-1">
+        <div *ngFor="let c of cart" class="flex gap-3 items-start text-sm text-gray-800 leading-tight">
+          <span class="font-bold text-gray-900">{{ c.qty }}x</span>
+          <div class="flex-1">
+            <p class="font-semibold text-gray-900">{{ c.product_name }}</p>
+            <div *ngIf="c.selectedAddons?.length" class="text-[11px] text-gray-500 mt-1 space-y-0.5"><p *ngFor="let a of c.selectedAddons">+ {{ a.addon_name }}</p></div>
+          </div>
+          <span class="font-medium text-right whitespace-nowrap">Rp {{ formatPrice(c.subtotal) }}</span>
+        </div>
+      </div>
+      <div class="flex justify-between font-semibold text-black pt-1"><span>Total</span><span>Rp {{ formatPrice(total) }}</span></div>
+      <div *ngIf="paymentMethod === 'cash'" class="space-y-2 text-sm text-black">
+        <div class="flex justify-between"><span>Uang Dibayar</span><span>Rp {{ formatPrice(cashPaid) }}</span></div>
+        <div class="flex justify-between font-bold text-black"><span>Kembalian</span><span>Rp {{ formatPrice(change) }}</span></div>
+      </div>
+      <div *ngIf="memberData && pointRule" class="flex justify-between font-bold text-green-600 text-sm py-2 border-t border-gray-100"><span>Poin Didapat</span><span>+{{ estimatedPoint }} Poin</span></div>
+      <div class="flex gap-3 pt-2">
+        <button (click)="showPaymentModal=false" class="flex-1 border border-gray-300 py-2 rounded-lg text-black">Batal</button>
+        <button (click)="confirmPayment()" class="flex-1 bg-gray-900 text-white py-2 rounded-lg">Download Struk</button>
+      </div>
     </div>
+  </div>
 
-    <!-- FOOTER -->
-    <div class="flex gap-3 px-5 py-4 border-t bg-gray-50">
-
-      <!-- TANPA ADDON -->
-      <button
-        (click)="skipAddon()"
-        class="flex-1 py-2.5 rounded-xl
-               border border-gray-300
-               text-gray-800 font-semibold
-               hover:bg-gray-100 transition">
-        Tanpa Addon
-      </button>
-
-      <!-- TAMBAHKAN -->
-      <button
-        (click)="confirmAddon()"
-        class="flex-1 py-2.5 rounded-xl
-               bg-gray-900 text-white font-semibold
-               shadow hover:bg-black transition">
-        Tambahkan
-      </button>
-
-    </div>
-
+  <!-- SUCCESS MODAL -->
+  <div *ngIf="showSuccessModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[999] animate-fade-in">
+    <ng-lottie [options]="lottieOptions" style="width:170px;height:170px;margin:auto"></ng-lottie>
   </div>
 </div>
-
-
-
-
-
-
-
