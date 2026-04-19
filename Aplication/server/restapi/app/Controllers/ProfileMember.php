@@ -32,26 +32,40 @@ class ProfileMember extends BaseController
         ]);
     }
 
-    /* ================= UPDATE PROFILE ================= */
+    /* ================= UPDATE PROFILE (Supports Image Upload) ================= */
     public function update($userId)
     {
-        $input = $this->request->getJSON(true);
+        // For Multipart, use getPost() instead of getJSON()
+        $name     = $this->request->getPost('name');
+        $email    = $this->request->getPost('email');
+        $phone    = $this->request->getPost('phone');
+        $username = $this->request->getPost('username');
+        
+        // Handle Image Upload
+        $image = $this->request->getFile('image');
+        $imageName = $this->request->getPost('old_image'); // Keep existing if no new one
 
-        if (!$input) {
+        if ($image && $image->isValid() && !$image->hasMoved()) {
+            $imageName = $image->getRandomName();
+            $image->move('uploads/profile/', $imageName);
+        }
+
+        if (!$name || !$username) {
             return $this->response->setJSON([
                 'status' => false,
-                'message' => 'No data received'
+                'message' => 'Nama & Username wajib diisi'
             ]);
         }
 
         $data = [
-            'name'     => $input['name'] ?? null,
-            'email'    => $input['email'] ?? null,
-            'phone'    => $input['phone'] ?? null,
-            'username' => $input['username'] ?? null, // ⬅️ WAJIB
+            'name'     => $name,
+            'email'    => $email,
+            'phone'    => $phone,
+            'username' => $username,
+            'image'    => $imageName
         ];
 
-        $updated = $this->model->updateProfile($userId, $data);
+        $updated = $this->model->update($userId, $data);
 
         return $this->response->setJSON([
             'status' => $updated ? true : false,

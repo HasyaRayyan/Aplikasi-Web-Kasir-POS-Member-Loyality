@@ -1,5 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  receiptOutline, searchOutline, alertOutline, star, 
+  addOutline, chevronBackOutline, chevronForwardOutline, 
+  cartOutline, trashOutline, closeCircle, giftOutline, 
+  closeOutline, radioButtonOnOutline, checkboxOutline,
+  personOutline, callOutline
+} from 'ionicons/icons';
+import { ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from 'src/app/services/product.service';
@@ -11,7 +22,10 @@ import { LottieComponent } from 'ngx-lottie';
   standalone: true,
   templateUrl: './kasir.page.html',
   styleUrls: ['./kasir.page.scss'],
-  imports: [IonicModule, CommonModule, FormsModule, LottieComponent]
+  imports: [
+    IonIcon, IonSpinner,
+    CommonModule, FormsModule, LottieComponent
+  ]
 })
 export class KasirPage implements OnInit {
 
@@ -63,7 +77,26 @@ export class KasirPage implements OnInit {
     private productService: ProductService, 
     private kasirService: KasirService,
     private toastCtrl: ToastController
-  ) {}
+  ) {
+    addIcons({ 
+      'receipt-outline': receiptOutline, 
+      'search-outline': searchOutline, 
+      'alert-outline': alertOutline, 
+      star, 
+      'add-outline': addOutline, 
+      'chevron-back-outline': chevronBackOutline, 
+      'chevron-forward-outline': chevronForwardOutline, 
+      'cart-outline': cartOutline, 
+      'trash-outline': trashOutline, 
+      'close-circle': closeCircle, 
+      'gift-outline': giftOutline, 
+      'close-outline': closeOutline, 
+      'radio-button-on-outline': radioButtonOnOutline, 
+      'checkbox-outline': checkboxOutline,
+      'person-outline': personOutline,
+      'call-outline': callOutline
+    });
+  }
 
   async showToast(msg: string, color: string = 'danger') {
     const t = await this.toastCtrl.create({

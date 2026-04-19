@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { refreshOutline, ribbon, chevronForward, cafeOutline, ticketOutline, bagHandleOutline, receiptOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { HttpClientModule } from '@angular/common/http';
 import { HomeService } from 'src/app/services/home.service';
 import { environment } from 'src/environments/environment';
 import { Router, RouterModule } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
-import { finalize } from 'rxjs';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +21,8 @@ import { finalize } from 'rxjs';
     IonIcon,
     HttpClientModule,
     RouterModule
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class HomePage implements OnInit {
 
@@ -27,12 +30,24 @@ export class HomePage implements OnInit {
   hasNotification: boolean = false;
 
   products: any[] = [];
+  banners: any[] = [];
   recentActivities: any[] = [];
 
   constructor(
     private homeService: HomeService,
     private router: Router
-  ) {}
+  ) {
+    addIcons({ 
+      'refresh-outline': refreshOutline, 
+      'ribbon': ribbon, 
+      'chevron-forward': chevronForward, 
+      'cafe-outline': cafeOutline, 
+      'ticket-outline': ticketOutline, 
+      'bag-handle-outline': bagHandleOutline, 
+      'receipt-outline': receiptOutline, 
+      'checkmark-circle-outline': checkmarkCircleOutline 
+    });
+  }
 
   ngOnInit() {
     this.loadHome();
@@ -48,7 +63,7 @@ export class HomePage implements OnInit {
     }
 
     this.homeService.getHome(Number(userId)).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log('HOME RES', res);
 
         if (!res.status) return;
@@ -58,9 +73,10 @@ export class HomePage implements OnInit {
         /* USER */
         this.user = {
           name: d.user?.name || 'Member',
+          image_url: d.user?.image_url || null,
           member_id: d.member?.member_id || '4444-0000-0000',
           member_level: (d.member?.membership_level || 'Silver').toUpperCase() + ' MEMBER',
-          total_point: Number(d.member?.active_points || 0),
+          total_point: Number(d.member?.lifetime_points || 0),
           lifetime_point: Number(d.member?.lifetime_points || 0)
         };
 
@@ -74,6 +90,14 @@ export class HomePage implements OnInit {
           image: p.image
             ? `${environment.apiBaseUrl}/uploads/products/${p.image}`
             : null
+        }));
+
+        /* BANNER */
+        this.banners = (d.banners || []).map((b: any) => ({
+          ...b,
+          image: b.image 
+            ? `${environment.apiBaseUrl}/uploads/banners/${b.image}`
+            : 'assets/img/default-banner.jpg'
         }));
 
         /* ACTIVITY */

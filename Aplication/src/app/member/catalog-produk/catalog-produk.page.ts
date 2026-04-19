@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { arrowBack, refreshOutline, searchOutline, cafeOutline, star } from 'ionicons/icons';
 import { environment } from 'src/environments/environment';
 import { RouterModule } from '@angular/router';
 import { ProductService, Product } from 'src/app/services/product.service';
@@ -13,9 +15,11 @@ import { CategoryService } from 'src/app/services/category.service';
   styleUrls: ['./catalog-produk.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, 
+    IonContent, 
     IonIcon,
-    CommonModule, FormsModule, RouterModule
+    CommonModule, 
+    FormsModule, 
+    RouterModule
   ]
 })
 export class CatalogProdukPage implements OnInit {
@@ -35,7 +39,15 @@ export class CatalogProdukPage implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService
-  ) {}
+  ) {
+    addIcons({ 
+      'arrow-back': arrowBack, 
+      'refresh-outline': refreshOutline, 
+      'search-outline': searchOutline, 
+      'cafe-outline': cafeOutline, 
+      'star': star 
+    });
+  }
 
   ngOnInit() {
     this.fetchCategories();
@@ -137,6 +149,10 @@ export class CatalogProdukPage implements OnInit {
 
   formatPrice(price: any) {
     return Number(price || 0).toLocaleString('id-ID');
+  }
+
+  goBack() {
+    window.history.back();
   }
 
 }

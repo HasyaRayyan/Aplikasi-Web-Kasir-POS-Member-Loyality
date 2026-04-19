@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner 
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  documents, search, folderOpen, receipt, 
+  chevronBack, chevronForward, close, cube 
+} from 'ionicons/icons';
 import { KasirService } from 'src/app/services/kasir.service';
 
 @Component({
@@ -9,7 +16,10 @@ import { KasirService } from 'src/app/services/kasir.service';
   templateUrl: './transaksi.page.html',
   styleUrls: ['./transaksi.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonIcon, IonSpinner,
+    CommonModule, FormsModule
+  ]
 })
 export class AdminTransaksiPage implements OnInit {
 
@@ -33,7 +43,18 @@ export class AdminTransaksiPage implements OnInit {
   // ===== SEARCH TIMER =====
   searchTimeout: any;
 
-  constructor(private kasirService: KasirService) {}
+  constructor(private kasirService: KasirService) {
+    addIcons({ 
+      'documents': documents, 
+      'search': search, 
+      'folder-open': folderOpen, 
+      'receipt': receipt, 
+      'chevron-back': chevronBack, 
+      'chevron-forward': chevronForward, 
+      'close': close, 
+      'cube': cube 
+    });
+  }
 
   ngOnInit() {
     this.loadData();

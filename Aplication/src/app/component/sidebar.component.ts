@@ -1,19 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, MenuController } from '@ionic/angular';
+import { 
+  IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, 
+  IonButton, IonList, IonListHeader, IonLabel, IonItem, 
+  IonMenu, IonMenuToggle 
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  gridOutline, cubeOutline, starOutline, peopleOutline, 
+  listOutline, receiptOutline, cashOutline, logOutOutline, 
+  chevronForwardOutline 
+} from 'ionicons/icons';
+import { MenuController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 
 import { MENU, MenuGroup } from '../configs/menu.config';
 import { AuthService } from '../services/auth.service';
-import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
-
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [
-    CommonModule,
-    IonicModule,
+    CommonModule, 
+    IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, 
+    IonButton, IonList, IonListHeader, IonLabel, IonItem, 
+    IonMenu, IonMenuToggle,
     RouterModule,
   ],
   templateUrl: './sidebar.component.html',
@@ -26,11 +37,24 @@ export class SidebarComponent implements OnInit {
   username = '';
   roleName = '';
   basePath = '';
+  loading = false;
 
   constructor(
     private authService: AuthService,
-    private menuCtrl: MenuController // ✅ PENTING
-  ) {}
+    private menuCtrl: MenuController
+  ) {
+    addIcons({ 
+      'grid-outline': gridOutline, 
+      'cube-outline': cubeOutline, 
+      'star-outline': starOutline, 
+      'people-outline': peopleOutline, 
+      'list-outline': listOutline, 
+      'receipt-outline': receiptOutline, 
+      'cash-outline': cashOutline, 
+      'log-out-outline': logOutOutline, 
+      'chevron-forward-outline': chevronForwardOutline 
+    });
+  }
 
   ngOnInit() {
     this.roleId = this.authService.getRole();
@@ -83,6 +107,5 @@ export class SidebarComponent implements OnInit {
     }
   }
 
-  loading = false;
 
 }

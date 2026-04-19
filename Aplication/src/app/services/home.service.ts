@@ -10,6 +10,8 @@ export interface HomeUser {
   name: string;
   email: string;
   phone: string;
+  image?: string;
+  image_url?: string;
 }
 
 export interface HomeMember {
@@ -34,7 +36,13 @@ export interface HomeProduct {
   image: string | null;
   price: string;
   point_price: number;
-  is_exchangeable: number;
+  is_exchangeable: string | number;
+}
+
+export interface HomeBanner {
+  id: number;
+  title: string;
+  image: string;
 }
 
 export interface HomeResponse {
@@ -44,6 +52,7 @@ export interface HomeResponse {
     member: HomeMember;
     recent_transactions: HomeTransaction[];
     products: HomeProduct[];
+    banners: HomeBanner[];
   };
 }
 
@@ -73,6 +82,8 @@ export interface ProfileUser {
   email: string;
   phone: string;
   username: string;
+  image?: string;
+  image_url?: string;
   created_at: string;
 }
 
@@ -161,6 +172,11 @@ export class HomeService {
 
   constructor(private http: HttpClient) {}
 
+  /* GET ALL PRODUCTS (FOR GUEST/ADMIN) */
+  getProducts(limit: number = 10): Observable<any> {
+    return this.http.get<any>(`${environment.apiBaseUrl}/api/products?limit=${limit}`);
+  }
+
   /* GET DATA HOME MEMBER */
   getHome(userId: number): Observable<HomeResponse> {
     return this.http.get<HomeResponse>(
@@ -182,11 +198,11 @@ export class HomeService {
     );
   }
 
-  /* UPDATE PROFILE */
-  updateProfile(userId: number, payload: UpdateProfilePayload) {
+  /* UPDATE PROFILE (FormData supports File upload) */
+  updateProfile(userId: number, formData: FormData) {
     return this.http.post(
       `${environment.apiBaseUrl}/api/profile/update/${userId}`,
-      payload
+      formData
     );
   }
 
@@ -196,6 +212,24 @@ export class HomeService {
       `${environment.apiBaseUrl}/api/profile/password/${userId}`,
       payload
     );
+  }
+
+  /* VERIFY CURRENT PASSWORD (Identity Challenge) */
+  verifyPassword(userId: number, password: string): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/api/auth/verify-password`, {
+      user_id: userId,
+      password: password
+    });
+  }
+
+  /* REQUEST RESET PASSWORD OTP */
+  requestResetOTP(phone: string): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/api/auth/reset-password/request`, { phone });
+  }
+
+  /* VERIFY RESET OTP & CHANGE PASSWORD */
+  commitResetPassword(payload: any): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/api/auth/reset-password/verify`, payload);
   }
 
   /* REDEEM PRODUCT */

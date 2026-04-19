@@ -1,36 +1,59 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
+import { 
+  IonContent, IonIcon, IonModal 
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  arrowBack, refreshOutline, star, giftOutline, 
+  cafeOutline, cubeOutline 
+} from 'ionicons/icons';
 import { HomeService } from 'src/app/services/home.service';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-redeem-point',
   templateUrl: './redeem-point.page.html',
   styleUrls: ['./redeem-point.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonContent, IonIcon, IonModal,
+    CommonModule, FormsModule, RouterModule
+  ]
 })
 export class RedeemPointPage implements OnInit {
-
+  Number = Number;
   products: any[] = [];
   loading: boolean = true;
   userPoints: number = 0;
+  
+  isModalOpen: boolean = false;
+  selectedProduct: any = null;
 
   constructor(
     private homeService: HomeService,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
     private router: Router
-  ) { }
-
-  ngOnInit() {
-    this.loadData();
+  ) { 
+    addIcons({ 
+      'arrow-back': arrowBack, 
+      'refresh-outline': refreshOutline, 
+      'star': star, 
+      'gift-outline': giftOutline, 
+      'cafe-outline': cafeOutline, 
+      'cube-outline': cubeOutline 
+    });
   }
 
-  loadData() {
+  ngOnInit() {
+    this.loadRedeemableProducts();
+  }
+
+  loadRedeemableProducts() {
     this.loading = true;
     const userId = Number(localStorage.getItem('user_id'));
 
@@ -61,24 +84,27 @@ export class RedeemPointPage implements OnInit {
     });
   }
 
-  async confirmRedeem(p: any) {
-    if (this.userPoints < p.point_price) {
+  confirmRedeem(p: any) {
+    if (this.Number(this.userPoints) < this.Number(p.point_price)) {
       this.showToast('Poin Anda tidak cukup', 'warning');
       return;
     }
+    this.selectedProduct = p;
+    this.isModalOpen = true;
+  }
 
-    const alert = await this.alertCtrl.create({
-      header: 'Tukar Poin',
-      message: `Yakin ingin menukar ${p.point_price} poin dengan <b>${p.product_name}</b>?`,
-      buttons: [
-        { text: 'Batal', role: 'cancel' },
-        { 
-          text: 'Tukar Sekarang', 
-          handler: () => this.redeem(p) 
-        }
-      ]
-    });
-    await alert.present();
+  closeModal() {
+    this.isModalOpen = false;
+    setTimeout(() => {
+      this.selectedProduct = null;
+    }, 300);
+  }
+
+  processRedeem() {
+    if (!this.selectedProduct) return;
+    const p = this.selectedProduct;
+    this.isModalOpen = false;
+    this.redeem(p);
   }
 
   redeem(p: any) {
@@ -87,7 +113,7 @@ export class RedeemPointPage implements OnInit {
       next: (res) => {
         if (res.success) {
           this.showToast('Penukaran Berhasil!', 'success');
-          this.loadData(); // refresh points & products
+          this.loadRedeemableProducts(); // refresh points & products
           // Navigate to Pesanan Saya
           this.router.navigate(['/member/pesanan-saya']);
         } else {

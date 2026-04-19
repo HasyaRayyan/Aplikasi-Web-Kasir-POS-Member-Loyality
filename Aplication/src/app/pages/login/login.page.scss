@@ -1,49 +1,271 @@
-/* Hilangkan semua dekorasi input ion-input */
-.input-plain {
-  --padding-start: 0px;
-  --padding-end: 0px;
-  --color: #ffffff;
-  --placeholder-color: #27272a;
-  --placeholder-opacity: 1;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #27272a; /* Garis tipis gelap */
-  min-height: 45px;
-  transition: border-color 0.4s ease;
+:host {
+  .auth-content {
+    --background: #ffffff;
+    font-family: 'Inter', sans-serif;
+  }
 }
 
-.input-plain:focus-within {
-  border-bottom-color: #ffffff; /* Garis berubah putih saat fokus */
+.auth-wrapper {
+  min-height: 100vh;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at top right, #f8fafc 0%, #ffffff 40%);
 }
 
-/* Tombol Putih Polos */
-.btn-plain {
-  height: 50px;
-  background: #ffffff;
-  color: #000000;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.2em;
+.nav-header {
+  padding-bottom: 2rem;
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    cursor: pointer;
+    &:active { transform: scale(0.9); }
+  }
+}
+
+.auth-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 450px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.5s ease-out;
+
+  .logo-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    
+    .brand-logo {
+      width: clamp(100px, 30vw, 150px);
+      height: auto;
+      aspect-ratio: 1;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+      animation: fadeInRotate 1s ease-out;
+    }
+  }
+
+  .title-section {
+    margin-bottom: 2.5rem;
+    text-align: center;
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 2.25rem);
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -1px;
+    }
+    p {
+      color: #64748b;
+      line-height: 1.6;
+      font-size: 1.1rem;
+      margin: 0 auto;
+      max-width: 90%;
+    }
+  }
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      background: #f8fafc;
+      border: 1.5px solid #f1f5f9;
+      border-radius: 16px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s;
+
+      ion-icon {
+        font-size: 1.5rem;
+        color: #94a3b8;
+      }
+
+      ion-input {
+        --padding-start: 0;
+        font-weight: 600;
+        color: #0f172a;
+        --placeholder-color: #94a3b8;
+        --placeholder-opacity: 0.7;
+      }
+
+      &:focus-within {
+        border-color: #0f172a;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
+        ion-icon { color: #0f172a; }
+      }
+    }
+  }
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -0.5rem;
+  a {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    &:hover { color: #0f172a; border-bottom: 2px solid #0f172a; }
+  }
+}
+
+.btn-primary {
+  margin-top: 1rem;
+  background: #0f172a;
+  color: #ffffff;
   border: none;
+  height: 60px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+
+  &:hover {
+    background: #334155;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
 }
 
-.btn-plain:hover:not(:disabled) {
-  opacity: 0.9;
+.auth-footer {
+  margin-top: 2.5rem;
+  text-align: center;
+  p {
+    color: #64748b;
+    font-size: 1rem;
+    .link {
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      &:hover { text-decoration: underline; }
+    }
+  }
 }
 
-.btn-plain:active:not(:disabled) {
-  transform: translateY(1px);
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-plain:disabled {
-  background: #18181b;
-  color: #3f3f46;
+@keyframes fadeInRotate {
+  from { 
+    opacity: 0; 
+    transform: scale(0.8) rotate(-10deg); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) rotate(0); 
+  }
 }
 
-/* Reset untuk mobile tap highlight */
-* {
-  -webkit-tap-highlight-color: transparent;
+/* ================= RESET PASSWORD MODAL ================= */
+ion-modal.auth-reset-modal {
+  --width: 90%;
+  --max-width: 420px;
+  --height: fit-content;
+  --border-radius: 32px;
+
+  &::part(content) { background: #fff; }
+
+  .modal-wrapper {
+    padding: 2.5rem 2rem;
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      h3 { font-size: 1.5rem; font-weight: 950; color: #000; margin: 0 0 0.5rem; letter-spacing: -1px; }
+      p { font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.4; }
+    }
+
+    .step-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+
+      .input-item {
+        label { display: block; font-size: 0.7rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.5rem; }
+        ion-input {
+          --background: #f8fafc;
+          --padding-start: 1rem;
+          --border-radius: 16px;
+          border: 1.5px solid #f1f5f9;
+          font-weight: 700;
+        }
+      }
+
+      .btn-action {
+        width: 100%;
+        padding: 1.25rem;
+        border-radius: 18px;
+        background: #10b981;
+        color: #fff;
+        font-weight: 900;
+        border: none;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        transition: all 0.2s;
+        &:active { transform: scale(0.98); opacity: 0.9; }
+      }
+
+      .resend-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #10b981; cursor: pointer; }
+    }
+
+    .btn-back {
+      width: 100%;
+      margin-top: 1.5rem;
+      background: transparent;
+      color: #94a3b8;
+      font-weight: 800;
+      border: none;
+    }
+  }
 }

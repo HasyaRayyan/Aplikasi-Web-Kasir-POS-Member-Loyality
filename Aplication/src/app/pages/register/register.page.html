@@ -1,157 +1,127 @@
-<ion-content
-  fullscreen
-  class="bg-white"
-  style="--background: #ededed;"
->
-  <div class="min-h-screen flex items-center justify-center px-4">
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-wrapper">
+    
+    <!-- BACK BUTTON -->
+    <div class="nav-header">
+      <button class="icon-btn" (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </div>
 
-    <div
-      class="
-        w-full
-        max-w-5xl
-        bg-white
-        rounded-3xl
-        shadow-2xl
-        flex
-        overflow-hidden
-        md:h-[620px]
-      "
-    >
+    <!-- MAIN CARD -->
+    <div class="auth-card">
+      
+      <!-- STEP 1: INPUT PHONE -->
+      <div *ngIf="currentStep === 1" class="step-container">
+        <!-- LOGO SECTION -->
+        <div class="logo-section">
+          <img src="assets/logo_thrift.png" alt="FourtyFourThrift Logo" class="brand-logo">
+        </div>
+        <div class="title-section">
+          <h1>Selamat Datang!</h1>
+          <p>Masukkan nomor WhatsApp atau HP kamu untuk memulai pendaftaran member.</p>
+        </div>
 
-      <!-- LEFT (REGISTER FORM) -->
-      <div class="w-full md:w-1/2 flex items-center justify-center py-10">
-        <div class="w-full max-w-sm text-center px-6">
-
-          <h2 class="text-xl font-semibold text-gray-800 mb-2">
-            Buat Akun Baru
-          </h2>
-
-          <p class="text-sm text-gray-500 mb-8">
-            Daftarkan diri Anda untuk mulai menggunakan aplikasi
-          </p>
-
-          <!-- NAMA -->
-          <div class="mb-4">
-            <ion-input
-              [(ngModel)]="form.name"
-              placeholder="Nama Lengkap"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
+        <div class="form-section">
+          <div class="input-group">
+            <label>Nomor Telepon</label>
+            <div class="input-wrapper">
+              <ion-icon name="call-outline"></ion-icon>
+              <ion-input 
+                type="tel" 
+                [(ngModel)]="form.phone" 
+                placeholder="Contoh: 08123456789"
+                (keyup.enter)="sendOtp()"
+              ></ion-input>
+            </div>
           </div>
 
-          <!-- USERNAME -->
-          <div class="mb-4">
-            <ion-input
-              [(ngModel)]="form.username"
-              placeholder="Username"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <!-- EMAIL -->
-          <div class="mb-4">
-            <ion-input
-              type="email"
-              [(ngModel)]="form.email"
-              placeholder="Email"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <!-- PHONE -->
-          <div class="mb-4">
-            <ion-input
-              type="tel"
-              [(ngModel)]="form.phone"
-              placeholder="No HP"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <!-- PASSWORD -->
-          <div class="mb-6">
-            <ion-input
-              type="password"
-              [(ngModel)]="form.password"
-              placeholder="Password"
-              class="bg-gray-100 rounded-full px-6 py-4 text-black"
-            ></ion-input>
-          </div>
-
-          <!-- BUTTON -->
-          <button
-            type="button"
-            (click)="register()"
-            class="
-              w-full
-              h-14
-              bg-gray-800
-              hover:bg-gray-900
-              rounded-full
-              text-white
-              font-semibold
-              transition
-            "
-          >
-            {{ loading ? 'Loading...' : 'SIGN UP' }}
+          <button class="btn-primary" [disabled]="loading" (click)="sendOtp()">
+            <span *ngIf="!loading">Lanjutkan</span>
+            <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
           </button>
-
-          <p class="text-xs text-gray-500 mt-6">
-            Sudah punya akun?
-            <span
-              class="text-gray-800 font-semibold cursor-pointer hover:underline"
-              routerLink="/login"
-            >
-              Login
-            </span>
-          </p>
-
         </div>
       </div>
 
-      <!-- RIGHT PANEL -->
-      <div
-        class="
-          hidden
-          md:flex
-          w-1/2
-          bg-gray-900
-          items-center
-          justify-center
-          text-white
-        "
-      >
-        <div class="text-center max-w-xs px-6">
+      <!-- STEP 2: VERIFY OTP -->
+      <div *ngIf="currentStep === 2" class="step-container">
+        <!-- LOGO SECTION -->
+        <div class="logo-section">
+          <img src="assets/logo_thrift.png" alt="FourtyFourThrift Logo" class="brand-logo">
+        </div>
+        <div class="title-section">
+          <h1>Verifikasi Kode</h1>
+          <p>Masukkan kode rahasia yang kami kirimkan ke nomor <b>{{ form.phone }}</b>.</p>
+        </div>
 
-          <h1 class="text-3xl font-extrabold mb-4">
-            Bergabung Sekarang!
-          </h1>
+        <div class="form-section">
+          <div class="input-group">
+            <label>Kode OTP (Cek Notif Toast)</label>
+            <div class="otp-wrapper">
+              <ion-input 
+                type="number" 
+                [(ngModel)]="form.otp" 
+                placeholder="----"
+                maxlength="4"
+                class="otp-input"
+                (keyup.enter)="verifyOtp()"
+              ></ion-input>
+            </div>
+          </div>
 
-          <p class="text-sm leading-relaxed mb-10 text-gray-300">
-            Buat akun untuk menikmati fitur lengkap dan kemudahan transaksi
-          </p>
-
-          <button
-            routerLink="/login"
-            class="
-              border-2 border-white
-              px-10 py-3
-              rounded-full
-              font-semibold
-              tracking-wide
-              hover:bg-white
-              hover:text-gray-900
-              active:scale-[0.97]
-              transition-all
-            "
-          >
-            SIGN IN
+          <button class="btn-primary" (click)="verifyOtp()">
+            Verifikasi Kode
           </button>
 
+          <p class="resend-text">Tidak terima kode? <span class="accent" (click)="sendOtp()">Kirim Ulang</span></p>
         </div>
+      </div>
+
+      <!-- STEP 3: COMPLETE BIODATA -->
+      <div *ngIf="currentStep === 3" class="step-container">
+        <!-- LOGO SECTION -->
+        <div class="logo-section">
+          <img src="assets/logo_thrift.png" alt="FourtyFourThrift Logo" class="brand-logo">
+        </div>
+        <div class="title-section">
+          <h1>Lengkapi Profil</h1>
+          <p>Sedikit lagi! Lengkapi data diri kamu untuk menikmati keuntungan member.</p>
+        </div>
+
+        <div class="form-section scrollable">
+          <div class="input-group">
+            <label>Nama Lengkap</label>
+            <div class="input-wrapper">
+              <ion-input [(ngModel)]="form.name" placeholder="Nama asli kamu"></ion-input>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Email (Opsional)</label>
+            <div class="input-wrapper">
+              <ion-input type="email" [(ngModel)]="form.email" placeholder="example@mail.com"></ion-input>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Kata Sandi</label>
+            <div class="input-wrapper">
+              <ion-input type="password" [(ngModel)]="form.password" placeholder="Buat sandi yang aman"></ion-input>
+            </div>
+          </div>
+
+          <button class="btn-primary" [disabled]="loading" (click)="register()">
+            <span *ngIf="!loading">Gabung Sekarang</span>
+            <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+          </button>
+        </div>
+      </div>
+
+      <!-- FOOTER LINKS -->
+      <div class="auth-footer" *ngIf="currentStep === 1">
+        <p>Sudah punya akun? <span class="link" routerLink="/login">Masuk di sini</span></p>
       </div>
 
     </div>
-
   </div>
 </ion-content>

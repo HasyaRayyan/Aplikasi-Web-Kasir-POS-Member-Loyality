@@ -1,120 +1,217 @@
 :host {
-  --ion-background-color: #f8fafc;
-}
-
-.header-toolbar {
-  --background: #ffffff;
-  --color: #0f172a;
-  font-weight: 700;
-  
-  ion-title {
-    font-size: 18px;
-    letter-spacing: -0.5px;
-  }
-
-  ion-back-button {
-    --color: #0f172a;
+  ion-content.order-content {
+    --background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
+.wrapper {
+  padding: 1.5rem;
+  padding-bottom: 5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  transition: max-width 0.3s ease;
+
+  @media (min-width: 768px) {
+    max-width: 800px;
+    padding: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    max-width: 1000px;
+  }
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+
+  @media (min-width: 768px) { margin-bottom: 3.5rem; }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+
+    .back-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #000;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+      @media (min-width: 768px) { width: 52px; height: 52px; font-size: 1.6rem; }
+      &:active { transform: scale(0.9); }
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #000;
+      margin: 0;
+      letter-spacing: -1px;
+      @media (min-width: 768px) { font-size: 2.2rem; }
+    }
+  }
+
+  .header-right {
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      @media (min-width: 768px) { width: 52px; height: 52px; border-radius: 16px; font-size: 1.6rem; }
+      &:active { transform: scale(0.9); background: #e2e8f0; }
+    }
+  }
+}
+
+/* ================= INFO CARD ================= */
 .info-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 16px;
-  margin-bottom: 24px;
-  color: #475569;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  background: #000;
+  border-radius: 24px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+  @media (min-width: 768px) { padding: 2rem; border-radius: 32px; }
 
   .info-content {
     display: flex;
+    gap: 1.25rem;
     align-items: flex-start;
-    gap: 12px;
 
-    ion-icon {
-      font-size: 24px;
-      margin-top: 2px;
-      color: #10b981;
+    .info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
     }
 
-    h4 {
-      margin: 0 0 4px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    p {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.5;
-      opacity: 0.9;
+    .info-text {
+      h4 {
+        margin: 0 0 0.35rem 0;
+        font-size: 1rem;
+        font-weight: 800;
+        @media (min-width: 768px) { font-size: 1.25rem; }
+      }
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: rgba(255,255,255,0.7);
+        @media (min-width: 768px) { font-size: 0.95rem; }
+        strong { color: #fff; }
+      }
     }
   }
 }
 
+/* ================= LIST & CARDS ================= */
 .redemption-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-bottom: 40px;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .redemption-card {
-  background: white;
-  border-radius: 20px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1.5px solid #f1f5f9;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+
+  @media (min-width: 1024px) {
+    &:hover {
+      transform: translateY(-5px);
+      border-color: #000;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+    }
+  }
 
   .card-header {
-    padding: 12px 16px;
-    background: #f8fafc;
+    padding: 1.25rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1.5px solid #f8fafc;
 
     .date {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 500;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
     }
   }
 
   .status-badge {
-    padding: 4px 10px;
+    padding: 0.35rem 0.75rem;
     border-radius: 8px;
-    font-size: 10px;
+    font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 
     &[data-status="pending"] {
-      background: #fef3c7;
-      color: #92400e;
+      background: #000;
+      color: #fff;
     }
     &[data-status="claimed"] {
-      background: #dcfce7;
-      color: #166534;
+      background: #f1f5f9;
+      color: #64748b;
     }
     &[data-status="expired"] {
-      background: #fee2e2;
-      color: #991b1b;
+      background: #f8fafc;
+      color: #cbd5e1;
+      text-decoration: line-through;
     }
   }
 
   .card-body {
-    padding: 16px;
+    padding: 1.5rem;
     display: flex;
-    gap: 16px;
+    gap: 1.25rem;
+    align-items: center;
 
     .product-thumb {
-      width: 70px;
-      height: 70px;
-      border-radius: 12px;
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
       overflow: hidden;
-      background: #f1f5f9;
+      background: #f8fafc;
       flex-shrink: 0;
+      @media (min-width: 768px) { width: 90px; height: 90px; }
 
       img {
         width: 100%;
@@ -128,7 +225,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 1.8rem;
         color: #cbd5e1;
       }
     }
@@ -137,82 +234,107 @@
       flex: 1;
 
       h3 {
-        margin: 0 0 6px;
-        font-size: 15px;
-        font-weight: 700;
-        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #000;
+        @media (min-width: 768px) { font-size: 1.15rem; }
       }
 
-      .points-used {
+      .points-row {
         display: flex;
         align-items: center;
-        gap: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #fbbf24;
-        margin-bottom: 8px;
-
-        ion-icon {
-          font-size: 14px;
-        }
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 0.75rem;
+        @media (min-width: 768px) { font-size: 0.9rem; }
+        
+        ion-icon { font-size: 1rem; }
       }
 
-      .expiry-info, .claim-info {
-        font-size: 11px;
-        color: #64748b;
-
-        .expiry-date, .claim-date {
+      .status-info {
+        small {
+          display: block;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 0.1rem;
+        }
+        p {
+          margin: 0;
+          font-size: 0.85rem;
           font-weight: 700;
-          color: #334155;
+          color: #000;
         }
+        &.claimed p { color: #94a3b8; }
       }
+    }
+
+    .card-arrow {
+      color: #cbd5e1;
+      font-size: 1.2rem;
     }
   }
 
   .card-footer {
-    padding: 12px 16px;
-    border-top: 1px dashed #e2e8f0;
-    background: #fcfdfe;
+    padding: 1rem 1.5rem;
+    background: #fcfcfc;
+    border-top: 1px dashed #f1f5f9;
 
-    .direct-claim-tip {
+    .instruction-tip {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #475569;
-      
-      ion-icon {
-        font-size: 16px;
-        color: #10b981;
-      }
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #000;
+
+      ion-icon { font-size: 1.1rem; }
     }
   }
 }
 
+/* ================= STATES ================= */
 .loading-state, .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
   text-align: center;
-  color: #64748b;
+  padding: 4rem 2rem;
 
-  ion-spinner {
-    margin-bottom: 16px;
-  }
+  ion-spinner { color: #000; margin-bottom: 1.5rem; }
 
-  ion-icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.1;
+  .empty-icon-box {
+    width: 100px;
+    height: 100px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: #cbd5e1;
+    font-size: 3rem;
   }
 
   p {
-    font-size: 14px;
-    max-width: 250px;
-    line-height: 1.6;
-    margin-bottom: 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+
+  .btn-primary {
+    background: #000;
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+    &:active { transform: scale(0.95); }
   }
 }

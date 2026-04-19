@@ -4,17 +4,24 @@ import { RoleGuard } from './guards/role-guard';
 
 export const routes: Routes = [
 
+  /* ================= GUEST / LANDING ================= */
+  {
+    path: 'guest',
+    loadComponent: () =>
+      import('./pages/guest/guest.page').then(m => m.GuestPage),
+  },
+
+  {
+    path: '',
+    redirectTo: 'guest',
+    pathMatch: 'full',
+  },
+
   /* ================= LOGIN ================= */
   {
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login.page').then(m => m.LoginPage),
-  },
-
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full',
   },
 
   /* ================= ADMIN ================= */
@@ -162,16 +169,14 @@ export const routes: Routes = [
       import('./pages/logout/logout.page').then(m => m.LogoutPage),
   },
 
-  /* ================= FALLBACK ================= */
-  {
-    path: '**',
-    redirectTo: 'login',
-  },
-
   {
     path: 'register',
     loadComponent: () => import('./pages/register/register.page').then( m => m.RegisterPage)
   },
 
-
+  /* ================= FALLBACK ================= */
+  {
+    path: '**',
+    redirectTo: 'guest',
+  },
 ];

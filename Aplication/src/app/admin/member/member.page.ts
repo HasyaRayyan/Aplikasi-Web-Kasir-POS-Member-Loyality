@@ -1,9 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner 
+} from '@ionic/angular/standalone';
+import { AlertController, ToastController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  addOutline, searchOutline, eyeOutline, createOutline, 
+  trashOutline, chevronBackOutline, chevronForwardOutline, 
+  closeOutline, personOutline
+} from 'ionicons/icons';
 import { UserService } from 'src/app/services/user.service';
-import { ToastController } from '@ionic/angular';
 
 
 @Component({
@@ -11,7 +19,10 @@ import { ToastController } from '@ionic/angular';
   templateUrl: './member.page.html',
   styleUrls: ['./member.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonIcon, IonSpinner,
+    CommonModule, FormsModule
+  ]
 })
 export class MemberPage implements OnInit {
 
@@ -22,31 +33,41 @@ export class MemberPage implements OnInit {
   page = 1;
   totalPages = 1;
 
+  searchTimeout: any;
+  newUser: any = {
+    role_id: null,
+    name: '',
+    email: '',
+    phone: '',
+    username: '',
+    password: '',
+    membership_level: 'Basic',
+    active_points: 0
+  };
+
+  roles: any[] = [];
   showModal = false;
   isEdit = false;
   editId: number | null = null;
 
-newUser: any = {
-  role_id: 'null',
-  name: '',
-  email: '',
-  phone: '',
-  username: '',
-  password: '',
-  membership_level: 'Basic',
-  total_points: 0
-};
-
-showDeleteAlert = false;
-deleteId: number | null = null;
-
-  roles: any[] = [];
-
 
 constructor(
   private userService: UserService,
-  private toastCtrl: ToastController
-) {}
+  private toastCtrl: ToastController,
+  private alertCtrl: AlertController
+) {
+  addIcons({ 
+    'add-outline': addOutline, 
+    'search-outline': searchOutline, 
+    'eye-outline': eyeOutline, 
+    'create-outline': createOutline, 
+    'trash-outline': trashOutline, 
+    'chevron-back-outline': chevronBackOutline, 
+    'chevron-forward-outline': chevronForwardOutline, 
+    'close-outline': closeOutline,
+    'person-outline': personOutline
+  });
+}
 
   ngOnInit() {
     this.loadData();
@@ -79,6 +100,17 @@ loadRoles() {
         this.totalPages = res.meta?.total_pages || 1;
         this.loading = false;
       });
+  }
+
+  onSearchChange() {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      this.page = 1;
+      this.loadData();
+    }, 500);
   }
 
   showDetailModal = false;
@@ -122,7 +154,7 @@ openAddModal() {
     username: '',
     password: '',
     membership_level: 'Basic',
-    total_points: 0
+    active_points: 0
   };
 }
 
@@ -166,36 +198,38 @@ openAddModal() {
   }
 
 
-  delete(id: number) {
-    this.deleteId = id;
-    this.showDeleteAlert = true;
-  }
-
-  executeDelete() {
-  if (!this.deleteId) return;
-
-  this.userService.deleteUser(this.deleteId)
-    .subscribe(() => {
-      this.addToast('User berhasil dihapus', 'success');
-      this.loadData();
-      this.showDeleteAlert = false;
-      this.deleteId = null;
+  async delete(id: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'Hapus User?',
+      message: 'Apakah Anda yakin ingin menghapus user ini secara permanen?',
+      cssClass: 'premium-alert',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          cssClass: 'alert-button-confirm',
+          handler: () => {
+            this.executeDelete(id);
+          }
+        }
+      ]
     });
-}
-
-deleteButtons = [
-  {
-    text: 'Batal',
-    role: 'cancel'
-  },
-  {
-    text: 'Hapus',
-    role: 'destructive',
-    handler: () => {
-      this.executeDelete();
-    }
+    await alert.present();
   }
-];
+
+  executeDelete(id: number) {
+    this.loading = true;
+    this.userService.deleteUser(id)
+      .subscribe(() => {
+        this.addToast('User berhasil dihapus', 'success');
+        this.loadData();
+      });
+  }
 
 
 

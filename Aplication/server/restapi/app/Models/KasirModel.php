@@ -162,8 +162,8 @@ class KasirModel extends Model
                     ", [$point, $point, $memberId]);
 
                     // 2. INSERT KE MEMBER POINT LEDGER (masa berlaku 1 tahun)
-                    $earned_date = date('Y-m-d');
-                    $expiry_date = date('Y-m-d', strtotime('+1 year'));
+                    $earned_date = date('Y-m-d H:i:s');
+                    $expiry_date = date('Y-m-d H:i:s', strtotime('+1 year'));
 
                     $this->db->table('member_point_ledger')->insert([
                         'member_id'      => $memberId,

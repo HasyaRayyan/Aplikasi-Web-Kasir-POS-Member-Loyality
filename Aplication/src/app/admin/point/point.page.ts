@@ -1,7 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner 
+} from '@ionic/angular/standalone';
+import { AlertController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { 
+  addOutline, searchOutline, createOutline, trashOutline, 
+  chevronBackOutline, chevronForwardOutline, starOutline, 
+  closeOutline 
+} from 'ionicons/icons';
 import { PointService } from 'src/app/services/point.service';
 
 @Component({
@@ -9,16 +18,15 @@ import { PointService } from 'src/app/services/point.service';
   templateUrl: './point.page.html',
   styleUrls: ['./point.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonIcon, IonSpinner,
+    CommonModule, FormsModule
+  ]
 })
 export class PointPage implements OnInit {
 
   rules: any[] = [];
   loading = false;
-
-
-  showDeleteAlert = false;
-deleteId: number | null = null;
 
 showSuccessAlert = false;
 successMessage = '';
@@ -40,7 +48,21 @@ successMessage = '';
     is_active: 1
   };
 
-  constructor(private pointService: PointService) {}
+  constructor(
+    private pointService: PointService,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({ 
+      'add-outline': addOutline, 
+      'search-outline': searchOutline, 
+      'create-outline': createOutline, 
+      'trash-outline': trashOutline, 
+      'chevron-back-outline': chevronBackOutline, 
+      'chevron-forward-outline': chevronForwardOutline, 
+      'star-outline': starOutline, 
+      'close-outline': closeOutline 
+    });
+  }
 
   ngOnInit() {
     this.loadData();
@@ -105,34 +127,36 @@ update() {
     });
 }
 
-deleteButtons = [
-  {
-    text: 'Batal',
-    role: 'cancel'
-  },
-  {
-    text: 'Hapus',
-    role: 'destructive',
-    handler: () => {
-      this.executeDelete();
-    }
-  }
-];
-
-delete(id: number) {
-  this.deleteId = id;
-  this.showDeleteAlert = true;
-}
-executeDelete() {
-  if (!this.deleteId) return;
-
-  this.pointService.deleteRule(this.deleteId)
-    .subscribe(() => {
-      this.loadData();
-      this.showDeleteAlert = false;
-      this.deleteId = null;
+  async delete(id: number) {
+    const alert = await this.alertCtrl.create({
+      header: 'Hapus Rule Point?',
+      message: 'Apakah Anda yakin ingin menghapus aturan poin ini secara permanen?',
+      cssClass: 'premium-alert',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          cssClass: 'alert-button-confirm',
+          handler: () => {
+             this.executeDelete(id);
+          }
+        }
+      ]
     });
-}
+    await alert.present();
+  }
+  executeDelete(id: number) {
+    this.loading = true;
+    this.pointService.deleteRule(id)
+      .subscribe(() => {
+        this.loadData();
+      });
+  }
 
 
   nextPage() {

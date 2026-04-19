@@ -1,11 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonAlert, IonSkeletonText
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  addOutline, searchOutline, createOutline, trashOutline, 
+  cubeOutline, eyeOutline, closeOutline, listOutline,
+  checkboxOutline, radioButtonOnOutline, chevronForwardOutline,
+  chevronBackOutline
+} from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
 import { ProductService, Product } from 'src/app/services/product.service';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { AlertController } from '@ionic/angular';
-
 
 export interface Addon {
   id: number;
@@ -21,7 +29,7 @@ export interface Addon {
   templateUrl: './produk.page.html',
   styleUrls: ['./produk.page.scss'],
   imports: [
-    IonicModule,
+    IonIcon, IonSkeletonText,
     CommonModule, FormsModule,
   ],
 })
@@ -41,10 +49,12 @@ addonTotal = 0;
 addonTotalPages = 0;
 
 search = '';
+categoryId = '';
 showAddModal = false;
 showDetailModal = false;
 detailProduct: any = null;
 categories: any[] = [];
+searchTimeout: any;
 
 newProduct: any = {
   product_code: '',
@@ -55,6 +65,7 @@ newProduct: any = {
   point_price: 0,
   qty: 0,
   is_active: 1,
+  is_exchangeable: 1,
   addons: []
   
 };
@@ -66,18 +77,37 @@ newProduct: any = {
   loading = true;
   loadingAddon = true;    // ⬅️ TAMBAH
 
-  constructor(private productService: ProductService, private alertCtrl: AlertController) {}
+  constructor(
+    private productService: ProductService, 
+    private alertCtrl: AlertController
+  ) {
+    addIcons({ 
+      'add-outline': addOutline, 
+      'search-outline': searchOutline, 
+      'create-outline': createOutline, 
+      'trash-outline': trashOutline, 
+      'cube-outline': cubeOutline, 
+      'eye-outline': eyeOutline, 
+      'close-outline': closeOutline, 
+      'list-outline': listOutline, 
+      'checkbox-outline': checkboxOutline, 
+      'radio-button-on-outline': radioButtonOnOutline,
+      'chevron-forward-outline': chevronForwardOutline,
+      'chevron-back-outline': chevronBackOutline
+    });
+  }
 
   ngOnInit() {
     this.loadData();
     this.loadAddons();   // ⬅️ PANGGIL
+    this.loadCategories(); // ⬅️ TAMBAH UNTUK FILTER
   }
 
 loadData() {
   this.loading = true;
 
   this.productService
-    .getProducts(this.page, this.limit, this.search)
+    .getProducts(this.page, this.limit, this.search, this.categoryId)
     .pipe(
       finalize(() => {
         this.loading = false; // langsung mati
@@ -93,6 +123,22 @@ loadData() {
         console.error('Gagal ambil produk:', err);
       }
     });
+}
+
+onSearchChange() {
+  if (this.searchTimeout) {
+    clearTimeout(this.searchTimeout);
+  }
+
+  this.searchTimeout = setTimeout(() => {
+    this.page = 1;
+    this.loadData();
+  }, 500);
+}
+
+onCategoryChange() {
+  this.page = 1;
+  this.loadData();
 }
 
 
@@ -139,6 +185,8 @@ prevPage() {
 
 
 openAddModal() {
+  this.isEdit = false;
+  this.editId = null;
   this.showAddModal = true;
   this.loadCategories();
 
@@ -152,6 +200,7 @@ openAddModal() {
     point_price: 0,
     qty: 0,
     is_active: 1,
+    is_exchangeable: 1,
     addons: []
   };
 
@@ -185,6 +234,8 @@ closeAddModal() {
 }
 
 saveProduct() {
+  if (!this.validateForm()) return;
+
   const formData = new FormData();
 
   formData.append('product_code', this.newProduct.product_code);
@@ -194,6 +245,7 @@ saveProduct() {
   formData.append('point_price', this.newProduct.point_price);
   formData.append('qty', this.newProduct.qty);
   formData.append('is_active', this.newProduct.is_active);
+  formData.append('is_exchangeable', this.newProduct.is_exchangeable);
   formData.append('addons', JSON.stringify(this.newProduct.addons));
 
   // FILE WAJIB DIPISAH
@@ -227,25 +279,28 @@ onFileChange(e: any) {
 
 async confirmDelete(id: string | number) {
   const alert = await this.alertCtrl.create({
-    header: 'Hapus Produk',
-    message: 'Yakin ingin menghapus produk ini?',
+    header: 'Hapus Produk?',
+    message: 'Data produk akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
+    cssClass: 'premium-alert',
     buttons: [
       {
         text: 'Batal',
-        role: 'cancel'
+        role: 'cancel',
+        cssClass: 'alert-button-cancel'
       },
       {
         text: 'Hapus',
         role: 'destructive',
+        cssClass: 'alert-button-confirm',
         handler: () => {
           this.deleteProduct(id);
         }
       }
     ]
   });
-
   await alert.present();
 }
+
 deleteProduct(id: string | number) {
   this.loading = true;
 
@@ -292,7 +347,9 @@ openEditModal(p: any) {
     point_price: p.point_price,
     qty: p.qty,
     is_active: p.is_active,
-    addons: p.addons ? JSON.parse(JSON.stringify(p.addons)) : []
+    is_exchangeable: p.is_exchangeable,
+    addons: p.addons ? JSON.parse(JSON.stringify(p.addons)) : [],
+    old_image: p.image // Simpan nama file lama untuk backend
   };
 
   if (p.image) {
@@ -303,12 +360,25 @@ openEditModal(p: any) {
 }
 
 updateProduct() {
+  if (!this.validateForm()) return;
+
   const formData = new FormData();
 
   Object.keys(this.newProduct).forEach(key => {
-    if (key === 'addons') {
+    if (key === 'image') {
+      // Hanya kirim image jika user memilih file baru
+      if (this.newProduct.image instanceof File) {
+        formData.append('image', this.newProduct.image);
+      }
+      // Jika null (tidak ganti foto), jangan kirim — server pertahankan foto lama
+    } else if (key === 'addons') {
       formData.append('addons', JSON.stringify(this.newProduct.addons));
-    } else if (this.newProduct[key] !== null) {
+    } else if (key === 'old_image') {
+      // Kirim nama file lama jika ada
+      if (this.newProduct.old_image) {
+        formData.append('old_image', this.newProduct.old_image);
+      }
+    } else if (this.newProduct[key] !== null && this.newProduct[key] !== undefined) {
       formData.append(key, this.newProduct[key]);
     }
   });
@@ -346,4 +416,42 @@ updateProduct() {
     this.newProduct.addons[groupIndex].items.splice(itemIndex, 1);
   }
 
+  // ============ VALIDATION ============
+  async showAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK'],
+      cssClass: 'premium-alert'
+    });
+    await alert.present();
+  }
+
+  validateForm(): boolean {
+    const p = this.newProduct;
+    
+    // 1. Check Mandatory Fields
+    if (!p.product_name || !p.product_code || !p.category_id) {
+      this.showAlert('Data Tidak Lengkap', 'Nama, Kode Produk, dan Kategori wajib diisi.');
+      return false;
+    }
+
+    if (p.price === null || p.price === undefined || p.price === '') {
+      this.showAlert('Harga Kosong', 'Harga jual harus diisi.');
+      return false;
+    }
+
+    // 2. Check Unique Name (Local check against current list)
+    const isDuplicate = this.products.some(item => 
+      item.product_name.toLowerCase().trim() === p.product_name.toLowerCase().trim() && 
+      (!this.isEdit || item.id !== this.editId)
+    );
+
+    if (isDuplicate) {
+      this.showAlert('Nama Sudah Digunakan', `Produk dengan nama "${p.product_name}" sudah ada di daftar ini.`);
+      return false;
+    }
+
+    return true;
+  }
 }

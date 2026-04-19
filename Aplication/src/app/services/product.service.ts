@@ -7,12 +7,13 @@ export interface Product {
   product_code: string;
   product_name: string;
   category_id: number;
-  category_name: string; // ⬅️ WAJIB
+  category_name: string;
   image: string | null;
   price: string;
   point_price: number;
   qty: string;
   is_active: string;
+  is_exchangeable: string | number;
   addons: any[];
 }
 
@@ -22,9 +23,9 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-getProducts(page = 1, limit = 10, search = '') {
+getProducts(page = 1, limit = 10, search = '', categoryId = '') {
   return this.http.get<any>(
-    `${environment.apiBaseUrl}/api/products?page=${page}&limit=${limit}&search=${search}`
+    `${environment.apiBaseUrl}/api/products?page=${page}&limit=${limit}&search=${search}&category_id=${categoryId}`
   );
 }
 

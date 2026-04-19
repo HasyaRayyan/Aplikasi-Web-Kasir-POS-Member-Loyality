@@ -1,54 +1,126 @@
-<ion-content fullscreen class="bg-black">
-  <div class="min-h-screen flex items-center justify-center p-8">
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-wrapper">
     
-    <div class="w-full max-w-sm">
-      <div class="mb-16">
-        <h1 class="text-4xl font-bold text-white tracking-tighter leading-none mb-1">THE44</h1>
-        <p class="text-[10px] text-zinc-600 tracking-[0.4em] uppercase font-medium">System Access</p>
-      </div>
-
-      <div class="space-y-10">
-        
-        <div class="relative">
-          <label class="text-[9px] text-zinc-500 uppercase tracking-widest absolute -top-5 left-0">Username</label>
-          <ion-input
-            [(ngModel)]="username"
-            placeholder="TYPE HERE"
-            class="input-plain"
-          ></ion-input>
-        </div>
-
-        <div class="relative">
-          <label class="text-[9px] text-zinc-500 uppercase tracking-widest absolute -top-5 left-0">Password</label>
-          <ion-input
-            type="password"
-            [(ngModel)]="password"
-            placeholder="********"
-            class="input-plain"
-          ></ion-input>
-          <a href="#" class="text-[9px] text-zinc-700 absolute right-0 -bottom-5 hover:text-white transition-colors">FORGOT?</a>
-        </div>
-
-        <div class="pt-4">
-          <button
-            (click)="login()"
-            class="btn-plain w-full"
-            [disabled]="loading"
-          >
-            <span *ngIf="!loading">SIGN IN</span>
-            <ion-spinner *ngIf="loading" name="lines-sharp" color="dark"></ion-spinner>
-          </button>
-        </div>
-
-        <div class="flex justify-between items-center pt-10">
-          <button class="text-[10px] text-white font-bold hover:underline decoration-1 underline-offset-4">
-            REGISTER
-          </button>
-          <span class="text-zinc-800 text-[10px]">VER. 1.0.44</span>
-        </div>
-
-      </div>
+    <!-- BACK BUTTON -->
+    <div class="nav-header">
+      <button class="icon-btn" routerLink="/guest">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
     </div>
-    
+
+    <!-- MAIN CARD -->
+    <div class="auth-card">
+      
+      <div class="login-container">
+        <div class="logo-section">
+          <img src="assets/logo_thrift.png" alt="FourtyFourThrift Logo" class="brand-logo">
+        </div>
+        <div class="title-section">
+          <h1>Selamat Datang Kembali</h1>
+          <p>Silakan masuk menggunakan nomor HP atau username akun Anda.</p>
+        </div>
+
+        <div class="form-section">
+          <!-- INPUT USERNAME / PHONE -->
+          <div class="input-group">
+            <label>Nomor HP / Username</label>
+            <div class="input-wrapper">
+              <ion-icon name="person-outline"></ion-icon>
+              <ion-input 
+                [(ngModel)]="username" 
+                placeholder="08xxxxxxxxxx"
+                (keyup.enter)="login()"
+              ></ion-input>
+            </div>
+          </div>
+
+          <!-- INPUT PASSWORD -->
+          <div class="input-group">
+            <label>Kata Sandi</label>
+            <div class="input-wrapper">
+              <ion-icon name="lock-closed-outline"></ion-icon>
+              <ion-input 
+                type="password" 
+                [(ngModel)]="password" 
+                placeholder="********"
+                (keyup.enter)="login()"
+              ></ion-input>
+            </div>
+          </div>
+
+          <!-- FORGOT PASSWORD -->
+          <div class="forgot-password">
+            <a href="javascript:void(0)" (click)="openResetModal()">Lupa kata sandi?</a>
+          </div>
+
+          <!-- LOGIN BUTTON -->
+          <button class="btn-primary" [disabled]="loading" (click)="login()">
+            <span *ngIf="!loading">Masuk Sekarang</span>
+            <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+          </button>
+        </div>
+
+        <!-- FOOTER LINKS -->
+        <div class="auth-footer">
+          <p>Belum punya akun? <span class="link" routerLink="/register">Daftar di sini</span></p>
+        </div>
+
+      </div>
+
+    </div>
   </div>
+
+  <!-- RESET PASSWORD MODAL (From Profile, reused here) -->
+  <ion-modal [isOpen]="showResetModal" (didDismiss)="showResetModal = false" class="auth-reset-modal">
+    <ng-template>
+      <div class="modal-wrapper">
+        <div class="modal-header">
+          <h3>{{ resetStep === 1 ? 'Lupa Sandi?' : (resetStep === 2 ? 'Verifikasi OTP' : 'Sandi Baru') }}</h3>
+          <p>{{ resetStep === 1 ? 'Kami akan mengirimkan kode verifikasi ke WhatsApp Anda.' : (resetStep === 2 ? 'Kode telah dikirim ke ' + resetPhone : 'Buat kata sandi baru yang kuat.') }}</p>
+        </div>
+        <div class="modal-body">
+          
+          <!-- STEP 1: INPUT PHONE -->
+          <div *ngIf="resetStep === 1" class="step-container">
+            <div class="input-item">
+              <label>Nomor HP Terdaftar</label>
+              <ion-input type="tel" [(ngModel)]="resetPhone" placeholder="Contoh: 08123456789"></ion-input>
+            </div>
+            <button class="btn-action" (click)="requestResetOTP()" [disabled]="resetLoading">
+              <span *ngIf="!resetLoading">Kirim Kode ke WA</span>
+              <ion-spinner *ngIf="resetLoading" name="crescent"></ion-spinner>
+            </button>
+          </div>
+
+          <!-- STEP 2: INPUT OTP -->
+          <div *ngIf="resetStep === 2" class="step-container">
+            <div class="input-item">
+              <label>Kode OTP dari WhatsApp</label>
+              <ion-input type="text" [(ngModel)]="otpCode" placeholder="Masukkan 6 Digit Kode" maxlength="6"></ion-input>
+            </div>
+            <button class="btn-action" (click)="verifyResetOTP()" [disabled]="resetLoading">Lanjutkan</button>
+            <p class="resend-text" (click)="requestResetOTP()">Kirim ulang kode</p>
+          </div>
+
+          <!-- STEP 3: NEW PASSWORD -->
+          <div *ngIf="resetStep === 3" class="step-container">
+            <div class="input-item">
+              <label>Sandi Baru</label>
+              <ion-input type="password" [(ngModel)]="newPassword" placeholder="Minimum 6 Karakter"></ion-input>
+            </div>
+            <div class="input-item">
+              <label>Konfirmasi Sandi Baru</label>
+              <ion-input type="password" [(ngModel)]="confirmPassword" placeholder="Ulangi Sandi Baru"></ion-input>
+            </div>
+            <button class="btn-action" (click)="confirmReset()" [disabled]="resetLoading">
+              <span *ngIf="!resetLoading">Simpan Sandi Baru</span>
+              <ion-spinner *ngIf="resetLoading" name="crescent"></ion-spinner>
+            </button>
+          </div>
+
+          <button class="btn-back" (click)="showResetModal = false">Batal</button>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
 </ion-content>

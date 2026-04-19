@@ -67,7 +67,7 @@
 
 /* ACTIVE STATE */
 .nav-item.active {
-  color: #10b981; /* Active Color (Emerald) */
+  color: #0f172a; /* Active Color (Black) */
 
   span {
     transform: translateY(1px);
@@ -93,9 +93,9 @@
     bottom: -4px;
     width: 4px;
     height: 4px;
-    background: #10b981;
+    background: #0f172a;
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 8px rgba(15, 23, 42, 0.4);
     animation: dotPop 0.4s ease-out;
   }
 }

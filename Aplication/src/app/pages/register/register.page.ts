@@ -1,72 +1,150 @@
 import { Component } from '@angular/core';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonContent, IonIcon, IonInput, IonSpinner, ToastController } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonContent, IonIcon, IonInput, IonSpinner, CommonModule, FormsModule, HttpClientModule, RouterLink]
 })
 export class RegisterPage {
 
   loading = false;
+  
+  // 1: Phone, 2: OTP, 3: Profile Form
+  currentStep = 1;
 
   form: any = {
-    name: '',
-    username: '',
-    email: '',
     phone: '',
+    otp: '',
+    name: '',
+    email: '',
     password: ''
   };
 
-  constructor(private toastCtrl: ToastController) {}
+  private apiUrl = `${environment.apiBaseUrl}/api/auth/register`;
+
+  constructor(
+    private toastCtrl: ToastController,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   async toast(msg: string, color = 'danger') {
     const t = await this.toastCtrl.create({
       message: msg,
-      duration: 2000,
+      duration: 3000,
       position: 'top',
-      color
+      color,
+      mode: 'ios'
     });
     t.present();
   }
 
-register(): void {
+  // --- STEP 1 ---
+  sendOtp() {
+    if (!this.form.phone || this.form.phone.length < 9) {
+      this.toast('Nomor telepon tidak valid/terlalu pendek', 'warning');
+      return;
+    }
 
-  if (!this.form.name) {
-    this.toast('Nama wajib diisi');
-    return;
+    this.loading = true;
+
+    // 1. Cek dulu apakah nomor sudah terdaftar di database
+    this.http.post<any>(`${environment.apiBaseUrl}/api/auth/check-phone`, {
+      phone: this.form.phone
+    }).subscribe({
+      next: (res) => {
+        
+        // 2. Jika tersedia, kirim SMS OTP asli melalui backend
+        this.http.post<any>(`${environment.apiBaseUrl}/api/auth/send-otp`, {
+          phone: this.form.phone
+        }).subscribe({
+          next: (otpRes) => {
+            this.loading = false;
+            this.currentStep = 2;
+            
+            // Simpan OTP yang di-generate backend untuk verifikasi (simulasi frontend)
+            // Di sistem asli, verifikasi biasanya dilakukan di backend juga.
+            if (otpRes.simulated_otp) {
+               this.generatedOtp = otpRes.simulated_otp.toString();
+               this.toast('SMS Berhasil dikirim! Cek HP kamu.', 'success');
+            }
+          },
+          error: (err) => {
+            this.loading = false;
+            this.toast(err.error?.message || 'Gagal mengirim SMS, coba lagi nanti', 'danger');
+          }
+        });
+
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toast(err.error?.message || 'Nomor HP sudah terdaftar', 'danger');
+      }
+    });
   }
 
-  if (!this.form.username) {
-    this.toast('Username wajib diisi');
-    return;
+  generatedOtp: string = '';
+
+  // --- STEP 2 ---
+  verifyOtp() {
+    if (this.form.otp.toString() !== this.generatedOtp) {
+      this.toast('Kode OTP salah! Periksa kembali SMS kamu.', 'danger');
+      return;
+    }
+    
+    // Sukses OTP, lanjut ke Biodata
+    this.currentStep = 3;
+    this.form.otp = ''; // clear
   }
 
-  if (!this.form.email) {
-    this.toast('Email wajib diisi');
-    return;
+  // --- STEP 3 ---
+  register() {
+    if (!this.form.name || !this.form.password) {
+      this.toast('Nama dan Password wajib diisi', 'warning');
+      return;
+    }
+
+    this.loading = true;
+
+    this.http.post<any>(this.apiUrl, {
+      phone: this.form.phone,
+      name: this.form.name,
+      email: this.form.email,
+      password: this.form.password,
+    }).subscribe({
+      next: (res) => {
+        this.loading = false;
+        if (!res.success) {
+          this.toast(res.message, 'danger');
+          return;
+        }
+
+        this.toast('Pendaftaran Member Sukses! Silakan Login.', 'success');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.loading = false;
+        const msg = err.error?.message || 'Gagal terhubung ke server';
+        this.toast(msg, 'danger');
+      }
+    });
+
   }
 
-  if (!this.form.phone) {
-    this.toast('No HP wajib diisi');
-    return;
+  goBack() {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
-
-  if (!this.form.password) {
-    this.toast('Password wajib diisi');
-    return;
-  }
-
-  this.loading = true;
-
-  setTimeout(() => {
-    this.loading = false;
-    this.toast('Registrasi berhasil', 'success');
-  }, 1200);
-}
 
 }

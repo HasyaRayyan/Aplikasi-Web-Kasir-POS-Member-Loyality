@@ -16,6 +16,8 @@ class HomeModel extends Model
                 u.name,
                 u.email,
                 u.phone,
+                u.username,
+                u.image,
                 m.id as id_member_tbl, 
                 m.member_id,
                 m.lifetime_points,
@@ -47,6 +49,17 @@ class HomeModel extends Model
             ->select('id, product_name, image, price, point_price, is_exchangeable')
             ->where('is_active', 1)
             ->limit($limit)
+            ->get()
+            ->getResultArray();
+    }
+
+    // BANNER AKTIF
+    public function getActiveBanners()
+    {
+        return $this->db->table('banners')
+            ->select('id, title, image')
+            ->where('is_active', 1)
+            ->orderBy('id', 'DESC')
             ->get()
             ->getResultArray();
     }
@@ -86,4 +99,51 @@ public function getRecentActivityByMember($userId, $limit = 3)
         ->getResultArray();
 }
 
+public function getPointLedger($userId)
+    {
+        // 1. Ambil Member ID & Total Poin
+        $member = $this->db->table('members')
+            ->select('id, active_points')
+            ->where('user_id', $userId)
+            ->get()
+            ->getRowArray();
+
+        if (!$member) {
+            return [
+                'total_points' => 0,
+                'history' => []
+            ];
+        }
+
+        $memberId = $member['id'];
+
+        // 2. Ambil History dari Ledger
+        // Join ke transactions untuk dapetin invoice_code (tapi hanya jika points_earned > 0)
+        $history = $this->db->table('member_point_ledger l')
+            ->select('
+                l.id,
+                t.invoice_code,
+                (l.points_earned - l.points_used) as points,
+                l.status,
+                l.expiry_date as expired_at,
+                l.earned_date as created_at
+            ')
+            ->join('transactions t', 't.id = l.transaction_id', 'left')
+            ->where('l.member_id', $memberId)
+            ->orderBy('l.id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        // Bersihkan invoice_code jika null (untuk redemption)
+        foreach ($history as &$h) {
+            if (!$h['invoice_code']) {
+                $h['invoice_code'] = ($h['points'] < 0) ? 'REDEMPTION' : 'SYSTEM';
+            }
+        }
+
+        return [
+            'total_points' => (int)$member['active_points'],
+            'history'      => $history
+        ];
+    }
 }

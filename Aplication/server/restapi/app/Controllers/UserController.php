@@ -13,10 +13,25 @@ class UserController extends ResourceController
     public function index()
     {
         $model = new UserModel();
+        
+        $page = $this->request->getVar('page') ?? 1;
+        $limit = $this->request->getVar('limit') ?? 10;
+        $search = $this->request->getVar('search') ?? '';
+        
+        $offset = ($page - 1) * $limit;
+        
+        $data = $model->getAllUsers($limit, $offset, $search);
+        $total = $model->countUsers($search);
 
         return $this->respond([
             'status' => true,
-            'data' => $model->getAllUsers()
+            'data' => $data,
+            'meta' => [
+                'total' => $total,
+                'page' => (int)$page,
+                'limit' => (int)$limit,
+                'total_pages' => ceil($total / $limit)
+            ]
         ]);
     }
 

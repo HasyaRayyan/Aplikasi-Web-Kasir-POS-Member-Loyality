@@ -2,193 +2,205 @@
 
   <!-- HEADER -->
   <div class="mb-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
-          Daftar Kategori
-        </h1>
-        <p class="text-gray-600 mt-2">Kelola kategori produk</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Daftar Kategori</h1>
+        <p class="text-gray-500 text-sm mt-1">Kelola kategori produk</p>
       </div>
 
-      <button
-        (click)="openAddModal()"
-        class="group inline-flex items-center gap-2 bg-gray-900 
-              hover:bg-black text-white font-semibold px-6 py-3.5 rounded-lg 
-              transition shadow-md hover:-translate-y-0.5">
-
-        <ion-icon name="add-outline"></ion-icon>
+      <button (click)="openAddModal()"
+        class="inline-flex items-center justify-center gap-2 bg-gray-900
+               hover:bg-black text-white font-semibold px-5 py-3 rounded-lg
+               transition shadow-md w-full sm:w-auto">
+        <ion-icon name="add-outline" class="text-lg"></ion-icon>
         Tambah Kategori
       </button>
     </div>
 
     <!-- SEARCH -->
-    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-      <div class="relative">
-        <ion-icon name="search-outline"
-          class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-
-        <input [(ngModel)]="search"
-          (keyup.enter)="loadData()"
-          placeholder="Cari kategori..."
-          class="w-full pl-12 pr-4 py-3.5 bg-white text-black
-                 border border-gray-300 rounded-lg
-                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                 outline-none transition">
-      </div>
+    <div class="relative">
+      <ion-icon name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></ion-icon>
+      <input [(ngModel)]="search" (ngModelChange)="onSearchChange()"
+        (keyup.enter)="loadData()"
+        placeholder="Cari kategori... (tekan Enter)"
+        class="w-full pl-12 pr-4 py-3 bg-white text-black
+               border border-gray-300 rounded-xl
+               focus:border-gray-900 focus:ring-2 focus:ring-gray-200
+               outline-none transition text-sm">
     </div>
   </div>
 
-  <!-- SPINNER -->
-  <div *ngIf="loading"
-    class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-    <ion-spinner name="crescent"></ion-spinner>
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <ion-spinner name="crescent" class="text-gray-900"></ion-spinner>
   </div>
 
-<!-- TABLE -->
-<div *ngIf="!loading"
-  class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <!-- TABLE AREA -->
+  <div *ngIf="!loading" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-  <!-- HEADER TABLE -->
-  <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b">
-    <div class="col-span-2 font-semibold text-gray-700">NO</div>
-    <div class="col-span-8 font-semibold text-gray-700">NAMA KATEGORI</div>
-    <div class="col-span-2 font-semibold text-gray-700 text-right">AKSI</div>
-  </div>
+    <!-- DESKTOP TABLE HEADER -->
+    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
+      <div class="col-span-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">No</div>
+      <div class="col-span-9 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Kategori</div>
+      <div class="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Aksi</div>
+    </div>
 
-  <!-- ROW -->
-  <div *ngFor="let c of categories; let i = index"
-    class="border-b hover:bg-gray-50 transition">
+    <!-- EMPTY STATE -->
+    <div *ngIf="categories.length === 0" class="py-16 text-center">
+      <ion-icon name="folder-open-outline" class="text-5xl text-gray-300 mb-3"></ion-icon>
+      <p class="text-gray-500 font-medium">Belum ada kategori</p>
+      <button (click)="openAddModal()"
+        class="mt-4 text-gray-900 font-semibold text-sm hover:underline">
+        + Tambah kategori baru
+      </button>
+    </div>
 
-    <!-- DESKTOP -->
-    <div class="hidden md:grid grid-cols-12 px-6 py-5 items-center">
+    <!-- ROWS -->
+    <div *ngFor="let c of categories; let i = index"
+      class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
 
-      <!-- NO -->
-      <div class="col-span-2 font-semibold text-gray-900">
-        {{ i + 1 }}
-      </div>
+      <!-- DESKTOP ROW -->
+      <div class="hidden md:grid grid-cols-12 px-6 py-4 items-center">
 
-      <!-- NAMA -->
-      <div class="col-span-8 flex items-center gap-3">
-        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-          <span class="font-bold text-gray-700">
-            {{ c.category_name[0] }}
-          </span>
+        <!-- NO -->
+        <div class="col-span-1 text-sm text-gray-500 font-medium">
+          {{ i + 1 }}
         </div>
 
-        <span class="font-medium text-gray-800">
-          {{ c.category_name }}
-        </span>
+        <!-- NAMA KATEGORI -->
+        <div class="col-span-9 flex items-center gap-3">
+          <div class="w-9 h-9 bg-gray-900 text-white rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+            {{ c.category_name[0].toUpperCase() }}
+          </div>
+          <span class="font-semibold text-gray-900">{{ c.category_name }}</span>
+        </div>
+
+        <!-- AKSI -->
+        <div class="col-span-2 flex justify-end gap-1">
+          <button (click)="openEditModal(c)"
+            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition"
+            title="Edit">
+            <ion-icon name="create-outline" class="text-lg"></ion-icon>
+          </button>
+          <button (click)="delete(c.id)"
+            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+            title="Hapus">
+            <ion-icon name="trash-outline" class="text-lg"></ion-icon>
+          </button>
+        </div>
       </div>
 
-      <!-- AKSI -->
-      <div class="col-span-2 flex justify-end gap-1">
-        <button (click)="openEditModal(c)"
-          class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
-          <ion-icon name="create-outline"></ion-icon>
-        </button>
+      <!-- MOBILE ROW -->
+      <div class="md:hidden p-4">
+        <div class="flex items-center justify-between gap-3">
+          <!-- Info -->
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-10 h-10 bg-gray-900 text-white rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+              {{ c.category_name[0].toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-900 truncate">{{ c.category_name }}</p>
+              <p class="text-xs text-gray-400">Kategori #{{ i + 1 }}</p>
+            </div>
+          </div>
 
-        <button (click)="delete(c.id)"
-          class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-          <ion-icon name="trash-outline"></ion-icon>
-        </button>
+          <!-- Buttons -->
+          <div class="flex gap-2 shrink-0">
+            <button (click)="openEditModal(c)"
+              class="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 
+                     rounded-lg text-sm font-medium border border-blue-100">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>Edit</span>
+            </button>
+            <button (click)="delete(c.id)"
+              class="flex items-center gap-1 px-3 py-2 bg-red-50 text-red-600 
+                     rounded-lg text-sm font-medium border border-red-100">
+              <ion-icon name="trash-outline"></ion-icon>
+              <span>Hapus</span>
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>
 
-    <!-- MOBILE -->
-    <div class="md:hidden p-5 space-y-2">
-
-      <div class="flex justify-between items-center">
-        <p class="font-bold">
-          {{ i + 1 }}. {{ c.category_name }}
-        </p>
-      </div>
-
-      <div class="flex gap-2">
-        <button (click)="openEditModal(c)"
-          class="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm">
-          Edit
+    <!-- PAGINATION -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
+      <span class="text-sm text-gray-600">
+        Menampilkan <b>{{ categories.length }}</b> kategori
+      </span>
+      <div class="flex items-center gap-2">
+        <button (click)="prevPage()" [disabled]="page <= 1"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+                 rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
+          <ion-icon name="chevron-back-outline" class="text-black"></ion-icon>
         </button>
-        <button (click)="delete(c.id)"
-          class="flex-1 py-2 bg-red-500 text-white rounded-lg text-sm">
-          Hapus
+        <span class="text-sm font-medium text-gray-700 px-1">
+          {{ page }} / {{ totalPages }}
+        </span>
+        <button (click)="nextPage()" [disabled]="page >= totalPages"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+                 rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
+          <ion-icon name="chevron-forward-outline" class="text-black"></ion-icon>
         </button>
       </div>
-
     </div>
 
   </div>
-</div>
 
 </div>
+
 <!-- MODAL TAMBAH / EDIT -->
 <div *ngIf="showModal"
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm
+         flex items-center justify-center z-[9999] p-4">
 
-  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col">
+  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
     <!-- HEADER -->
-    <div class="px-6 py-4 border-b flex items-center justify-between">
+    <div class="px-6 py-4 border-b flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-gray-900 text-white rounded-lg flex items-center justify-center">
           <ion-icon [name]="isEdit ? 'create-outline' : 'add-outline'"></ion-icon>
         </div>
-
         <div>
-          <h2 class="font-bold text-lg text-gray-900">
+          <h2 class="font-bold text-base text-gray-900">
             {{ isEdit ? 'Edit Kategori' : 'Tambah Kategori' }}
           </h2>
-          <p class="text-xs text-gray-500">
-            Nama kategori akan tampil di produk
-          </p>
+          <p class="text-xs text-gray-500">Nama kategori tampil di daftar produk</p>
         </div>
       </div>
-
-      <button (click)="closeModal()" class="text-gray-500 hover:text-black">
+      <button (click)="closeModal()" class="text-gray-400 hover:text-black transition">
         <ion-icon name="close-outline" class="text-2xl"></ion-icon>
       </button>
     </div>
 
     <!-- BODY -->
-    <div class="p-6 space-y-4">
-
+    <div class="p-6 flex-1 overflow-y-auto">
       <div>
-        <label class="text-xs font-semibold text-gray-600 mb-1 block">
-          Nama Kategori
-        </label>
-
+        <label class="text-xs font-semibold text-gray-600 mb-1.5 block">Nama Kategori</label>
         <input [(ngModel)]="form.category_name"
           placeholder="Contoh: Minuman"
           class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5
-                 placeholder-gray-400
                  focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                 outline-none transition">
-
-        <p class="text-[11px] text-gray-400 mt-1">
-          Maksimal 100 karakter
-        </p>
+                 outline-none transition text-sm">
+        <p class="text-[11px] text-gray-400 mt-1.5">Maksimal 100 karakter</p>
       </div>
-
     </div>
 
     <!-- FOOTER -->
-    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
+    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50 shrink-0">
       <button (click)="closeModal()"
-        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+        class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition">
         Batal
       </button>
-
       <button (click)="isEdit ? update() : save()"
-        class="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black shadow-sm">
+        class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-black transition shadow-sm">
         {{ isEdit ? 'Update' : 'Simpan' }}
       </button>
     </div>
 
   </div>
 </div>
-<ion-alert
-  [isOpen]="showDeleteAlert"
-  header="Hapus Kategori?"
-  message="Kategori akan dihapus permanen"
-  [buttons]="deleteButtons">
-</ion-alert>

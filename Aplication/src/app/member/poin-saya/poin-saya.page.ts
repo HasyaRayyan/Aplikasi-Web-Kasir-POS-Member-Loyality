@@ -1,127 +1,144 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
-import { HomeService, PointHistoryItem } from 'src/app/services/home.service';
+import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
+import { 
+  IonContent, IonIcon, IonSegment, IonSegmentButton, IonLabel, 
+  IonSpinner, IonToast
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  arrowBack, refreshOutline, arrowForwardOutline, 
+  arrowUpOutline, giftOutline 
+} from 'ionicons/icons';
+import { Router, RouterModule } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-poin-saya',
   templateUrl: './poin-saya.page.html',
   styleUrls: ['./poin-saya.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonContent, IonIcon, IonSegment, IonSegmentButton, IonLabel,
+    CommonModule, FormsModule, HttpClientModule, RouterModule
+  ]
 })
 export class PoinSayaPage implements OnInit {
 
-  loading: boolean = true;
-  totalPoints: number = 0;
-  history: PointHistoryItem[] = [];
+  userId: any;
+  pointsData: any = {
+    active_points: 0,
+    lifetime_points: 0,
+    membership_level: 'Basic',
+    member_id_card: '',
+    history: [],
+    redemptions: []
+  };
+  
+  loading: boolean = false;
+  segment: string = 'history'; // history | redemptions
 
   constructor(
-    private homeService: HomeService,
-    private toastCtrl: ToastController,
-    private router: Router
-  ) { }
+    private http: HttpClient,
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
+  ) { 
+    addIcons({ 
+      'arrow-back': arrowBack, 
+      'refresh-outline': refreshOutline, 
+      'arrow-forward-outline': arrowForwardOutline, 
+      'arrow-up-outline': arrowUpOutline, 
+      'gift-outline': giftOutline 
+    });
+  }
 
   ngOnInit() {
-    this.loadPointHistory();
+    this.userId = localStorage.getItem('user_id');
+    if (this.userId) {
+      this.loadPointsData();
+    }
   }
 
-  loadPointHistory() {
+  async loadPointsData() {
     this.loading = true;
-    const userId = Number(localStorage.getItem('user_id'));
 
-    this.homeService.getPointHistory(userId).subscribe({
-      next: (res) => {
-        if (res.status) {
-          this.totalPoints = res.data.total_points;
-          this.history = res.data.history;
-        } else {
-          // If the backend is not yet fully implemented for this, provide mock data fallback
-          this.fallbackToMockData();
+    this.http.get<any>(`${environment.apiBaseUrl}/api/member/points-history/${this.userId}`)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.pointsData = res.data;
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+          this.showToast('Gagal memuat data poin. Pastikan server aktif.', 'danger');
+          console.error(err);
         }
-        this.loading = false;
-      },
-      error: () => {
-        this.fallbackToMockData();
-        this.loading = false;
-      }
-    });
+      });
   }
 
-  fallbackToMockData() {
-    this.totalPoints = 850;
-    this.history = [
-      {
-        id: 1,
-        invoice_code: 'INV-20231010-001',
-        points: 150,
-        status: 'active',
-        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        expired_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 2,
-        invoice_code: 'INV-20231005-045',
-        points: 300,
-        status: 'active',
-        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        expired_at: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 3,
-        invoice_code: 'INV-20230915-021',
-        points: 400,
-        status: 'active',
-        created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        expired_at: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString()
-      },
-      {
-        id: 4,
-        invoice_code: 'INV-20230110-011',
-        points: 200,
-        status: 'expired',
-        created_at: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
-        expired_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ];
-    this.showToast('Menggunakan data simulasi (backend belum tersedia)', 'warning');
+  /* ================= UTIL (Dashboard Matching) ================= */
+
+  getInitials(name: string): string {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
   }
 
-  getStatusClass(status: string): string {
-    switch(status) {
-      case 'active': return 'status-active';
-      case 'used': return 'status-used';
-      case 'expired': return 'status-expired';
-      default: return 'status-default';
-    }
+  getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
   }
 
-  getStatusName(status: string): string {
-    switch(status) {
-      case 'active': return 'Aktif';
-      case 'used': return 'Digunakan';
-      case 'expired': return 'Kadaluwarsa';
-      default: return status;
-    }
+  formatPoints(points: number): string {
+    return (points || 0).toLocaleString('en-US');
   }
 
-  formatDate(dateString: string): string {
-    if (!dateString) return '-';
-    // Format "12 Okt 2023"
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('id-ID', options);
+  getProgress(): number {
+    const p = this.pointsData.lifetime_points || 0;
+    if (p < 1000) return (p / 1000) * 100;
+    if (p < 5000) return ((p - 1000) / 4000) * 100;
+    if (p < 10000) return ((p - 5000) / 5000) * 100;
+    return 100;
   }
 
-  async showToast(msg: string, color: string = 'success') {
-    const toast = await this.toastCtrl.create({
+  getNextLevel(): string {
+    const p = this.pointsData.lifetime_points || 0;
+    if (p < 1000) return 'GOLD';
+    if (p < 5000) return 'PLATINUM';
+    if (p < 10000) return 'DIAMOND';
+    return 'MAX LEVEL';
+  }
+
+  getNextLevelPoints(): number {
+    const p = this.pointsData.lifetime_points || 0;
+    if (p < 1000) return 1000 - p;
+    if (p < 5000) return 5000 - p;
+    if (p < 10000) return 10000 - p;
+    return 0;
+  }
+
+  async showToast(msg: string, color: string) {
+    const t = await this.toastCtrl.create({
       message: msg,
-      duration: 2000,
+      duration: 3000,
       color: color,
-      position: 'bottom'
+      position: 'top'
     });
-    await toast.present();
+    t.present();
+  }
+
+  doRefresh(event: any) {
+    this.loadPointsData().then(() => {
+      event.target.complete();
+    });
+  }
+
+  goBack() {
+    window.history.back();
   }
 }

@@ -1,310 +1,280 @@
 <div class="min-h-screen bg-white p-4 md:p-8">
 
-  <!-- HEADER SECTION -->
+  <!-- HEADER -->
   <div class="mb-8">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
-          Point Rules
-        </h1>
-        <p class="text-gray-600 mt-2">Kelola aturan perolehan poin member</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Point Rules</h1>
+        <p class="text-gray-500 text-sm mt-1">Kelola aturan perolehan poin member</p>
       </div>
 
-      <button
-        (click)="openAddModal()"
-        class="group inline-flex items-center justify-center gap-2 bg-gray-900 
-              hover:bg-black text-white font-semibold px-6 py-3.5 rounded-lg 
-              transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 
-              w-full md:w-auto">
-
-        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-        <span>Tambah Rule Baru</span>
-
+      <button (click)="openAddModal()"
+        class="inline-flex items-center justify-center gap-2 bg-gray-900
+               hover:bg-black text-white font-semibold px-5 py-3 rounded-lg
+               transition shadow-md w-full sm:w-auto">
+        <ion-icon name="add-outline" class="text-lg"></ion-icon>
+        Tambah Rule Baru
       </button>
     </div>
 
     <!-- SEARCH -->
-    <div class="bg-white rounded-xl p-5 mb-8 shadow-sm border border-gray-200">
-      <div class="flex flex-col lg:flex-row gap-4 lg:items-center">
+    <div class="relative">
+      <ion-icon name="search-outline"
+        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></ion-icon>
+      <input type="text" [(ngModel)]="search" (keyup.enter)="loadData()"
+        placeholder="Cari nama event... (tekan Enter)"
+        class="w-full pl-12 pr-4 py-3 bg-white text-black
+               border border-gray-300 rounded-xl text-sm
+               focus:border-gray-900 focus:ring-2 focus:ring-gray-200
+               outline-none transition">
+    </div>
+  </div>
 
-        <div class="flex-1 relative group">
-          <ion-icon name="search-outline" 
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
-          </ion-icon>
+  <!-- LOADING -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <ion-spinner name="crescent" class="text-gray-900"></ion-spinner>
+  </div>
 
-          <input type="text"
-            [(ngModel)]="search"
-            (keyup.enter)="loadData()"
-            placeholder="Cari event promo..."
-            class="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 
-                   rounded-lg text-black focus:border-gray-800 focus:ring-2 
-                   focus:ring-gray-200 outline-none transition hover:border-gray-400">
+  <!-- TABLE AREA -->
+  <div *ngIf="!loading" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
-          <div class="absolute right-3 top-1/2 -translate-y-1/2">
-            <kbd class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-md border">Enter</kbd>
+    <!-- DESKTOP TABLE HEADER -->
+    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b border-gray-200">
+      <div class="col-span-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Event</div>
+      <div class="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Per Rp</div>
+      <div class="col-span-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Point</div>
+      <div class="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Periode</div>
+      <div class="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Aksi</div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="rules.length === 0" class="py-16 text-center">
+      <ion-icon name="star-outline" class="text-5xl text-gray-300 mb-3"></ion-icon>
+      <p class="text-gray-500 font-medium">Belum ada point rule</p>
+      <button (click)="openAddModal()"
+        class="mt-4 text-gray-900 font-semibold text-sm hover:underline">
+        + Tambah rule baru
+      </button>
+    </div>
+
+    <!-- ROWS -->
+    <div *ngFor="let r of rules"
+      class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
+
+      <!-- DESKTOP ROW -->
+      <div class="hidden md:grid grid-cols-12 px-6 py-4 items-center">
+
+        <!-- EVENT -->
+        <div class="col-span-5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            [ngClass]="r.is_active ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'">
+            <ion-icon name="star-outline"></ion-icon>
+          </div>
+          <div>
+            <p class="font-semibold text-gray-900">{{ r.event_name }}</p>
+            <span class="text-xs font-medium"
+              [ngClass]="r.is_active ? 'text-emerald-600' : 'text-red-500'">
+              {{ r.is_active ? 'Aktif' : 'Non Aktif' }}
+            </span>
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
+        <!-- PER RP -->
+        <div class="col-span-2 text-sm text-gray-700 font-medium">
+          Rp {{ r.amount_per_point | number }}
+        </div>
 
-  <!-- SPINNER -->
-  <div *ngIf="loading"
-    class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-    <ion-spinner name="crescent" class="spinner-black"></ion-spinner>
-  </div>
-
-  <!-- MAIN TABLE -->
-  <div *ngIf="!loading"
-    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-
-    <!-- HEADER TABLE -->
-    <div class="hidden md:grid grid-cols-12 bg-gray-50 px-6 py-4 border-b">
-      <div class="col-span-3 font-semibold text-gray-700">EVENT</div>
-      <div class="col-span-2 font-semibold text-gray-700">PER RP</div>
-      <div class="col-span-2 font-semibold text-gray-700">POINT</div>
-      <div class="col-span-3 font-semibold text-gray-700">PERIODE</div>
-      <div class="col-span-2 font-semibold text-gray-700 text-right">AKSI</div>
-    </div>
-
-    <!-- ROW -->
-    <div *ngFor="let r of rules"
-      class="border-b border-gray-100 hover:bg-gray-50 transition">
-
-      <!-- DESKTOP -->
-      <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-5 items-center">
-
-        <div class="col-span-3">
-          <h3 class="font-semibold text-gray-900">{{ r.event_name }}</h3>
-          <span class="text-xs"
-            [ngClass]="r.is_active ? 'text-green-600':'text-red-600'">
-            {{ r.is_active ? 'Aktif':'Non Aktif' }}
+        <!-- POINT -->
+        <div class="col-span-1">
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-800 rounded-md text-sm font-bold">
+            {{ r.point_value }} <span class="text-xs font-normal text-gray-500">poin</span>
           </span>
         </div>
 
-        <div class="col-span-2 font-medium text-gray-700">
-          Rp {{ r.amount_per_point }}
+        <!-- PERIODE -->
+        <div class="col-span-2 text-xs text-gray-500">
+          <p>{{ r.start_date }}</p>
+          <p>{{ r.end_date }}</p>
         </div>
 
-        <div class="col-span-2 font-bold text-gray-900">
-          {{ r.point_value }} Poin
-        </div>
-
-        <div class="col-span-3 text-gray-600 text-sm">
-          {{ r.start_date }} - {{ r.end_date }}
-        </div>
-
+        <!-- AKSI -->
         <div class="col-span-2 flex justify-end gap-1">
           <button (click)="openEditModal(r)"
-            class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
-            <ion-icon name="create-outline"></ion-icon>
+            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition"
+            title="Edit">
+            <ion-icon name="create-outline" class="text-base"></ion-icon>
           </button>
-
           <button (click)="delete(r.id)"
-            class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-            <ion-icon name="trash-outline"></ion-icon>
+            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
+            title="Hapus">
+            <ion-icon name="trash-outline" class="text-base"></ion-icon>
           </button>
         </div>
-
       </div>
 
-      <!-- MOBILE -->
-      <div class="md:hidden p-5 space-y-2">
+      <!-- MOBILE ROW -->
+      <div class="md:hidden p-4">
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            [ngClass]="r.is_active ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'">
+            <ion-icon name="star-outline" class="text-lg"></ion-icon>
+          </div>
 
-        <div class="flex justify-between">
-          <p class="font-bold">{{ r.event_name }}</p>
-          <span class="text-sm font-semibold">{{ r.point_value }} P</span>
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <p class="font-semibold text-gray-900 truncate">{{ r.event_name }}</p>
+              <span class="text-xs font-bold px-2 py-0.5 rounded shrink-0"
+                [ngClass]="r.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'">
+                {{ r.is_active ? 'Aktif' : 'Non Aktif' }}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap gap-x-4 gap-y-1 mb-3 text-sm text-gray-600">
+              <span>Rp {{ r.amount_per_point | number }} = <b>{{ r.point_value }}</b> poin</span>
+              <span class="text-xs text-gray-400">{{ r.start_date }} – {{ r.end_date }}</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
+              <button (click)="openEditModal(r)"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-600
+                       rounded-lg text-xs font-medium border border-blue-100">
+                <ion-icon name="create-outline"></ion-icon> Edit
+              </button>
+              <button (click)="delete(r.id)"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-600
+                       rounded-lg text-xs font-medium border border-red-100">
+                <ion-icon name="trash-outline"></ion-icon> Hapus
+              </button>
+            </div>
+          </div>
         </div>
-
-        <p class="text-sm text-gray-600">
-          Rp {{ r.amount_per_point }}
-        </p>
-
-        <p class="text-xs text-gray-500">
-          {{ r.start_date }} - {{ r.end_date }}
-        </p>
-
-        <div class="flex gap-2">
-          <button (click)="openEditModal(r)"
-            class="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm">
-            Edit
-          </button>
-          <button (click)="delete(r.id)"
-            class="flex-1 py-2 bg-red-500 text-white rounded-lg text-sm">
-            Hapus
-          </button>
-        </div>
-
       </div>
 
     </div>
 
     <!-- PAGINATION -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between 
-                gap-4 px-6 py-4 bg-gray-50 border-t">
-
-      <span class="text-gray-700">
-        Menampilkan <b>{{ rules.length }}</b> data
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
+      <span class="text-sm text-gray-600">
+        Menampilkan <b>{{ rules.length }}</b> rule
       </span>
-
       <div class="flex items-center gap-2">
-        <button (click)="prevPage()"
-          class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg"
-          [disabled]="page<=1">
+        <button (click)="prevPage()" [disabled]="page <= 1"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+                 rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
           <ion-icon name="chevron-back-outline" class="text-black"></ion-icon>
         </button>
-
-        <span class="text-black">{{ page }} / {{ totalPages }}</span>
-
-        <button (click)="nextPage()"
-          class="w-9 h-9 flex items-center justify-center bg-white border rounded-lg"
-          [disabled]="page>=totalPages">
+        <span class="text-sm font-medium text-gray-700 px-1">{{ page }} / {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="page >= totalPages"
+          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+                 rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
           <ion-icon name="chevron-forward-outline" class="text-black"></ion-icon>
         </button>
       </div>
-
     </div>
+
   </div>
 </div>
-<!-- MODAL POINT RULE -->
-<div *ngIf="showModal"
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
 
-  <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
+<!-- MODAL TAMBAH / EDIT RULE -->
+<div *ngIf="showModal"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm
+         flex items-center justify-center z-[9999] p-4">
+
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
     <!-- HEADER -->
-    <div class="px-6 py-4 border-b flex justify-between items-center">
+    <div class="px-6 py-4 border-b flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-gray-900 text-white rounded-lg flex items-center justify-center">
           <ion-icon name="star-outline"></ion-icon>
         </div>
-
-        <h2 class="font-bold text-lg text-gray-900">
-          {{ isEdit ? 'Edit Rule Point' : 'Tambah Rule Point' }}
-        </h2>
+        <div>
+          <h2 class="font-bold text-base text-gray-900">
+            {{ isEdit ? 'Edit Rule Point' : 'Tambah Rule Point' }}
+          </h2>
+          <p class="text-xs text-gray-500">Konfigurasi aturan perolehan poin</p>
+        </div>
       </div>
-
-      <button (click)="closeModal()"
-        class="text-gray-500 hover:text-black transition">
+      <button (click)="closeModal()" class="text-gray-400 hover:text-black transition">
         <ion-icon name="close-outline" class="text-2xl"></ion-icon>
       </button>
     </div>
 
     <!-- BODY -->
-    <div class="p-6 space-y-6 overflow-y-auto">
+    <div class="p-6 space-y-4 overflow-y-auto flex-1">
 
-      <!-- EVENT -->
+      <!-- NAMA EVENT -->
       <div>
-        <label class="text-sm font-semibold text-gray-700 block mb-1">
-          Nama Event
-        </label>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Nama Event</label>
         <input [(ngModel)]="newRule.event_name"
           placeholder="Contoh: Promo Ramadhan"
-          class="w-full bg-white text-black border border-gray-300 
-                 rounded-lg px-4 py-2.5
-                 placeholder-gray-400
-                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                 outline-none transition">
+          class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+                 focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
       </div>
 
-      <!-- DATE -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
+      <!-- TANGGAL -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-semibold text-gray-700 block mb-1">
-            Tanggal Mulai
-          </label>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Tanggal Mulai</label>
           <input type="date" [(ngModel)]="newRule.start_date"
-            class="w-full bg-white text-black border border-gray-300 
-                   rounded-lg px-4 py-2.5
-                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                   outline-none transition">
+            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
-
         <div>
-          <label class="text-sm font-semibold text-gray-700 block mb-1">
-            Tanggal Selesai
-          </label>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Tanggal Selesai</label>
           <input type="date" [(ngModel)]="newRule.end_date"
-            class="w-full bg-white text-black border border-gray-300 
-                   rounded-lg px-4 py-2.5
-                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                   outline-none transition">
+            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
-
       </div>
 
-      <!-- POINT CONFIG -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+      <!-- NOMINAL & POINT -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-semibold text-gray-700 block mb-1">
-            Nominal per Point
-          </label>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Nominal per Point (Rp)</label>
           <input type="number" [(ngModel)]="newRule.amount_per_point"
             placeholder="Contoh: 10000"
-            class="w-full bg-white text-black border border-gray-300 
-                   rounded-lg px-4 py-2.5
-                   placeholder-gray-400
-                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                   outline-none transition">
-          <p class="text-xs text-gray-500 mt-1">
-            10000 = 1 Point
-          </p>
+            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
+          <p class="text-[11px] text-gray-400 mt-1">Rp 10.000 belanja = 1 Poin</p>
         </div>
-
         <div>
-          <label class="text-sm font-semibold text-gray-700 block mb-1">
-            Jumlah Point
-          </label>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Jumlah Point Didapat</label>
           <input type="number" [(ngModel)]="newRule.point_value"
             placeholder="Contoh: 1"
-            class="w-full bg-white text-black border border-gray-300 
-                   rounded-lg px-4 py-2.5
-                   placeholder-gray-400
-                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200
-                   outline-none transition">
+            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+                   focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
-
       </div>
 
-      <!-- ACTIVE -->
-      <div class="flex items-center gap-3 pt-2">
-        <input type="checkbox"
+      <!-- STATUS AKTIF -->
+      <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <input type="checkbox" id="isActiveCheck"
           class="w-4 h-4 accent-black cursor-pointer"
           [(ngModel)]="newRule.is_active">
-
-        <span class="text-sm font-medium text-gray-700">
+        <label for="isActiveCheck" class="text-sm font-medium text-gray-700 cursor-pointer">
           Rule Aktif
-        </span>
+          <span class="block text-xs text-gray-400 font-normal">Aktifkan agar rule berlaku saat transaksi</span>
+        </label>
       </div>
 
     </div>
 
     <!-- FOOTER -->
-    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50">
-
+    <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50 shrink-0">
       <button (click)="closeModal()"
-        class="px-4 py-2 border border-gray-300 
-               rounded-lg text-gray-700 hover:bg-gray-100 transition">
+        class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition">
         Batal
       </button>
-
       <button (click)="isEdit ? update() : save()"
-        class="px-6 py-2 bg-gray-900 text-white 
-               rounded-lg hover:bg-black transition shadow-sm">
+        class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-black transition shadow-sm">
         {{ isEdit ? 'Update Rule' : 'Simpan Rule' }}
       </button>
-
     </div>
 
   </div>
 </div>
-
-<ion-alert
-  [isOpen]="showDeleteAlert"
-  header="Hapus Rule?"
-  message="Data akan dihapus permanen"
-  [buttons]="deleteButtons">
-</ion-alert>

@@ -81,8 +81,8 @@ class RedemptionModel extends Model
             'member_id'      => $memberId,
             'points_earned'  => 0,
             'points_used'    => $pointPrice,
-            'earned_date'    => date('Y-m-d'),
-            'expiry_date'    => date('Y-m-d'), // Tanggal hari ini saja
+            'earned_date'    => date('Y-m-d H:i:s'),
+            'expiry_date'    => date('Y-m-d H:i:s'), // Tanggal hari ini saja
             'status'         => 'used'
         ]);
 

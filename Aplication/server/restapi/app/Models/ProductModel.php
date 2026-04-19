@@ -9,7 +9,7 @@ class ProductModel extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
 
-public function getProductsWithAddons($limit, $offset, $search = '')
+public function getProductsWithAddons($limit, $offset, $search = '', $categoryId = null)
 {
     // 1. Ambil Produk Saja (Agar limit dan offset akurat pada produk)
     $builder = $this->db->table('products p')
@@ -24,6 +24,7 @@ public function getProductsWithAddons($limit, $offset, $search = '')
             p.is_active,
             p.category_id,
             p.created_at,
+            p.is_exchangeable,
             c.category_name
         ')
         ->join('categories c', 'c.id = p.category_id', 'left');
@@ -33,6 +34,10 @@ public function getProductsWithAddons($limit, $offset, $search = '')
                 ->like('p.product_name', $search)
                 ->orLike('p.product_code', $search)
                 ->groupEnd();
+    }
+
+    if ($categoryId) {
+        $builder->where('p.category_id', $categoryId);
     }
 
     $products = $builder
@@ -93,7 +98,7 @@ public function getProductsWithAddons($limit, $offset, $search = '')
     return $flatResult;
 }
 
-    public function countProducts($search)
+    public function countProducts($search, $categoryId = null)
     {
         $builder = $this->db->table('products');
 
@@ -102,6 +107,10 @@ public function getProductsWithAddons($limit, $offset, $search = '')
                     ->like('product_name', $search)
                     ->orLike('product_code', $search)
                     ->groupEnd();
+        }
+
+        if ($categoryId) {
+            $builder->where('category_id', $categoryId);
         }
 
         return $builder->countAllResults();
@@ -160,7 +169,8 @@ public function createProduct($data, $addons = [])
         'price'        => $data['price'],
         'point_price'  => $data['point_price'] ?? 0,
         'qty'          => $data['qty'],
-        'is_active'    => $data['is_active']
+        'is_active'    => $data['is_active'],
+        'is_exchangeable' => $data['is_exchangeable'] ?? 1
     ]);
 
     $productId = $this->db->insertID();
@@ -267,6 +277,7 @@ public function getKasirProducts($search = '', $category = '', $limit = 9, $page
             p.qty,
             p.is_active,
             p.category_id,
+            p.is_exchangeable,
             c.category_name
         ')
         ->join('categories c', 'c.id = p.category_id', 'left')

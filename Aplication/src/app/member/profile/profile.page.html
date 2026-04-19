@@ -1,98 +1,365 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="header-toolbar">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/member/home" text="" color="dark"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Profil Saya</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true" class="profile-content">
 
-  <div class="wrapper">
+  <!-- SKELETON LOADING -->
+  <div class="wrapper skeleton-wrapper" *ngIf="loading">
+    <div class="header">
+      <div class="header-left">
+        <ion-skeleton-text animated style="width: 44px; height: 44px; border-radius: 50%"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 150px; height: 30px; border-radius: 8px"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <div class="profile-hero skeleton">
+      <div class="user-main">
+        <div class="avatar-box skeleton">
+          <ion-skeleton-text animated style="width: 100%; height: 100%; border-radius: inherit"></ion-skeleton-text>
+        </div>
+        <div class="user-text">
+          <ion-skeleton-text animated style="width: 100px; height: 12px; margin-bottom: 8px"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width: 200px; height: 32px; border-radius: 6px"></ion-skeleton-text>
+        </div>
+      </div>
+      <div class="stats-row skeleton">
+        <ion-skeleton-text animated style="width: 100%; height: 60px; border-radius: 12px"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <div class="menu-container">
+      <div class="menu-section">
+        <ion-skeleton-text animated style="width: 120px; height: 16px; margin-bottom: 1.5rem"></ion-skeleton-text>
+        <div class="menu-card skeleton">
+          <div class="menu-item" *ngFor="let i of [1,2,3]">
+            <div class="item-start">
+              <ion-skeleton-text animated style="width: 24px; height: 24px; border-radius: 6px"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 140px; height: 16px"></ion-skeleton-text>
+            </div>
+            <ion-skeleton-text animated style="width: 20px; height: 20px"></ion-skeleton-text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrapper" *ngIf="!loading">
     
-    <!-- IDENTITY HEADER -->
-    <div class="identity-section">
-      <div class="avatar-wrapper">
-        <div class="avatar-main">
-          {{ getInitials(name) }}
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="back-btn" (click)="goBack()">
+          <ion-icon name="arrow-back"></ion-icon>
+        </div>
+        <div class="title-wrap">
+          <h1 class="page-title">Profil Saya</h1>
         </div>
       </div>
-      <h2 class="user-name">{{ name }}</h2>
-      <p class="user-handle">@{{ username }}</p>
-      <div class="status-badge">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Verified Member
+      <div class="header-right">
+        <div class="icon-btn" (click)="loadProfile()">
+          <ion-icon name="refresh-outline"></ion-icon>
+        </div>
       </div>
     </div>
 
-    <!-- LOADER -->
-    <div *ngIf="loading" class="loader-state">
-      <ion-spinner name="crescent"></ion-spinner>
+    <!-- PROFILE HERO SECTION -->
+    <div class="profile-hero">
+      <div class="user-main">
+        <div class="avatar-box">
+          <img *ngIf="imageUrl" [src]="imageUrl" alt="Avatar">
+          <div *ngIf="!imageUrl" class="initial-avatar">{{ getInitial() }}</div>
+        </div>
+        <div class="user-text">
+          <p class="greeting">Anggota Terdaftar</p>
+          <h2 class="name">{{ name }}</h2>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="label">Level</span>
+          <div class="value-row">
+            <ion-icon name="heart"></ion-icon>
+            <span class="value">{{ level }}</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-box">
+          <span class="label">Total Poin</span>
+          <div class="value-row">
+            <ion-icon name="star"></ion-icon>
+            <span class="value">{{ points }} <small>PTS</small></span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content-body" *ngIf="!loading">
+    <!-- MENU CONTAINER -->
+    <div class="menu-container">
       
-      <!-- IDENTITY FORM -->
-      <div class="form-card">
-        <div class="card-header">
-          <h3>Personal Details</h3>
+      <!-- SECTION: ORDERS -->
+      <section class="menu-section">
+        <h3 class="section-title">Pesanan & Belanja</h3>
+        <div class="menu-card">
+          <div class="menu-item" routerLink="/member/riwayat">
+            <div class="item-start">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>Riwayat Transaksi</span>
+            </div>
+            <div class="item-end">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="input-item">
-          <label>Username</label>
-          <ion-input [(ngModel)]="username" placeholder="Username"></ion-input>
+      <!-- SECTION: ACCOUNT SETTINGS -->
+      <section class="menu-section">
+        <h3 class="section-title">Informasi Akun</h3>
+        <div class="menu-card">
+          <div class="menu-item" id="open-detail-modal">
+            <div class="item-start">
+              <ion-icon name="person-circle-outline"></ion-icon>
+              <span>Detail Profil</span>
+            </div>
+            <div class="item-end">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </div>
+          </div>
+          
+          <div class="menu-item" id="open-edit-modal">
+            <div class="item-start">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>Ubah Profil</span>
+            </div>
+            <div class="item-end">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </div>
+          </div>
+          <div class="menu-item" (click)="openSecuritySection()">
+            <div class="item-start">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+              <span>Keamanan</span>
+            </div>
+            <div class="item-end">
+              <ion-icon name="chevron-forward"></ion-icon>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="input-item">
-          <label>Full Name</label>
-          <ion-input [(ngModel)]="name" placeholder="Enter your name"></ion-input>
-        </div>
+      <!-- EDIT MODAL -->
+      <ion-modal #editModal trigger="open-edit-modal" class="edit-modal">
+        <ng-template>
+          <div class="modal-wrapper">
+            <div class="modal-header">
+              <h3>Ubah Profil</h3>
+            </div>
+            <div class="modal-body">
+              
+              <div class="photo-section">
+                <div class="avatar-preview" (click)="fileInput.click()">
+                  <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview">
+                  <div *ngIf="!imagePreview" class="initial-preview">{{ getInitial() }}</div>
+                  <div class="camera-overlay">
+                    <ion-icon name="camera"></ion-icon>
+                  </div>
+                </div>
+                <input type="file" #fileInput (change)="onFileSelected($event)" hidden accept="image/*">
+                <p class="photo-hint">Ketuk untuk ubah foto</p>
+              </div>
 
-        <div class="input-item">
-          <label>Email Address</label>
-          <ion-input [(ngModel)]="email" type="email" placeholder="Email"></ion-input>
-        </div>
+              <div class="edit-form">
+                <div class="input-item">
+                  <label>Nama Lengkap</label>
+                  <ion-input [(ngModel)]="name" placeholder="Nama Anda"></ion-input>
+                </div>
+                <div class="input-item">
+                  <label>Username</label>
+                  <ion-input [(ngModel)]="username" placeholder="username"></ion-input>
+                </div>
+                <div class="input-item">
+                  <label>Email</label>
+                  <ion-input type="email" [(ngModel)]="email" placeholder="email@example.com"></ion-input>
+                </div>
+                <div class="input-item">
+                  <label>Nomor HP</label>
+                  <ion-input type="tel" [(ngModel)]="phone" placeholder="08xxx"></ion-input>
+                </div>
+              </div>
 
-        <div class="input-item">
-          <label>Phone Number</label>
-          <ion-input [(ngModel)]="phone" type="tel" placeholder="Phone"></ion-input>
-        </div>
+              <div class="modal-actions">
+                <button class="btn-save" (click)="updateProfile(); editModal.dismiss()" [disabled]="saving">
+                  <span *ngIf="!saving">Simpan Perubahan</span>
+                  <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+                </button>
+                <button class="btn-cancel" (click)="editModal.dismiss()">Batal</button>
+              </div>
 
-        <button class="btn-save" (click)="updateProfile()">
-          Save Changes
+            </div>
+          </div>
+        </ng-template>
+      </ion-modal>
+
+      <!-- SECURITY SETTINGS MODAL (Unified) -->
+      <ion-modal [isOpen]="showSecurityModal" (didDismiss)="showSecurityModal = false" class="security-settings-modal">
+        <ng-template>
+          <div class="modal-wrapper">
+            
+            <!-- MODE: CHANGE PASSWORD (Default after verification) -->
+            <div *ngIf="securityMode === 'change'" class="mode-container">
+              <div class="modal-header">
+                <div class="icon-circle success">
+                  <ion-icon name="key"></ion-icon>
+                </div>
+                <h3>Ganti Kata Sandi</h3>
+                <p>Masukkan sandi saat ini dan sandi baru Anda.</p>
+              </div>
+              <div class="modal-body">
+                <div class="edit-form">
+                  <div class="input-item">
+                    <label>Sandi Saat Ini</label>
+                    <ion-input type="password" [(ngModel)]="oldPassword" placeholder="********"></ion-input>
+                  </div>
+                  <div class="input-item">
+                    <label>Sandi Update</label>
+                    <ion-input type="password" [(ngModel)]="newPassword" placeholder="Sandi baru"></ion-input>
+                  </div>
+                  <div class="input-item">
+                    <label>Konfirmasi Sandi Update</label>
+                    <ion-input type="password" [(ngModel)]="confirmPassword" placeholder="Ulangi sandi baru"></ion-input>
+                  </div>
+                </div>
+                <div class="modal-actions">
+                  <button class="btn-primary-action" (click)="submitChangePassword()" [disabled]="saving">
+                    <span *ngIf="!saving">Simpan Sandi Baru</span>
+                    <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+                  </button>
+                  <p class="switch-link" (click)="handleForgotPassword()">Gunakan WhatsApp OTP (Lupa Sandi)</p>
+                  <button class="btn-cancel-text" (click)="showSecurityModal = false">Batal</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODE: RESET PASSWORD (OTP FLOW) -->
+            <div *ngIf="securityMode === 'reset'" class="mode-container reset-mode">
+              <div class="modal-header">
+                <div class="icon-circle whatsapp">
+                  <ion-icon name="logo-whatsapp"></ion-icon>
+                </div>
+                <h3>Lupa Sandi?</h3>
+                <p>Masukkan nomor WhatsApp terdaftar Anda untuk menerima kode verifikasi.</p>
+              </div>
+              
+              <div class="modal-body">
+                <!-- STEP 1: INPUT PHONE -->
+                <div *ngIf="resetStep === 1" class="step-container">
+                  <div class="input-group">
+                    <label>Nomor WhatsApp</label>
+                    <div class="input-with-icon">
+                      <ion-icon name="phone-portrait-outline"></ion-icon>
+                      <ion-input type="tel" [(ngModel)]="resetPhone" placeholder="Contoh: 08123456789"></ion-input>
+                    </div>
+                  </div>
+                  
+                  <div class="modal-actions">
+                    <button class="btn-primary-action" (click)="requestResetOTP()" [disabled]="saving">
+                      <span *ngIf="!saving">Kirim Kode ke WA</span>
+                      <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+                    </button>
+                    <button class="btn-cancel-text" (click)="securityMode = 'change'">Kembali ke Ubah Sandi</button>
+                  </div>
+                </div>
+
+                <!-- STEP 2: INPUT OTP -->
+                <div *ngIf="resetStep === 2" class="step-container">
+                  <div class="modal-header">
+                     <p class="otp-sent-text">Kode telah dikirim ke WhatsApp <strong>{{ resetPhone }}</strong></p>
+                  </div>
+                  <div class="input-group otp-group">
+                    <ion-input type="text" [(ngModel)]="otpCode" placeholder="6 DIGIT" maxlength="6"></ion-input>
+                  </div>
+                  <div class="modal-actions">
+                    <button class="btn-primary-action" (click)="verifyResetOTP()" [disabled]="saving">Verifikasi Kode</button>
+                    <p class="resend-link" (click)="requestResetOTP()">Belum terima kode? <span>Kirim ulang</span></p>
+                    <button class="btn-cancel-text" (click)="resetStep = 1">Ganti Nomor</button>
+                  </div>
+                </div>
+
+                <!-- STEP 3: NEW PASSWORD -->
+                <div *ngIf="resetStep === 3" class="step-container">
+                   <div class="edit-form">
+                    <div class="input-item">
+                      <label>Sandi Baru</label>
+                      <ion-input type="password" [(ngModel)]="newPassword" placeholder="Sandi baru"></ion-input>
+                    </div>
+                    <div class="input-item">
+                      <label>Konfirmasi Sandi Baru</label>
+                      <ion-input type="password" [(ngModel)]="confirmPassword" placeholder="Ulangi sandi baru"></ion-input>
+                    </div>
+                  </div>
+                  <div class="modal-actions">
+                    <button class="btn-primary-action" (click)="confirmReset()" [disabled]="saving">
+                      <span *ngIf="!saving">Simpan Sandi Baru</span>
+                      <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </ng-template>
+      </ion-modal>
+
+      <!-- DETAIL MODAL -->
+      <ion-modal #detailModal trigger="open-detail-modal" class="detail-modal">
+        <ng-template>
+          <div class="modal-wrapper">
+            <div class="modal-header">
+              <h3>Detail Akun</h3>
+            </div>
+            <div class="modal-body">
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="label">Nama Lengkap</span>
+                  <p class="value">{{ name }}</p>
+                </div>
+                <div class="info-item">
+                  <span class="label">Username</span>
+                  <p class="value">@{{ username }}</p>
+                </div>
+                <div class="info-item">
+                  <span class="label">Email</span>
+                  <p class="value">{{ email || '-' }}</p>
+                </div>
+                <div class="info-item">
+                  <span class="label">Nomor HP</span>
+                  <p class="value">{{ phone || '-' }}</p>
+                </div>
+              </div>
+
+              <div class="modal-actions">
+                <button class="btn-close" (click)="detailModal.dismiss()">
+                  Oke, Saya Mengerti
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </ion-modal>
+
+      <!-- BANNERS & OTHERS -->
+      <div class="extra-actions">
+
+        <!-- LOGOUT -->
+        <button class="logout-btn" (click)="logout()">
+          <ion-icon name="log-out-outline"></ion-icon>
+          <span>Keluar dari Akun</span>
         </button>
+
+        <p class="app-version">TheFourtyFour App v1.2.0</p>
       </div>
-
-      <!-- SECURITY FORM -->
-      <div class="form-card">
-        <div class="card-header">
-          <h3>Security & Password</h3>
-        </div>
-
-        <div class="input-item">
-          <label>Current Password</label>
-          <ion-input [(ngModel)]="oldPassword" type="password" placeholder="••••••••"></ion-input>
-        </div>
-
-        <div class="input-item">
-          <label>New Password</label>
-          <ion-input [(ngModel)]="newPassword" type="password" placeholder="••••••••"></ion-input>
-        </div>
-
-        <button class="btn-outline" (click)="changePassword()">
-          Update Password
-        </button>
-      </div>
-
-      <!-- LOGOUT -->
-      <button class="btn-logout" (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-        Logout Securely
-      </button>
 
     </div>
+
   </div>
 
   <ion-toast
@@ -103,4 +370,4 @@
     (didDismiss)="showToast=false">
   </ion-toast>
 
-</ion-content>
+</ion-content>

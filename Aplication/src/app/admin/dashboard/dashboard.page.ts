@@ -1,6 +1,14 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner, IonButtons, IonMenuButton 
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  people, cube, cart, wallet, barChart, 
+  flame, receipt, documentText, trendingUp, 
+  fileTray, menuOutline, calendarOutline 
+} from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
 
 import { DashboardService, DashboardMetrics, BestProduct, RecentTransaction } from 'src/app/services/dashboard.service';
@@ -28,15 +36,15 @@ Chart.register(
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
-    IonicModule,
-    CommonModule,
-    RouterModule
+    IonIcon, IonSpinner,
+    CommonModule, RouterModule
   ],
   templateUrl: './dashboard.page.html',
 })
 export class AdminDashboard implements OnInit, AfterViewInit {
 
   name: string = 'Admin';
+  today: Date = new Date();
   chart!: Chart;
   
   metrics: DashboardMetrics = { transactions: 0, revenue: 0, products: 0, members: 0 };
@@ -48,7 +56,22 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   constructor(
     private router: Router,
     private dashboardService: DashboardService
-  ) {}
+  ) {
+    addIcons({ 
+      'people': people, 
+      'cube': cube, 
+      'cart': cart, 
+      'wallet': wallet, 
+      'bar-chart': barChart, 
+      'flame': flame, 
+      'receipt': receipt, 
+      'document-text': documentText, 
+      'trending-up': trendingUp, 
+      'file-tray': fileTray,
+      'menu-outline': menuOutline,
+      'calendar-outline': calendarOutline
+    });
+  }
 
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

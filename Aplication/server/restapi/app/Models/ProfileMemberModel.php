@@ -8,13 +8,13 @@ class ProfileMemberModel extends Model
     protected $table = 'users';
     protected $primaryKey = 'id';
     protected $allowedFields = [
-        'name','email','phone','username','password'
+        'name','email','phone','username','password','image'
     ];
 
     /* ================= GET PROFILE ================= */
     public function getProfile($userId)
     {
-        return $this->select('id, name, email, phone, username, created_at')
+        return $this->select('id, name, email, phone, username, image, created_at')
             ->where('id', $userId)
             ->first();
     }

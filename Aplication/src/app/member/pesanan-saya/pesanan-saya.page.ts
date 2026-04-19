@@ -1,17 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { 
+  IonContent, IonIcon, IonSpinner
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  arrowBack, refreshOutline, informationCircleOutline, 
+  giftOutline, cafeOutline, star, chevronForward, idCardOutline 
+} from 'ionicons/icons';
 import { HomeService, RedemptionItem } from 'src/app/services/home.service';
 import { environment } from 'src/environments/environment';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { ToastController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-pesanan-saya',
   templateUrl: './pesanan-saya.page.html',
   styleUrls: ['./pesanan-saya.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonContent, IonIcon, IonSpinner,
+    CommonModule, FormsModule, RouterModule
+  ]
 })
 export class PesananSayaPage implements OnInit {
 
@@ -23,7 +34,18 @@ export class PesananSayaPage implements OnInit {
     private homeService: HomeService,
     private toastCtrl: ToastController,
     private router: Router
-  ) { }
+  ) {
+    addIcons({ 
+      'arrow-back': arrowBack, 
+      'refresh-outline': refreshOutline, 
+      'information-circle-outline': informationCircleOutline, 
+      'gift-outline': giftOutline, 
+      'cafe-outline': cafeOutline, 
+      'star': star, 
+      'chevron-forward': chevronForward, 
+      'id-card-outline': idCardOutline 
+    });
+  }
 
   ngOnInit() {
     this.loadHistory();
@@ -36,10 +58,24 @@ export class PesananSayaPage implements OnInit {
     this.homeService.getMemberRedemptions(userId).subscribe({
       next: (res) => {
         if (res.status) {
-          this.redemptions = res.data.map(r => ({
-            ...r,
-            product_image: r.image ? `${this.apiUrl}/uploads/products/${r.image}` : null
-          }));
+          const now = new Date().getTime();
+          this.redemptions = res.data.map((r: any) => {
+            
+            // Auto expire checking on frontend
+            let currentStatus = r.status;
+            if (currentStatus === 'pending') {
+               const expDate = new Date(r.expired_at).getTime();
+               if (now > expDate) {
+                  currentStatus = 'expired';
+               }
+            }
+
+            return {
+              ...r,
+              status: currentStatus,
+              product_image: r.image ? `${this.apiUrl}/uploads/products/${r.image}` : null
+            };
+          });
         }
         this.loading = false;
       },
@@ -63,7 +99,7 @@ export class PesananSayaPage implements OnInit {
     switch (status) {
       case 'pending': return 'Siap Diambil';
       case 'claimed': return 'Sudah Diambil';
-      case 'expired': return 'Kadaluwarsa';
+      case 'expired': return 'Hangus';
       default: return status;
     }
   }

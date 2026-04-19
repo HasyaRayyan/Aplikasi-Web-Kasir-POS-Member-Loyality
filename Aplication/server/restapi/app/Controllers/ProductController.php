@@ -16,14 +16,20 @@ class ProductController extends ResourceController
     $page   = (int) ($this->request->getGet('page') ?? 1);
     $limit  = (int) ($this->request->getGet('limit') ?? 10);
     $search = $this->request->getGet('search') ?? '';
+    $categoryId = $this->request->getGet('category_id');
+
+    // Handle empty string as null for better filtering
+    if ($categoryId === '') {
+        $categoryId = null;
+    }
 
     $offset = ($page - 1) * $limit;
 
     // TOTAL
-    $total = $productModel->countProducts($search);
+    $total = $productModel->countProducts($search, $categoryId);
 
     // DATA
-    $rows = $productModel->getProductsWithAddons($limit, $offset, $search);
+    $rows = $productModel->getProductsWithAddons($limit, $offset, $search, $categoryId);
 
     $products = [];
 
@@ -40,6 +46,7 @@ class ProductController extends ResourceController
                 'point_price'   => $r['point_price'],
                 'qty'           => $r['qty'],
                 'is_active'     => $r['is_active'],
+                'is_exchangeable' => $r['is_exchangeable'],
 
                 // ⬇️ TAMBAHAN KATEGORI
                 'category_id'   => $r['category_id'],
@@ -152,7 +159,8 @@ public function create()
         'price'        => $this->request->getPost('price'),
         'point_price'  => $this->request->getPost('point_price'),
         'qty'          => $this->request->getPost('qty'),
-        'is_active'    => $this->request->getPost('is_active')
+        'is_active'    => $this->request->getPost('is_active'),
+        'is_exchangeable' => $this->request->getPost('is_exchangeable')
     ];
 
     $addonsJson = $this->request->getPost('addons');
@@ -222,7 +230,8 @@ public function updates($id)
         'price'        => $this->request->getPost('price'),
         'point_price'  => $this->request->getPost('point_price'),
         'qty'          => $this->request->getPost('qty'),
-        'is_active'    => $this->request->getPost('is_active')
+        'is_active'    => $this->request->getPost('is_active'),
+        'is_exchangeable' => $this->request->getPost('is_exchangeable')
     ];
 
     $addonsJson = $this->request->getPost('addons');

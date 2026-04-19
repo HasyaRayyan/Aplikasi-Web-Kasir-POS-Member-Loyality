@@ -1,68 +1,149 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="header-toolbar">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/member/home" (click)="goBack()"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Redeem Point</ion-title>
-    <div slot="end" class="points-badge">
-      <ion-icon name="star" color="warning"></ion-icon>
-      <span>{{ userPoints.toLocaleString() }}</span>
-    </div>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  
-  <div class="promo-banner">
-    <div class="banner-content">
-      <h2>Tukar Poinmu!</h2>
-      <p>Dapatkan penawaran menarik hanya dengan poin loyalitas Anda.</p>
-    </div>
-    <div class="banner-icon">
-      <ion-icon name="gift-outline"></ion-icon>
-    </div>
-  </div>
-
-  <div class="section-title">
-    <h3>Pilihan Hadiah</h3>
-    <p>Pilih barang yang ingin Anda ambil di toko.</p>
-  </div>
-
-  <div *ngIf="loading" class="loading-state">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Memuat produk...</p>
-  </div>
-
-  <div *ngIf="!loading && products.length === 0" class="empty-state">
-    <ion-icon name="cube-outline"></ion-icon>
-    <p>Belum ada produk yang tersedia untuk ditukar poin saat ini.</p>
-  </div>
-
-  <div class="product-grid" *ngIf="!loading && products.length > 0">
-    <div class="product-card" *ngFor="let p of products">
-      <div class="product-image">
-        <img *ngIf="p.image_url; else noImg" [src]="p.image_url" alt="product">
-        <ng-template #noImg>
-          <div class="no-image-placeholder">
-            <ion-icon name="image-outline"></ion-icon>
-          </div>
-        </ng-template>
-      </div>
-      
-      <div class="product-info">
-        <h4>{{ p.product_name }}</h4>
-        <div class="point-requirement">
-          <ion-icon name="star"></ion-icon>
-          <span class="pts">{{ p.point_price }}</span>
-          <span class="lbl">Poin</span>
+<ion-content [fullscreen]="true" class="redeem-content">
+  <div class="wrapper">
+    
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="back-btn" (click)="goBack()">
+          <ion-icon name="arrow-back"></ion-icon>
         </div>
-        
-        <button class="redeem-action-btn" (click)="confirmRedeem(p)" [disabled]="userPoints < p.point_price">
-          <ion-icon name="gift-outline"></ion-icon>
-          {{ userPoints < p.point_price ? 'Poin Kurang' : 'Tukar Sekarang' }}
-        </button>
+        <div class="title-wrap">
+          <h1 class="page-title">Tukar Poin</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="icon-btn" (click)="loadRedeemableProducts()">
+          <ion-icon name="refresh-outline"></ion-icon>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- POINTS SUMMARY CARD -->
+    <div class="points-summary">
+      <div class="summary-content">
+        <div class="label-wrap">
+          <ion-icon name="star"></ion-icon>
+          <span>Poin Tersedia</span>
+        </div>
+        <h2 class="amount">{{ userPoints.toLocaleString() }} <small>PTS</small></h2>
+      </div>
+      <div class="summary-btn" routerLink="/member/poin-saya">
+        Riwayat
+      </div>
+    </div>
+
+    <!-- PROMO INFO (Minimalist) -->
+    <div class="info-card">
+      <div class="info-content">
+        <div class="info-icon">
+          <ion-icon name="gift-outline"></ion-icon>
+        </div>
+        <div class="info-text">
+          <h4>Dapatkan Produk Gratis!</h4>
+          <p>Tukarkan poin loyalitas Anda dengan pilihan menu eksklusif kami secara gratis.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCT LISTING -->
+    <div *ngIf="loading" class="product-grid">
+      <div *ngFor="let s of [1,2,3,4]" class="product-card skeleton-pulse">
+        <div class="image-box skeleton-line opacity-10"></div>
+        <div class="info-box">
+          <div class="skeleton-line w-32 h-4 mb-2"></div>
+          <div class="skeleton-line w-full h-10"></div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading" class="product-grid">
+      <div class="product-card" *ngFor="let p of products">
+        <div class="image-box">
+          <img *ngIf="p.image_url; else noImg" [src]="p.image_url" alt="product">
+          <ng-template #noImg>
+            <div class="thumb-placeholder">
+              <ion-icon name="cafe-outline"></ion-icon>
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="info-box">
+          <h3 class="product-name">{{ p.product_name }}</h3>
+          
+          <div class="requirements">
+            <ion-icon name="star"></ion-icon>
+            <span>{{ p.point_price }} Poin</span>
+          </div>
+
+          <button class="btn-redeem" 
+                  (click)="confirmRedeem(p)" 
+                  [disabled]="Number(userPoints) < Number(p.point_price)">
+            {{ Number(userPoints) < Number(p.point_price) ? 'Poin Kurang' : 'Tukar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && products.length === 0" class="empty-state">
+      <div class="empty-icon-box">
+        <ion-icon name="cube-outline"></ion-icon>
+      </div>
+      <h3>Tidak Ada Pilihan</h3>
+      <p>Belum ada produk yang tersedia untuk penukaran poin saat ini.</p>
+    </div>
+
+    <!-- REDEEM CONFIRMATION MODAL -->
+    <ion-modal [isOpen]="isModalOpen" 
+               (didDismiss)="closeModal()"
+               class="redeem-modal">
+      <ng-template>
+        <div class="modal-wrapper">
+          <div class="modal-header">
+            <h3>Konfirmasi</h3>
+          </div>
+          
+          <div class="modal-body" *ngIf="selectedProduct">
+            <div class="confirm-card">
+              <div class="prod-preview">
+                <img [src]="selectedProduct.image_url" *ngIf="selectedProduct.image_url" alt="preview">
+                <div class="icon-placeholder" *ngIf="!selectedProduct.image_url">
+                  <ion-icon name="gift-outline"></ion-icon>
+                </div>
+              </div>
+              <div class="prod-details">
+                <h4>{{ selectedProduct.product_name }}</h4>
+                <div class="cost-info">
+                  <ion-icon name="star"></ion-icon>
+                  <span>{{ selectedProduct.point_price }} Poin</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-box">
+              <div class="row">
+                <span>Poin Saat Ini</span>
+                <span>{{ userPoints }} PTS</span>
+              </div>
+              <div class="row divider">
+                <span>Poin Terpakai</span>
+                <span class="minus">-{{ selectedProduct.point_price }} PTS</span>
+              </div>
+              <div class="row total">
+                <span>Sisa Poin</span>
+                <span>{{ userPoints - selectedProduct.point_price }} PTS</span>
+              </div>
+            </div>
+
+            <div class="action-grid">
+              <button class="btn-cancel" (click)="closeModal()">Batal</button>
+              <button class="btn-confirm" (click)="processRedeem()">
+                Konfirmasi & Tukar
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
+
+  </div>
 </ion-content>

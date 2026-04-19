@@ -13,8 +13,8 @@ export class CategoryService {
   constructor(private http: HttpClient) {}
 
   // ================= GET ALL =================
-  getCategories(): Observable<any> {
-    return this.http.get(this.baseUrl);
+  getCategories(page = 1, limit = 10, search = ''): Observable<any> {
+    return this.http.get(`${this.baseUrl}?page=${page}&limit=${limit}&search=${search}`);
   }
 
   // ================= GET BY ID =================

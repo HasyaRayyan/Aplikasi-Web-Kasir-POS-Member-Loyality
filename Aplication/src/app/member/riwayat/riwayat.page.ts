@@ -1,13 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonIcon,
+import { IonContent, IonIcon,
   IonAccordionGroup, IonAccordion,
-  IonItem, IonLabel, IonList, IonButtons, IonBackButton,
+  IonItem, IonLabel,
   IonModal, IonDatetime, IonDatetimeButton
 } from '@ionic/angular/standalone';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HomeService, RiwayatTransaction } from 'src/app/services/home.service';
+
+import { 
+  arrowBack, refreshOutline, star, calendarOutline, 
+  calendarNumberOutline, receiptOutline, wallet, 
+  card, chevronDown, flagOutline 
+} from 'ionicons/icons';
+import { addIcons } from 'ionicons';
 
 @Component({
   selector: 'app-riwayat',
@@ -15,7 +22,7 @@ import { HomeService, RiwayatTransaction } from 'src/app/services/home.service';
   styleUrls: ['./riwayat.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle,
+    IonContent,
     IonIcon, IonAccordionGroup, IonAccordion,
     IonItem, IonLabel, IonModal, IonDatetime, IonDatetimeButton,
     CommonModule, FormsModule
@@ -34,10 +41,30 @@ export class RiwayatPage implements OnInit {
   totalSpent: number = 0;
   earnedPoints: number = 0;
 
-  constructor(private homeService: HomeService) {}
+  constructor(
+    private homeService: HomeService,
+    private router: Router
+  ) {
+    addIcons({ 
+      'arrow-back': arrowBack, 
+      'refresh-outline': refreshOutline, 
+      'star': star, 
+      'calendar-outline': calendarOutline, 
+      'calendar-number-outline': calendarNumberOutline, 
+      'receipt-outline': receiptOutline, 
+      'wallet': wallet, 
+      'card': card, 
+      'chevron-down': chevronDown, 
+      'flag-outline': flagOutline 
+    });
+  }
 
   ngOnInit() {
     this.loadRiwayat();
+  }
+
+  goBack() {
+    this.router.navigate(['/member/home']);
   }
 
   loadRiwayat() {

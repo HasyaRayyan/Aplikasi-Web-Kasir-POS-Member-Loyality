@@ -1,88 +1,26 @@
-// // @import 'tailwindcss/base';
-// @tailwind base;
-// @tailwind components;
-// @tailwind utilities;
-
-
-// @import 'tailwindcss/components';
-
-// @import 'tailwindcss/utilities';
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
-/* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
-// * {
-//   font-family: 'Montserrat', sans-serif;
-// }
 
-// :root {
-//   --ion-font-family: 'Montserrat', sans-serif;
-// }
-// .menu-item {
-//   @apply flex items-center h-11 px-4 rounded-2xl
-//          hover:bg-slate-800 hover:text-white
-//          transition relative;
-// }
+@import './tailwind.css';
 
-// .menu-item > * + * {
-//   margin-left: 1rem; /* ganti gap-4 */
-// }
+/* Tailwind utilities handled via tailwind.css */
 
-
-// @import "@ionic/angular/css/spacing.css";
-// @import "@ionic/angular/css/width.css";
-// @import "@ionic/angular/css/height.css";
-// @import "@ionic/angular/css/display.css";
-// @import "@ionic/angular/css/position.css";
-
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
 
-
-// @tailwind base;
-// @tailwind components;
-// @import "tailwindcss";
-// @tailwind utilities;
-
-/* Font */
+/* Global Font Configuration */
 * {
   font-family: 'Montserrat', sans-serif;
 }
 
-// html, body, ion-app, ion-router-outlet, ion-tabs {
-//   height: 100%;
-// }
-
+/* Layout Fixes for Shared Components */
 ion-tabs, ion-router-outlet {
   display: flex;
   flex: 1;
@@ -93,17 +31,177 @@ ion-content {
   flex: 1;
 }
 
+/* Point Icons */
+.point-icon {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  vertical-align: sub;
+  margin-right: 4px;
+  display: inline-block;
+  
+  &.lg {
+    width: 2.2rem;
+    height: 2.2rem;
+    margin-right: 8px;
+  }
 
+  &.sm {
+    width: 1.1em;
+    height: 1.1em;
+  }
+}
 
+/* CUSTOM PREMIUM DELETE ALERT */
+.custom-delete-alert {
+  --background: #ffffff;
+  --ion-text-color: #0f172a;
 
-// .menu {
-//   @apply flex items-center gap-3 px-4 py-2 rounded-xl
-//          text-slate-700 hover:bg-slate-100 transition;
-// }
+  .alert-wrapper {
+    border-radius: 28px !important;
+    padding: 8px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+  }
 
+  .alert-head {
+    padding: 32px 24px 16px !important;
+    text-align: center !important;
+  }
 
-// html,
-// body,
-// ion-app {
-//   background: #ffffff !important;
-// }
+  .alert-title {
+    font-size: 1.5rem !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.025em !important;
+    color: #0f172a !important;
+  }
+
+  .alert-message {
+    padding: 0 24px 24px !important;
+    text-align: center !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+  }
+
+  .alert-button-group {
+    padding: 8px 16px 20px !important;
+    gap: 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  .alert-button {
+    flex: 1 !important;
+    height: 52px !important;
+    border-radius: 18px !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin: 0 !important;
+    text-align: center !important;
+    --padding-start: 0 !important;
+    --padding-end: 0 !important;
+
+    .alert-button-inner {
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100% !important;
+      display: flex !important;
+    }
+  }
+
+  /* BUTTON TIDAK (CANCEL) */
+  .alert-button-cancel {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+  }
+
+  /* BUTTON IYA (CONFIRM) */
+  .alert-button-confirm {
+    background: #0f172a !important;
+    color: #ff4d4d !important; /* Premium Red */
+    box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2) !important;
+  }
+}
+
+/* PREMIUM BLACK & WHITE ALERT */
+.premium-alert {
+  --background: #ffffff;
+  
+  .alert-wrapper {
+    border-radius: 24px !important;
+    padding: 4px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+  }
+
+  .alert-head {
+    padding: 32px 24px 12px !important;
+    text-align: center !important;
+  }
+
+  .alert-title {
+    font-size: 1.4rem !important;
+    font-weight: 900 !important;
+    color: #000000 !important;
+    letter-spacing: -0.02em !important;
+    text-transform: capitalize !important;
+  }
+
+  .alert-message {
+    padding: 0 24px 24px !important;
+    text-align: center !important;
+    font-size: 0.9rem !important;
+    color: #4b5563 !important;
+    line-height: 1.5 !important;
+    font-weight: 500 !important;
+  }
+
+  .alert-button-group {
+    padding: 4px 16px 20px !important;
+    justify-content: center !important;
+  }
+
+  .alert-button {
+    background: #000000 !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    max-width: 160px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.8rem !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    margin: 4px !important;
+
+    .alert-button-inner {
+      justify-content: center !important;
+    }
+  }
+
+  /* BUTTON TYPE OVERRIDES */
+  .alert-button-cancel {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      background: #f9fafb !important;
+    }
+  }
+
+  .alert-button-confirm {
+    background: #000000 !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background: #111111 !important;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+    }
+  }
+}
