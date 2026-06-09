@@ -1,6 +1,6 @@
-# 🛒 TheFourtyFour - POS & Member Loyalty App
+# 🛒 POS & Member Loyalty App & Web
 
-Sebuah aplikasi Point of Sale (POS) dan sistem Loyalitas Member modern yang dibangun menggunakan framework **Ionic** dan **Angular**. Aplikasi ini dirancang untuk memudahkan manajemen transaksi sekaligus meningkatkan retensi pelanggan melalui sistem poin loyalitas yang terintegrasi.
+Sebuah aplikasi Point of Sale (POS) dan sistem Loyalitas Member modern. Sisi antarmuka (frontend) dibangun menggunakan framework **Ionic** dan **Angular**, sedangkan sisi server (backend) ditenagai oleh **CodeIgniter 4 (CI 4)**. Aplikasi ini dirancang untuk memudahkan manajemen transaksi sekaligus meningkatkan retensi pelanggan melalui sistem poin loyalitas yang terintegrasi.
 
 ## ✨ Fitur Utama
 
@@ -17,10 +17,10 @@ Aplikasi ini mengusung estetika *"Absolute Cinema"* dengan pendekatan desain yan
 
 ## 🛠️ Teknologi yang Digunakan
 
-* **Frontend Framework:** [Ionic](https://ionicframework.com/) & [Angular](https://angular.io/)
-* **Bahasa Pemrograman:** TypeScript, HTML5, CSS3
+* **Frontend:** [Ionic](https://ionicframework.com/) & [Angular](https://angular.io/) (TypeScript, HTML5, CSS3)
+* **Backend:** [CodeIgniter 4](https://codeigniter.com/) (PHP)
 
-## 🚀 Cara Instalasi & Penggunaan
+## 🚀 Cara Instalasi & Penggunaan (Frontend)
 
 Ikuti langkah-langkah berikut untuk menjalankan project ini di komputer lokal:
 
