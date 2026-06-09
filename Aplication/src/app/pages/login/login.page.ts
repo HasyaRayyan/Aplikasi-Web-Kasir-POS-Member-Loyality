@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { HomeService } from 'src/app/services/home.service';
+import { addIcons } from 'ionicons';
+import { arrowBack, personOutline, lockClosedOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -42,7 +44,9 @@ export class LoginPage {
     private router: Router,
     private toastCtrl: ToastController,
     private homeService: HomeService
-  ) {}
+  ) {
+    addIcons({ arrowBack, personOutline, lockClosedOutline });
+  }
 
   async showToast(msg: string, color: string = 'danger') {
     const t = await this.toastCtrl.create({

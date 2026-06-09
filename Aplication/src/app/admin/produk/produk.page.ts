@@ -50,6 +50,7 @@ addonTotalPages = 0;
 
 search = '';
 categoryId = '';
+stockFilter = '';
 showAddModal = false;
 showDetailModal = false;
 detailProduct: any = null;
@@ -107,7 +108,7 @@ loadData() {
   this.loading = true;
 
   this.productService
-    .getProducts(this.page, this.limit, this.search, this.categoryId)
+    .getProducts(this.page, this.limit, this.search, this.categoryId, this.stockFilter)
     .pipe(
       finalize(() => {
         this.loading = false; // langsung mati
@@ -137,6 +138,11 @@ onSearchChange() {
 }
 
 onCategoryChange() {
+  this.page = 1;
+  this.loadData();
+}
+
+onStockFilterChange() {
   this.page = 1;
   this.loadData();
 }

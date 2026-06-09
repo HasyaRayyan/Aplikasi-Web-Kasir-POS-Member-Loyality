@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { addIcons } from 'ionicons';
+import { arrowBack, chevronBack } from 'ionicons/icons';
 
 @Component({
   selector: 'app-register',
@@ -34,7 +36,9 @@ export class RegisterPage {
     private toastCtrl: ToastController,
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    addIcons({ arrowBack, chevronBack });
+  }
 
   async toast(msg: string, color = 'danger') {
     const t = await this.toastCtrl.create({
@@ -49,8 +53,9 @@ export class RegisterPage {
 
   // --- STEP 1 ---
   sendOtp() {
-    if (!this.form.phone || this.form.phone.length < 9) {
-      this.toast('Nomor telepon tidak valid/terlalu pendek', 'warning');
+    const phone = (this.form.phone || '').trim();
+    if (phone.length < 10 || phone.length > 14) {
+      this.toast('Nomor telepon harus 10 - 14 digit', 'warning');
       return;
     }
 

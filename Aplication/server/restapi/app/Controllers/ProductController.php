@@ -17,6 +17,7 @@ class ProductController extends ResourceController
     $limit  = (int) ($this->request->getGet('limit') ?? 10);
     $search = $this->request->getGet('search') ?? '';
     $categoryId = $this->request->getGet('category_id');
+    $stockStatus = $this->request->getGet('stock_status');
 
     // Handle empty string as null for better filtering
     if ($categoryId === '') {
@@ -26,10 +27,10 @@ class ProductController extends ResourceController
     $offset = ($page - 1) * $limit;
 
     // TOTAL
-    $total = $productModel->countProducts($search, $categoryId);
+    $total = $productModel->countProducts($search, $categoryId, $stockStatus);
 
     // DATA
-    $rows = $productModel->getProductsWithAddons($limit, $offset, $search, $categoryId);
+    $rows = $productModel->getProductsWithAddons($limit, $offset, $search, $categoryId, $stockStatus);
 
     $products = [];
 

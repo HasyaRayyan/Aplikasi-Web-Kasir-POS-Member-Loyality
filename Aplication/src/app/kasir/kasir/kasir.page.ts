@@ -36,12 +36,14 @@ export class KasirPage implements OnInit {
 
   paymentMethod = 'cash'; // default
   cashPaid: number = 0;
+  cashPaidDisplay: string = '';
   change: number = 0;
 
   showPaymentModal = false;
   search = '';
   category = '';
   loading = true;
+  filterStatus = 'all'; // 'all', 'available', 'sold'
 
   page = 1;
   limit = 9;
@@ -113,14 +115,34 @@ export class KasirPage implements OnInit {
 
   calculateChange() {
     const bayar = Number(this.cashPaid) || 0;
-    const total = this.cart.reduce((a, b) => a + Number(b.subtotal), 0);
+    const total = this.total;
     this.change = bayar - total;
     if (this.change < 0) this.change = 0;
+  }
+
+  onCashPaidInput(event: any) {
+    let val = event.target.value;
+    
+    // 1. Bersihkan karakter non-digit
+    val = val.replace(/\D/g, '');
+    
+    // 2. Simpan nilai aslinya (angka)
+    this.cashPaid = val ? parseInt(val, 10) : 0;
+    
+    // 3. Format tampilannya dengan titik
+    if (this.cashPaid === 0) {
+      this.cashPaidDisplay = '';
+    } else {
+      this.cashPaidDisplay = this.formatPrice(this.cashPaid);
+    }
+    
+    this.calculateChange();
   }
 
   setPayment(method: string) {
     this.paymentMethod = method;
     this.cashPaid = 0;
+    this.cashPaidDisplay = '';
     this.change = 0;
   }
 
@@ -467,6 +489,24 @@ export class KasirPage implements OnInit {
     this.page = 1;
     this.loadKasir();
   }
+  setFilterStatus(status: string) {
+    this.filterStatus = status;
+    if (status === 'all') {
+      this.loadKasir();
+    } else if (status === 'available') {
+      this.products = this.allProducts.filter(p => Number(p.qty) > 0);
+    } else if (status === 'sold') {
+      this.products = this.allProducts.filter(p => Number(p.qty) === 0);
+    }
+  }
+
+  solditem() {
+    this.setFilterStatus('sold');
+  }
+
+  availableitem() {
+    this.setFilterStatus('available');
+  }
 
   clearCart() {
     if (this.cart.length === 0) return;
@@ -490,6 +530,13 @@ export class KasirPage implements OnInit {
 
   searchMember() {
     if (!this.memberPhone) return;
+    
+    const phone = this.memberPhone.trim();
+    if (phone.length < 10 || phone.length > 14) {
+      this.showToast('Nomor HP Member harus 10 - 14 digit', 'warning');
+      return;
+    }
+
     this.memberLoading = true;
     this.kasirService.findMember(this.memberPhone)
       .subscribe((res: any) => {
@@ -657,6 +704,7 @@ export class KasirPage implements OnInit {
     this.memberPhone = '';
     this.memberData = null;
     this.cashPaid = 0;
+    this.cashPaidDisplay = '';
     this.change = 0;
     this.paymentMethod = 'cash';
     this.showPaymentModal = false;

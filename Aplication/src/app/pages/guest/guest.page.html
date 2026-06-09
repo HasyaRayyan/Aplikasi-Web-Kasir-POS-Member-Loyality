@@ -1,90 +1,118 @@
 <ion-content [fullscreen]="true" class="guest-content">
   <div class="wrapper">
     
-    <!-- HEADER -->
+    <!-- HEADER (Match Member Style but Guest) -->
     <div class="header">
       <div class="brand">
-        <ion-icon name="cafe"></ion-icon>
-        <span>TheFourtyFour</span>
-      </div>
-      <div class="auth-btns">
-        <button class="btn-outline" (click)="goToLogin()">Masuk</button>
-        <button class="btn-solid" (click)="goToRegister()">Daftar</button>
-      </div>
-    </div>
-
-    <!-- HERO BANNER -->
-    <div class="hero-card">
-      <div class="hero-text">
-        <h1>Ngopi Lebih Hemat dengan <span>Point Reward</span></h1>
-        <p>Gabung jadi member sekarang dan nikmati promo eksklusif gratis kopi setiap penukaran poin!</p>
-        <button class="btn-cta" (click)="goToRegister()">Gabung Member Gratis</button>
-      </div>
-      <div class="hero-decoration">
-        <ion-icon name="sparkles"></ion-icon>
-      </div>
-    </div>
-
-    <!-- PREVIEW CARD (LOYALTY PROMO) -->
-    <div class="preview-card" (click)="goToLogin()">
-      <div class="card-inner">
-        <div class="text-side">
-          <h3>Cek Poin Kamu</h3>
-          <p>Login untuk melihat saldo poin dan tingkat level keberuntunganmu.</p>
+        <div class="logo-box">
+          <img src="assets/logo_thrift.png" alt="Logo">
         </div>
-        <div class="icon-side">
-          <ion-icon name="arrow-forward-circle"></ion-icon>
+        <div class="title-wrap">
+          <p class="greeting">Selamat Datang,</p>
+          <h1 class="name">TheFourtyFour</h1>
         </div>
       </div>
+      <div class="header-actions">
+        <button class="btn-login" (click)="goToLogin()">Masuk</button>
+      </div>
     </div>
 
-    <!-- QUICK OPTIONS (GUEST) -->
-    <div class="option-grid">
-      <div class="opt-item" (click)="goToLogin()">
+    <!-- LOYALTY CARD PREVIEW (B&W Premium) -->
+    <div class="loyalty-card" (click)="goToRegister()">
+      <div class="card-glow"></div>
+      <div class="card-content">
+        <div class="tier-section">
+          <div class="tier-badge">
+            <ion-icon name="ribbon"></ion-icon>
+            GUEST
+          </div>
+          <div class="cta-text">
+            <h2>Kumpulkan Poin Hemat</h2>
+            <span>Daftar Member Sekarang</span>
+          </div>
+        </div>
+        <div class="desc-section">
+          <p>Dapatkan poin setiap transaksi dan tukarkan dengan menu favoritmu secara gratis!</p>
+        </div>
+      </div>
+      <div class="card-action-arrow">
+        <ion-icon name="chevron-forward"></ion-icon>
+      </div>
+    </div>
+
+    <!-- PROMO SLIDER (Swiper) -->
+    <div class="promo-slider" *ngIf="banners.length > 0">
+      <swiper-container 
+        pagination="true" 
+        autoplay-delay="3000"
+        autoplay-disable-on-interaction="false"
+        loop="true"
+        initial-slide="0"
+        speed="800">
+        <swiper-slide *ngFor="let b of banners">
+          <div class="slide-card">
+            <img [src]="b.image" (error)="b.image = 'assets/img/default-banner.jpg'" alt="promo">
+            <div class="slide-overlay">
+              <span class="slide-tag">TERBARU</span>
+              <h3>{{ b.title }}</h3>
+            </div>
+          </div>
+        </swiper-slide>
+      </swiper-container>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="action-grid">
+      <div class="action-item" (click)="goToLogin()">
+        <div class="icon-box"><ion-icon name="cafe-outline"></ion-icon></div>
+        <span>Menu</span>
+      </div>
+      <div class="action-item" (click)="goToRegister()">
+        <div class="icon-box"><ion-icon name="star-outline"></ion-icon></div>
+        <span>Join Member</span>
+      </div>
+      <div class="action-item" (click)="goToLogin()">
         <div class="icon-box"><ion-icon name="ticket-outline"></ion-icon></div>
         <span>Promo</span>
       </div>
-      <div class="opt-item" (click)="goToLogin()">
-        <div class="icon-box"><ion-icon name="location-outline"></ion-icon></div>
-        <span>Outlet</span>
-      </div>
-      <div class="opt-item" (click)="goToLogin()">
+      <div class="action-item" (click)="goToLogin()">
         <div class="icon-box"><ion-icon name="help-circle-outline"></ion-icon></div>
         <span>Bantuan</span>
       </div>
-      <div class="opt-item" (click)="goToLogin()">
-        <div class="icon-box"><ion-icon name="person-outline"></ion-icon></div>
-        <span>Akun</span>
-      </div>
     </div>
 
-    <!-- CATALOG PREVIEW -->
+    <!-- HORIZONTAL PRODUCT SCROLLER (Recommended) -->
     <div class="section-container">
       <div class="section-header">
-        <h3>Menu Terpopuler</h3>
+        <h3>Menu Pilihan</h3>
         <button class="btn-text" (click)="goToLogin()">Lihat Semua</button>
       </div>
 
-      <div class="product-grid">
-        <div class="product-tile" *ngFor="let p of products">
+      <div class="product-scroller">
+        <div class="product-tile" *ngFor="let p of products" (click)="goToLogin()">
           <div class="image-wrapper">
              <img *ngIf="p.image; else noImg" [src]="p.image" alt="p">
              <ng-template #noImg><div class="no-img"><ion-icon name="cafe-outline"></ion-icon></div></ng-template>
           </div>
           <div class="info">
-            <h4>{{ p.product_name || p.name }}</h4>
+            <h4>{{ p.name }}</h4>
             <p class="price">Rp {{ formatPrice(p.price) }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- BOTTOM CTA -->
-    <div class="bottom-banner">
-      <div class="banner-content">
-        <ion-icon name="gift-outline"></ion-icon>
-        <p>Mau Gratis Kopi? <b>Daftar Member Sekarang!</b></p>
-        <ion-icon name="chevron-forward"></ion-icon>
+    <!-- REGISTER CTA SECTION (B&W) -->
+    <div class="register-cta" (click)="goToRegister()">
+      <div class="cta-content">
+        <div class="icon-circle">
+          <ion-icon name="gift-outline"></ion-icon>
+        </div>
+        <div class="text">
+          <h5>Siap Nikmati Keuntungan?</h5>
+          <p>Daftar sekarang, proses cepat & gratis!</p>
+        </div>
+        <ion-icon name="chevron-forward" class="arrow"></ion-icon>
       </div>
     </div>
 

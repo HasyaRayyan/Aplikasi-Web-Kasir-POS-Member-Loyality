@@ -9,7 +9,7 @@ import { addIcons } from 'ionicons';
 import { 
   gridOutline, cubeOutline, starOutline, peopleOutline, 
   listOutline, receiptOutline, cashOutline, logOutOutline, 
-  chevronForwardOutline 
+  chevronForwardOutline, imageOutline
 } from 'ionicons/icons';
 import { MenuController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
@@ -52,7 +52,8 @@ export class SidebarComponent implements OnInit {
       'receipt-outline': receiptOutline, 
       'cash-outline': cashOutline, 
       'log-out-outline': logOutOutline, 
-      'chevron-forward-outline': chevronForwardOutline 
+      'chevron-forward-outline': chevronForwardOutline,
+      'image-outline': imageOutline
     });
   }
 

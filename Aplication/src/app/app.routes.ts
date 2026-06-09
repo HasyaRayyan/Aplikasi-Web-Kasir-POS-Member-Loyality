@@ -74,6 +74,12 @@ export const routes: Routes = [
           import('./admin/category/category.page')
             .then( m => m.CategoryPage)
       },
+      {
+        path: 'slider',
+        loadComponent: () =>
+          import('./admin/slider/slider.page')
+            .then(m => m.SliderPage),
+      },
     ],
   },
 

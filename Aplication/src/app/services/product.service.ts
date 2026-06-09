@@ -23,9 +23,9 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-getProducts(page = 1, limit = 10, search = '', categoryId = '') {
+getProducts(page = 1, limit = 10, search = '', categoryId = '', stockStatus = '') {
   return this.http.get<any>(
-    `${environment.apiBaseUrl}/api/products?page=${page}&limit=${limit}&search=${search}&category_id=${categoryId}`
+    `${environment.apiBaseUrl}/api/products?page=${page}&limit=${limit}&search=${search}&category_id=${categoryId}&stock_status=${stockStatus}`
   );
 }
 

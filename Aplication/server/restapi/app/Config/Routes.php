@@ -23,6 +23,7 @@ $routes->options('(:any)', function () {
 $routes->group('api', function ($routes) {
     
     // Auth Routes
+    $routes->get('home-guest', 'HomeMember::guest');
     $routes->post('auth/login', 'Auth::login');
     $routes->post('auth/register', 'Auth::register');
     $routes->post('auth/check-phone', 'Auth::checkPhone');
@@ -86,6 +87,14 @@ $routes->group('api', function ($routes) {
     $routes->get('profile/(:num)', 'ProfileMember::index/$1');
     $routes->post('profile/update/(:num)', 'ProfileMember::update/$1');
     $routes->post('profile/password/(:num)', 'ProfileMember::changePassword/$1');
+
+    // Slider Management
+    $routes->get('banners', 'BannerController::index');
+    $routes->post('banners', 'BannerController::create');
+    $routes->post('banners/update/(:num)', 'BannerController::update/$1');
+    $routes->delete('banners/(:num)', 'BannerController::delete/$1');
+    $routes->post('banners/delete/(:num)', 'BannerController::delete/$1');
+    $routes->post('banners/toggle/(:num)', 'BannerController::toggle/$1');
 
     // Resource Route for Categories - Fixed Controller Name
     $routes->resource('categories', ['controller' => 'Category']);

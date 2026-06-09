@@ -276,14 +276,14 @@ validateUser(): boolean {
   // ================= FORMAT =================
 
   // PHONE
-  if (phone.length < 11 || phone.length > 13) {
-    this.addToast('Nomor telp harus 11 - 13 digit');
+  if (phone.length < 10 || phone.length > 14) {
+    this.addToast('Nomor telp harus 10 - 14 digit');
     return false;
   }
 
   // EMAIL
-  if (!email.endsWith('@gmail.com')) {
-    this.addToast('Email harus menggunakan @gmail.com');
+  if (!email.includes('@')) {
+    this.addToast('Format email tidak valid (harus mengandung @)');
     return false;
   }
 

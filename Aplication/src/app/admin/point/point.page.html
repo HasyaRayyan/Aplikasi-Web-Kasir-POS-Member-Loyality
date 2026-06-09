@@ -2,19 +2,21 @@
 
   <!-- HEADER -->
   <div class="mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-      <div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div class="flex-1">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Point Rules</h1>
         <p class="text-gray-500 text-sm mt-1">Kelola aturan perolehan poin member</p>
       </div>
 
-      <button (click)="openAddModal()"
-        class="inline-flex items-center justify-center gap-2 bg-gray-900
-               hover:bg-black text-white font-semibold px-5 py-3 rounded-lg
-               transition shadow-md w-full sm:w-auto">
-        <ion-icon name="add-outline" class="text-lg"></ion-icon>
-        Tambah Rule Baru
-      </button>
+      <div class="flex shrink-0">
+        <button (click)="openAddModal()"
+          class="inline-flex items-center justify-center gap-2 bg-gray-900
+                 hover:bg-black text-white font-semibold px-6 py-3.5 rounded-xl
+                 transition shadow-md w-full md:w-auto">
+          <ion-icon name="add-outline" class="text-xl"></ion-icon>
+          <span>Tambah Rule Baru</span>
+        </button>
+      </div>
     </div>
 
     <!-- SEARCH -->
@@ -22,7 +24,7 @@
       <ion-icon name="search-outline"
         class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></ion-icon>
       <input type="text" [(ngModel)]="search" (keyup.enter)="loadData()"
-        placeholder="Cari nama event... (tekan Enter)"
+        placeholder="Cari nama event..."
         class="w-full pl-12 pr-4 py-3 bg-white text-black
                border border-gray-300 rounded-xl text-sm
                focus:border-gray-900 focus:ring-2 focus:ring-gray-200

@@ -18,10 +18,10 @@
     </div>
 
     <!-- CONTROL BAR -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
   <!-- SEARCH -->
-  <div class="md:col-span-1 lg:col-span-2">
+  <div class="md:col-span-2 lg:col-span-2">
     <div class="relative group">
       <ion-icon name="search-outline"
         class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 
@@ -51,6 +51,25 @@
       </select>
 
       <ion-icon name="chevron-down-outline"
+        class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 
+               pointer-events-none"></ion-icon>
+    </div>
+  </div>
+
+  <!-- STOCK STATUS -->
+  <div class="md:col-span-1 lg:col-span-1">
+    <div class="relative group">
+      
+      <select [(ngModel)]="stockFilter" (change)="onStockFilterChange()"
+        class="w-full pl-4 pr-10 py-3.5 bg-white text-black border border-gray-300 rounded-xl
+               focus:border-gray-900 focus:ring-2 focus:ring-gray-200
+               outline-none appearance-none cursor-pointer font-medium">
+        <option value="">Semua Stok</option>
+        <option value="available">Tersedia</option>
+        <option value="sold_out">Stok Habis</option>
+      </select>
+
+      <ion-icon name="cube-outline"
         class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 
                pointer-events-none"></ion-icon>
     </div>

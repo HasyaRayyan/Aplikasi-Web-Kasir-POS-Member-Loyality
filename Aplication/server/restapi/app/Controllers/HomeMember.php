@@ -14,6 +14,20 @@ class HomeMember extends BaseController
         $this->homeModel = new HomeModel();
     }
 
+    public function guest()
+    {
+        $products = $this->homeModel->getActiveProducts(8);
+        $banners = $this->homeModel->getActiveBanners();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'data' => [
+                'products' => $products,
+                'banners'  => $banners
+            ]
+        ]);
+    }
+
     public function index($userId)
     {
         $userMember = $this->homeModel->getUserMember($userId);

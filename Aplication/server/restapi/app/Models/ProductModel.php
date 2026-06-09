@@ -9,7 +9,7 @@ class ProductModel extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
 
-public function getProductsWithAddons($limit, $offset, $search = '', $categoryId = null)
+public function getProductsWithAddons($limit, $offset, $search = '', $categoryId = null, $stockStatus = null)
 {
     // 1. Ambil Produk Saja (Agar limit dan offset akurat pada produk)
     $builder = $this->db->table('products p')
@@ -38,6 +38,12 @@ public function getProductsWithAddons($limit, $offset, $search = '', $categoryId
 
     if ($categoryId) {
         $builder->where('p.category_id', $categoryId);
+    }
+
+    if ($stockStatus === 'sold_out') {
+        $builder->where('p.qty <=', 0);
+    } elseif ($stockStatus === 'available') {
+        $builder->where('p.qty >', 0);
     }
 
     $products = $builder
@@ -98,7 +104,7 @@ public function getProductsWithAddons($limit, $offset, $search = '', $categoryId
     return $flatResult;
 }
 
-    public function countProducts($search, $categoryId = null)
+    public function countProducts($search, $categoryId = null, $stockStatus = null)
     {
         $builder = $this->db->table('products');
 
@@ -111,6 +117,12 @@ public function getProductsWithAddons($limit, $offset, $search = '', $categoryId
 
         if ($categoryId) {
             $builder->where('category_id', $categoryId);
+        }
+
+        if ($stockStatus === 'sold_out') {
+            $builder->where('qty <=', 0);
+        } elseif ($stockStatus === 'available') {
+            $builder->where('qty >', 0);
         }
 
         return $builder->countAllResults();

@@ -41,7 +41,7 @@
               <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold">Total</th>
               <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold">Metode</th>
               <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold hidden sm:table-cell">Waktu</th>
-              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold text-center">Aksi</th>
+              <th class="pb-4 pt-2 px-2 text-xs uppercase tracking-wider font-bold text-right">Aksi</th>
             </tr>
           </thead>
 
@@ -95,7 +95,7 @@
                 </span>
               </td>
               <td class="py-4 px-2 text-slate-500 font-medium hidden sm:table-cell">{{ h.created_at | date:'dd MMM yyyy, HH:mm' }}</td>
-              <td class="py-4 px-2 text-center">
+              <td class="py-4 px-2 text-right">
                  <button (click)="openDetail(h)" class="bg-white border text-slate-400 border-slate-200 hover:bg-slate-900 hover:text-white hover:border-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm focus:ring-2 focus:ring-slate-200">
                     Detail
                  </button>

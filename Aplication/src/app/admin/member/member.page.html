@@ -2,27 +2,27 @@
 
   <!-- HEADER -->
   <div class="mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Member / User</h1>
         <p class="text-gray-500 text-sm mt-1">Kelola user dan membership</p>
       </div>
 
-      <button (click)="openAddModal()"
-        class="inline-flex items-center justify-center gap-2 bg-gray-900
-               hover:bg-black text-white font-semibold px-5 py-3 rounded-lg
-               transition shadow-md w-full sm:w-auto">
-        <ion-icon name="add-outline" class="text-lg"></ion-icon>
-        Tambah User
-      </button>
+      <div class="flex shrink-0">
+        <button (click)="openAddModal()" 
+          class="inline-flex items-center justify-center gap-2 bg-gray-900
+                 hover:bg-black text-white font-semibold px-5 py-3 rounded-lg
+                 transition shadow-md w-full md:w-auto">
+          <ion-icon name="add-outline" class="text-lg"></ion-icon>
+          Tambah User
+        </button>
+      </div>
     </div>
 
     <!-- SEARCH -->
     <div class="relative">
-      <ion-icon name="search-outline"
-        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></ion-icon>
-      <input [(ngModel)]="search" (ngModelChange)="onSearchChange()"
-        placeholder="Cari nama / username... (tekan Enter)"
+      <ion-icon name="search-outline" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></ion-icon>
+      <input [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Cari nama / username... (tekan Enter)"
         class="w-full pl-12 pr-4 py-3 bg-white text-black
                border border-gray-300 rounded-xl text-sm
                focus:border-gray-900 focus:ring-2 focus:ring-gray-200
@@ -54,15 +54,15 @@
     </div>
 
     <!-- ROWS -->
-    <div *ngFor="let u of users"
-      class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
+    <div *ngFor="let u of users" class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition">
 
       <!-- DESKTOP ROW -->
       <div class="hidden md:grid grid-cols-12 px-6 py-4 items-center">
 
         <!-- NAMA -->
         <div class="col-span-3 flex items-center gap-3">
-          <div class="w-9 h-9 bg-gray-900 text-white rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+          <div
+            class="w-9 h-9 bg-gray-900 text-white rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
             {{ u.name[0].toUpperCase() }}
           </div>
           <div class="min-w-0">
@@ -78,9 +78,12 @@
 
         <!-- ROLE -->
         <div class="col-span-2">
-          <span class="px-2.5 py-1 rounded-md text-xs font-semibold"
-            [ngClass]="u.role_id == 1 ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'">
-            {{ u.role_id == 1 ? 'Admin' : 'Kasir' }}
+          <span class="px-2.5 py-1 rounded-md text-xs font-semibold" [ngClass]="{
+              'bg-blue-50 text-emerald-700': u.role_id == 1,
+              'bg-blue-50 text-blue-700': u.role_id == 2,
+              'bg-blue-50 text-green-700': u.role_id == 3
+            }">
+            {{ u.role_id == 1 ? 'Admin' : (u.role_id == 2 ? 'Kasir' : 'Member') }}
           </span>
         </div>
 
@@ -92,18 +95,15 @@
         <!-- AKSI -->
         <div class="col-span-2 flex justify-end gap-1">
           <button (click)="openDetailModal(u)"
-            class="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition"
-            title="Detail">
+            class="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition" title="Detail">
             <ion-icon name="eye-outline" class="text-base"></ion-icon>
           </button>
           <button (click)="openEditModal(u)"
-            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition"
-            title="Edit">
+            class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition" title="Edit">
             <ion-icon name="create-outline" class="text-base"></ion-icon>
           </button>
           <button (click)="delete(u.id)"
-            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"
-            title="Hapus">
+            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition" title="Hapus">
             <ion-icon name="trash-outline" class="text-base"></ion-icon>
           </button>
         </div>
@@ -113,7 +113,8 @@
       <div class="md:hidden p-4">
         <div class="flex items-start gap-3">
           <!-- Avatar -->
-          <div class="w-11 h-11 bg-gray-900 text-white rounded-xl flex items-center justify-center font-bold text-base shrink-0">
+          <div
+            class="w-11 h-11 bg-gray-900 text-white rounded-xl flex items-center justify-center font-bold text-base shrink-0">
             {{ u.name[0].toUpperCase() }}
           </div>
 
@@ -121,9 +122,12 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2 mb-0.5">
               <p class="font-semibold text-gray-900 truncate">{{ u.name }}</p>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold shrink-0"
-                [ngClass]="u.role_id == 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'">
-                {{ u.role_id == 1 ? 'Admin' : 'Kasir' }}
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold shrink-0" [ngClass]="{
+                  'bg-emerald-100 text-emerald-700': u.role_id == 1,
+                  'bg-blue-100 text-blue-700': u.role_id == 2,
+                  'bg-indigo-100 text-indigo-700': u.role_id == 3
+                }">
+                {{ u.role_id == 1 ? 'Admin' : (u.role_id == 2 ? 'Kasir' : 'Member') }}
               </span>
             </div>
             <p class="text-xs text-gray-500 mb-1">@{{ u.username }}</p>
@@ -131,18 +135,15 @@
 
             <!-- Action Buttons -->
             <div class="flex gap-2">
-              <button (click)="openDetailModal(u)"
-                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-gray-50 text-gray-600
+              <button (click)="openDetailModal(u)" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-gray-50 text-gray-600
                        rounded-lg text-xs font-medium border border-gray-200">
                 <ion-icon name="eye-outline"></ion-icon> Detail
               </button>
-              <button (click)="openEditModal(u)"
-                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-600
+              <button (click)="openEditModal(u)" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-600
                        rounded-lg text-xs font-medium border border-blue-100">
                 <ion-icon name="create-outline"></ion-icon> Edit
               </button>
-              <button (click)="delete(u.id)"
-                class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-600
+              <button (click)="delete(u.id)" class="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-50 text-red-600
                        rounded-lg text-xs font-medium border border-red-100">
                 <ion-icon name="trash-outline"></ion-icon> Hapus
               </button>
@@ -160,14 +161,12 @@
         Halaman <b>{{ page }}</b> dari {{ totalPages }}
       </span>
       <div class="flex items-center gap-2">
-        <button (click)="prevPage()" [disabled]="page <= 1"
-          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+        <button (click)="prevPage()" [disabled]="page <= 1" class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
                  rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
           <ion-icon name="chevron-back-outline" class="text-black"></ion-icon>
         </button>
         <span class="text-sm font-medium text-gray-700 px-1">{{ page }} / {{ totalPages }}</span>
-        <button (click)="nextPage()" [disabled]="page >= totalPages"
-          class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
+        <button (click)="nextPage()" [disabled]="page >= totalPages" class="w-9 h-9 flex items-center justify-center bg-white border border-gray-300
                  rounded-lg hover:border-gray-900 disabled:opacity-40 transition">
           <ion-icon name="chevron-forward-outline" class="text-black"></ion-icon>
         </button>
@@ -178,8 +177,7 @@
 </div>
 
 <!-- MODAL TAMBAH / EDIT USER -->
-<div *ngIf="showModal"
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm
+<div *ngIf="showModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm
          flex items-center justify-center z-[9999] p-4">
 
   <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -205,24 +203,21 @@
         <!-- NAMA -->
         <div class="sm:col-span-2">
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Nama Lengkap</label>
-          <input [(ngModel)]="newUser.name" placeholder="Nama Lengkap"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <input [(ngModel)]="newUser.name" placeholder="Nama Lengkap" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
         <!-- USERNAME -->
         <div>
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Username</label>
-          <input [(ngModel)]="newUser.username" placeholder="username"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <input [(ngModel)]="newUser.username" placeholder="username" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
         <!-- ROLE -->
         <div>
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Role</label>
-          <select [(ngModel)]="newUser.role_id"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <select [(ngModel)]="newUser.role_id" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
             <option [ngValue]="null">Pilih Role</option>
             <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.name }}</option>
@@ -232,16 +227,14 @@
         <!-- EMAIL -->
         <div>
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Email</label>
-          <input [(ngModel)]="newUser.email" type="email" placeholder="email@email.com"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <input [(ngModel)]="newUser.email" type="email" placeholder="email@email.com" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
         <!-- PHONE -->
         <div>
           <label class="text-xs font-semibold text-gray-600 mb-1 block">No HP</label>
-          <input [(ngModel)]="newUser.phone" type="tel" placeholder="08xxxxxxxx"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <input [(ngModel)]="newUser.phone" type="tel" placeholder="08xxxxxxxx" maxlength="14" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
@@ -249,16 +242,14 @@
         <div class="sm:col-span-2">
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Password</label>
           <input [(ngModel)]="newUser.password" type="password"
-            [placeholder]="isEdit ? 'Kosongkan jika tidak diubah' : 'Password'"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+            [placeholder]="isEdit ? 'Kosongkan jika tidak diubah' : 'Password'" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
         <!-- TOTAL POINT -->
         <div>
           <label class="text-xs font-semibold text-gray-600 mb-1 block">Active Point</label>
-          <input [(ngModel)]="newUser.active_points" type="number" placeholder="0"
-            class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
+          <input [(ngModel)]="newUser.active_points" type="number" placeholder="0" class="w-full bg-white text-black border border-gray-300 rounded-lg px-4 py-2.5 text-sm
                    focus:border-gray-900 focus:ring-2 focus:ring-gray-200 outline-none transition">
         </div>
 
@@ -289,8 +280,7 @@
 </div>
 
 <!-- MODAL DETAIL USER -->
-<div *ngIf="showDetailModal"
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm
+<div *ngIf="showDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm
          flex items-center justify-center z-[9999] p-4">
 
   <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -348,10 +338,6 @@
 
     <!-- FOOTER -->
     <div class="px-6 py-4 border-t flex justify-end gap-3 bg-gray-50 shrink-0">
-      <button (click)="openEditModal(selectedUser); closeDetailModal()"
-        class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-sm hover:bg-blue-100 transition">
-        Edit User
-      </button>
       <button (click)="closeDetailModal()"
         class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm hover:bg-black transition shadow-sm">
         Tutup

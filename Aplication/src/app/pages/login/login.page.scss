@@ -236,6 +236,7 @@ ion-modal.auth-reset-modal {
         label { display: block; font-size: 0.7rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.5rem; }
         ion-input {
           --background: #f8fafc;
+          --color: #000;
           --padding-start: 1rem;
           --border-radius: 16px;
           border: 1.5px solid #f1f5f9;
@@ -247,25 +248,26 @@ ion-modal.auth-reset-modal {
         width: 100%;
         padding: 1.25rem;
         border-radius: 18px;
-        background: #10b981;
+        background: #000;
         color: #fff;
         font-weight: 900;
         border: none;
-        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         transition: all 0.2s;
         &:active { transform: scale(0.98); opacity: 0.9; }
       }
 
-      .resend-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #10b981; cursor: pointer; }
+      .resend-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #000; text-decoration: underline; cursor: pointer; }
     }
 
     .btn-back {
       width: 100%;
       margin-top: 1.5rem;
       background: transparent;
-      color: #94a3b8;
+      color: #71717a;
       font-weight: 800;
       border: none;
+      font-size: 0.9rem;
     }
   }
 }

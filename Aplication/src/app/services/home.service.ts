@@ -177,6 +177,11 @@ export class HomeService {
     return this.http.get<any>(`${environment.apiBaseUrl}/api/products?limit=${limit}`);
   }
 
+  /* GET DATA HOME GUEST */
+  getGuestHome(): Observable<any> {
+    return this.http.get<any>(`${environment.apiBaseUrl}/api/home-guest`);
+  }
+
   /* GET DATA HOME MEMBER */
   getHome(userId: number): Observable<HomeResponse> {
     return this.http.get<HomeResponse>(

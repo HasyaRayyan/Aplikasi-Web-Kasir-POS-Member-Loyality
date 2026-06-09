@@ -46,6 +46,11 @@ export const MENU: MenuGroup[] = [
         path: 'transaksi',
         icon: 'receipt-outline',
       },
+      {
+        label: 'Slider Banner',
+        path: 'slider',
+        icon: 'image-outline',
+      },
     ],
   },
   {

@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { 
+  IonIcon, IonSpinner, IonButton 
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  searchOutline, eyeOutline, chevronBackOutline, 
+  chevronForwardOutline, closeOutline 
+} from 'ionicons/icons';
 import { KasirService } from 'src/app/services/kasir.service';
 
 @Component({
@@ -9,7 +16,7 @@ import { KasirService } from 'src/app/services/kasir.service';
   templateUrl: './riwayat.page.html',
   styleUrls: ['./riwayat.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonIcon, IonSpinner, CommonModule, FormsModule]
 })
 export class RiwayatPage implements OnInit {
 
@@ -33,7 +40,15 @@ export class RiwayatPage implements OnInit {
   // ===== SEARCH TIMER =====
   searchTimeout: any;
 
-  constructor(private kasirService: KasirService) {}
+  constructor(private kasirService: KasirService) {
+    addIcons({ 
+      'search-outline': searchOutline, 
+      'eye-outline': eyeOutline, 
+      'chevron-back-outline': chevronBackOutline, 
+      'chevron-forward-outline': chevronForwardOutline, 
+      'close-outline': closeOutline 
+    });
+  }
 
   ngOnInit() {
     this.loadData();
