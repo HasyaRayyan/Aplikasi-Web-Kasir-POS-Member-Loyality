@@ -1,15 +1,15 @@
-# 🛒 POS & Member Loyalty App & Web
+#  POS & Member Loyalty App & Web
 
 Sebuah aplikasi Point of Sale (POS) dan sistem Loyalitas Member modern. Sisi antarmuka (frontend) dibangun menggunakan framework **Ionic** dan **Angular**, sedangkan sisi server (backend) ditenagai oleh **CodeIgniter 4 (CI 4)**. Aplikasi ini dirancang untuk memudahkan manajemen transaksi sekaligus meningkatkan retensi pelanggan melalui sistem poin loyalitas yang terintegrasi.
 
-## ✨ Fitur Utama
+##  Fitur Utama
 
 * **Sistem Kasir (POS):** Antarmuka yang intuitif untuk memproses pesanan dan checkout dengan cepat.
 * **Manajemen Member & Loyalitas:** Sistem pelacakan poin member terintegrasi untuk setiap transaksi.
 * **Riwayat Transaksi:** Laporan dan pencatatan transaksi yang detail dan mudah dipantau.
 * **Profil Pengguna:** Manajemen data profil kasir dan member.
-
-## 🎨 UI/UX Design
+ 
+##  UI/UX Design
 
 Aplikasi ini mengusung estetika *"Absolute Cinema"* dengan pendekatan desain yang minimalis dan modern:
 * **Tema:** Monokrom (Hitam & Putih) dengan aksen warna **Emerald Green** untuk *highlight* dan elemen interaktif.
@@ -43,7 +43,7 @@ Pastikan kamu sudah menginstal [Node.js](https://nodejs.org/). Kemudian jalankan
    ```
    Aplikasi akan terbuka secara otomatis di browser bawaan kamu (biasanya di `http://localhost:8100`).
 
-## 📂 Struktur Direktori Utama
+##  Struktur Direktori Utama
 
 * `/src/app/pages/` - Berisi halaman-halaman utama aplikasi (seperti Riwayat Transaksi, Profil, dan POS).
 * `/src/theme/` - Berisi konfigurasi variabel CSS global, termasuk penyesuaian skema warna Emerald dan styling Glassmorphism.
